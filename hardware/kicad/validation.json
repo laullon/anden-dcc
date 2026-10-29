@@ -1,0 +1,14 @@
+{
+  "revision": "C",
+  "kicad": "8.0.6",
+  "erc_violations": 0,
+  "physical_validation": false,
+  "sha256": {
+    "hardware/kicad/anden-dcc.kicad_sch": "89873702941cc4151dd55c8e85aa75c9a0f9e3806345b64c67a8bdd62218641b",
+    "hardware/kicad/Anden.kicad_sym": "56b6b2ec486028a764cf1bc50d4d699565c40891a1e86ca74df3e767026f3d19",
+    "hardware/kicad/netlist.xml": "ed5e50af53a3eb3ec5127b1b8b26d69601db71c96a5526618fe2d0170506660d",
+    "hardware/kicad/erc.json": "9db9f43bab717de2f3194cf37bb3871ce1ef5c46c56222976e0af3e5cb6eda5b",
+    "docs/hardware/schematic.svg": "3e36d613ce821a209c9c39c390fa329103cfbb93c9c96e8ed0bd4ae95c734bee",
+    "docs/hardware/schematic.pdf": "e42ba9a0a4dd8d57d8050b8b13f9936befdc238492ae27c30d20fee695e21248"
+  }
+}

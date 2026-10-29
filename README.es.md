@@ -17,7 +17,7 @@ Una pequeña central para un diorama H0, con **Raspberry Pi Pico W**, control we
 Wi-Fi y OTA. La interfaz arranca en inglés; **ES** cambia al español y recuerda
 la preferencia en ese navegador.
 
-**Versión 0.5.1:** F0/luces y direcciones cortas 1–127. Los pulsos DCC de 3,3 V
+**Versión 0.5.2:** F0/luces y direcciones cortas 1–127. Los pulsos DCC de 3,3 V
 en GP2 se midieron en la versión de una locomotora; la nueva planificación DMA
 para varias locomotoras está pendiente de captura física.
 **Todavía no se habilita la potencia ni el movimiento**.
@@ -31,11 +31,13 @@ pruebas y firmware de protección.
 5. **Añadir locomotora** amplía la lista hasta ocho tarjetas.
 6. Los archivos `.bin` se instalan en **Configuración → Actualizar firmware**.
 
-**¿No recuerdas una dirección?** Abre **Programación** o **Editar → ¿No sabes la
-dirección?**. Los controles están preparados, pero **todavía no se puede leer ni
-programar un decodificador**: faltan la salida alimentada aislada, la lectura de
-respuestas por corriente y el transmisor de servicio. Guardar una tarjeta solo
-cambia la lista. [Plan de programación y hardware](docs/PROGRAMMING.md).
+**Montaje simplificado:** una salida del L298P alimenta ambas vías en paralelo;
+cada locomotora mantiene sus controles independientes por dirección. Solo se
+añade un 74AHCT125 de adaptación de nivel. La programación de decóderes se ha
+retirado: las direcciones se obtendrán por otro método.
+[Esquema de una hoja](docs/hardware/schematic.pdf) · [Materiales](docs/hardware/BOM.md).
+La habilitación de potencia y el corte por corriente en firmware aún están
+pendientes de implementación y pruebas.
 
 La lista empieza con dos tarjetas (direcciones 3 y 4): ajústalas a tus decóderes.
 Los nombres y direcciones se guardan en la Pico y se comparten entre navegadores.

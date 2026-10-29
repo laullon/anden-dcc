@@ -1,0 +1,953 @@
+(kicad_symbol_lib
+  (version 20231120)
+  (generator "anden-dcc")
+  (symbol "PicoW"
+    (pin_names
+      (offset 1))
+    (in_bom yes)
+    (on_board yes)
+    (property "Reference" "M"
+      (at 0 30.67 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (property "Value" "Pico W \u00b7 physical pins"
+      (at 0 28.67 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (symbol "PicoW_0_1"
+      (rectangle
+        (start -22.86 26.67)
+        (end 22.86 -26.67)
+        (stroke
+          (width .254)
+          (type default))
+        (fill
+          (type background))))
+    (symbol "PicoW_1_1"
+      (pin passive line
+        (at -25.4 24.13 0)
+        (length 2.54)
+        (name "GP0"
+          (effects
+            (font
+              (size 1 1))))
+        (number "1"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 21.59 0)
+        (length 2.54)
+        (name "GP1"
+          (effects
+            (font
+              (size 1 1))))
+        (number "2"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at -25.4 19.049999999999997 0)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "3"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 16.509999999999998 0)
+        (length 2.54)
+        (name "GP2"
+          (effects
+            (font
+              (size 1 1))))
+        (number "4"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 13.969999999999999 0)
+        (length 2.54)
+        (name "GP3"
+          (effects
+            (font
+              (size 1 1))))
+        (number "5"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 11.43 0)
+        (length 2.54)
+        (name "GP4"
+          (effects
+            (font
+              (size 1 1))))
+        (number "6"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 8.889999999999999 0)
+        (length 2.54)
+        (name "GP5"
+          (effects
+            (font
+              (size 1 1))))
+        (number "7"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at -25.4 6.349999999999998 0)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "8"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 3.8099999999999987 0)
+        (length 2.54)
+        (name "GP6"
+          (effects
+            (font
+              (size 1 1))))
+        (number "9"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 1.2699999999999996 0)
+        (length 2.54)
+        (name "GP7"
+          (effects
+            (font
+              (size 1 1))))
+        (number "10"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 -1.2699999999999996 0)
+        (length 2.54)
+        (name "GP8"
+          (effects
+            (font
+              (size 1 1))))
+        (number "11"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 -3.8100000000000023 0)
+        (length 2.54)
+        (name "GP9"
+          (effects
+            (font
+              (size 1 1))))
+        (number "12"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at -25.4 -6.350000000000001 0)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "13"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 -8.890000000000004 0)
+        (length 2.54)
+        (name "GP10"
+          (effects
+            (font
+              (size 1 1))))
+        (number "14"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 -11.430000000000003 0)
+        (length 2.54)
+        (name "GP11"
+          (effects
+            (font
+              (size 1 1))))
+        (number "15"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 -13.970000000000002 0)
+        (length 2.54)
+        (name "GP12"
+          (effects
+            (font
+              (size 1 1))))
+        (number "16"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 -16.51 0)
+        (length 2.54)
+        (name "GP13"
+          (effects
+            (font
+              (size 1 1))))
+        (number "17"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at -25.4 -19.05 0)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "18"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 -21.59 0)
+        (length 2.54)
+        (name "GP14"
+          (effects
+            (font
+              (size 1 1))))
+        (number "19"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -25.4 -24.13 0)
+        (length 2.54)
+        (name "GP15"
+          (effects
+            (font
+              (size 1 1))))
+        (number "20"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 -24.13 180)
+        (length 2.54)
+        (name "GP16"
+          (effects
+            (font
+              (size 1 1))))
+        (number "21"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 -21.59 180)
+        (length 2.54)
+        (name "GP17"
+          (effects
+            (font
+              (size 1 1))))
+        (number "22"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 25.4 -19.05 180)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "23"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 -16.51 180)
+        (length 2.54)
+        (name "GP18"
+          (effects
+            (font
+              (size 1 1))))
+        (number "24"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 -13.970000000000002 180)
+        (length 2.54)
+        (name "GP19"
+          (effects
+            (font
+              (size 1 1))))
+        (number "25"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 -11.430000000000003 180)
+        (length 2.54)
+        (name "GP20"
+          (effects
+            (font
+              (size 1 1))))
+        (number "26"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 -8.890000000000004 180)
+        (length 2.54)
+        (name "GP21"
+          (effects
+            (font
+              (size 1 1))))
+        (number "27"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 25.4 -6.350000000000001 180)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "28"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 -3.8100000000000023 180)
+        (length 2.54)
+        (name "GP22"
+          (effects
+            (font
+              (size 1 1))))
+        (number "29"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 -1.2699999999999996 180)
+        (length 2.54)
+        (name "RUN"
+          (effects
+            (font
+              (size 1 1))))
+        (number "30"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 1.2699999999999996 180)
+        (length 2.54)
+        (name "GP26_ADC0"
+          (effects
+            (font
+              (size 1 1))))
+        (number "31"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 3.8099999999999987 180)
+        (length 2.54)
+        (name "GP27_ADC1"
+          (effects
+            (font
+              (size 1 1))))
+        (number "32"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 25.4 6.349999999999998 180)
+        (length 2.54)
+        (name "AGND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "33"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 8.889999999999999 180)
+        (length 2.54)
+        (name "GP28_ADC2"
+          (effects
+            (font
+              (size 1 1))))
+        (number "34"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 11.43 180)
+        (length 2.54)
+        (name "ADC_VREF"
+          (effects
+            (font
+              (size 1 1))))
+        (number "35"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_out line
+        (at 25.4 13.969999999999999 180)
+        (length 2.54)
+        (name "3V3_OUT"
+          (effects
+            (font
+              (size 1 1))))
+        (number "36"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 16.509999999999998 180)
+        (length 2.54)
+        (name "3V3_EN"
+          (effects
+            (font
+              (size 1 1))))
+        (number "37"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 25.4 19.049999999999997 180)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "38"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 25.4 21.59 180)
+        (length 2.54)
+        (name "VSYS"
+          (effects
+            (font
+              (size 1 1))))
+        (number "39"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 25.4 24.13 180)
+        (length 2.54)
+        (name "VBUS_USB"
+          (effects
+            (font
+              (size 1 1))))
+        (number "40"
+          (effects
+            (font
+              (size 1 1)))))))
+  (symbol "PD15"
+    (pin_names
+      (offset 1))
+    (in_bom yes)
+    (on_board yes)
+    (property "Reference" "M"
+      (at 0 12.89 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (property "Value" "USB-C PD trigger / 15 V"
+      (at 0 10.89 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (symbol "PD15_0_1"
+      (rectangle
+        (start -15.24 8.89)
+        (end 15.24 -8.89)
+        (stroke
+          (width .254)
+          (type default))
+        (fill
+          (type background))))
+    (symbol "PD15_1_1"
+      (pin power_out line
+        (at 17.78 3.81 180)
+        (length 2.54)
+        (name "OUT+"
+          (effects
+            (font
+              (size 1 1))))
+        (number "1"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 17.78 -3.81 180)
+        (length 2.54)
+        (name "OUT-"
+          (effects
+            (font
+              (size 1 1))))
+        (number "2"
+          (effects
+            (font
+              (size 1 1)))))))
+  (symbol "MP1584"
+    (pin_names
+      (offset 1))
+    (in_bom yes)
+    (on_board yes)
+    (property "Reference" "M"
+      (at 0 14.0 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (property "Value" "MP1584 module / 5.00 V"
+      (at 0 12.0 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (symbol "MP1584_0_1"
+      (rectangle
+        (start -16.51 10.0)
+        (end 16.51 -10.0)
+        (stroke
+          (width .254)
+          (type default))
+        (fill
+          (type background))))
+    (symbol "MP1584_1_1"
+      (pin power_in line
+        (at -19.05 5.08 0)
+        (length 2.54)
+        (name "IN+"
+          (effects
+            (font
+              (size 1 1))))
+        (number "1"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at -19.05 -5.08 0)
+        (length 2.54)
+        (name "IN-"
+          (effects
+            (font
+              (size 1 1))))
+        (number "2"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_out line
+        (at 19.05 5.08 180)
+        (length 2.54)
+        (name "OUT+"
+          (effects
+            (font
+              (size 1 1))))
+        (number "3"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 19.05 -5.08 180)
+        (length 2.54)
+        (name "OUT-"
+          (effects
+            (font
+              (size 1 1))))
+        (number "4"
+          (effects
+            (font
+              (size 1 1)))))))
+  (symbol "DeekRobot"
+    (pin_names
+      (offset 1))
+    (in_bom yes)
+    (on_board yes)
+    (property "Reference" "M"
+      (at 0 44.64 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (property "Value" "Deek-Robot L298P"
+      (at 0 42.64 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (symbol "DeekRobot_0_1"
+      (rectangle
+        (start -20.32 40.64)
+        (end 20.32 -40.64)
+        (stroke
+          (width .254)
+          (type default))
+        (fill
+          (type background))))
+    (symbol "DeekRobot_1_1"
+      (pin input line
+        (at -22.86 30.48 0)
+        (length 2.54)
+        (name "DIR_A"
+          (effects
+            (font
+              (size 1 1))))
+        (number "D12"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -22.86 20.32 0)
+        (length 2.54)
+        (name "DIR_B"
+          (effects
+            (font
+              (size 1 1))))
+        (number "D13"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -22.86 10.16 0)
+        (length 2.54)
+        (name "EN_A"
+          (effects
+            (font
+              (size 1 1))))
+        (number "D3"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -22.86 0 0)
+        (length 2.54)
+        (name "EN_B"
+          (effects
+            (font
+              (size 1 1))))
+        (number "D11"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -22.86 -10.16 0)
+        (length 2.54)
+        (name "BRAKE_A"
+          (effects
+            (font
+              (size 1 1))))
+        (number "D9"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -22.86 -20.32 0)
+        (length 2.54)
+        (name "BRAKE_B"
+          (effects
+            (font
+              (size 1 1))))
+        (number "D8"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin output line
+        (at 22.86 30.48 180)
+        (length 2.54)
+        (name "SNS_A"
+          (effects
+            (font
+              (size 1 1))))
+        (number "A0"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin output line
+        (at 22.86 20.32 180)
+        (length 2.54)
+        (name "SNS_B"
+          (effects
+            (font
+              (size 1 1))))
+        (number "A1"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 22.86 5.08 180)
+        (length 2.54)
+        (name "DCC_A+"
+          (effects
+            (font
+              (size 1 1))))
+        (number "A+"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 22.86 -5.08 180)
+        (length 2.54)
+        (name "DCC_A-"
+          (effects
+            (font
+              (size 1 1))))
+        (number "A-"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 22.86 -20.32 180)
+        (length 2.54)
+        (name "B+ unused"
+          (effects
+            (font
+              (size 1 1))))
+        (number "B+"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin passive line
+        (at 22.86 -30.48 180)
+        (length 2.54)
+        (name "B- unused"
+          (effects
+            (font
+              (size 1 1))))
+        (number "B-"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at -7.62 43.18 270)
+        (length 2.54)
+        (name "5V_LOGIC"
+          (effects
+            (font
+              (size 1 1))))
+        (number "5V"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 7.62 43.18 270)
+        (length 2.54)
+        (name "VIN_MOTOR"
+          (effects
+            (font
+              (size 1 1))))
+        (number "VIN"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 0 -43.18 90)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "GND"
+          (effects
+            (font
+              (size 1 1)))))))
+  (symbol "AHCT125"
+    (pin_names
+      (offset 1))
+    (in_bom yes)
+    (on_board yes)
+    (property "Reference" "M"
+      (at 0 29.4 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (property "Value" "SN74AHCT125N"
+      (at 0 27.4 0)
+      (effects
+        (font
+          (size 1.27 1.27))))
+    (symbol "AHCT125_0_1"
+      (rectangle
+        (start -19.05 25.4)
+        (end 19.05 -25.4)
+        (stroke
+          (width .254)
+          (type default))
+        (fill
+          (type background))))
+    (symbol "AHCT125_1_1"
+      (pin input line
+        (at -21.59 17.78 0)
+        (length 2.54)
+        (name "1A / DCC"
+          (effects
+            (font
+              (size 1 1))))
+        (number "2"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -21.59 12.7 0)
+        (length 2.54)
+        (name "~{1OE}"
+          (effects
+            (font
+              (size 1 1))))
+        (number "1"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -21.59 7.62 0)
+        (length 2.54)
+        (name "2A / ENABLE"
+          (effects
+            (font
+              (size 1 1))))
+        (number "5"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -21.59 2.54 0)
+        (length 2.54)
+        (name "~{2OE}"
+          (effects
+            (font
+              (size 1 1))))
+        (number "4"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -21.59 -2.54 0)
+        (length 2.54)
+        (name "3A unused"
+          (effects
+            (font
+              (size 1 1))))
+        (number "9"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -21.59 -7.62 0)
+        (length 2.54)
+        (name "~{3OE}"
+          (effects
+            (font
+              (size 1 1))))
+        (number "10"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -21.59 -12.7 0)
+        (length 2.54)
+        (name "4A unused"
+          (effects
+            (font
+              (size 1 1))))
+        (number "12"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin input line
+        (at -21.59 -17.78 0)
+        (length 2.54)
+        (name "~{4OE}"
+          (effects
+            (font
+              (size 1 1))))
+        (number "13"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin tri_state line
+        (at 21.59 17.78 180)
+        (length 2.54)
+        (name "1Y / DCC"
+          (effects
+            (font
+              (size 1 1))))
+        (number "3"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin tri_state line
+        (at 21.59 7.62 180)
+        (length 2.54)
+        (name "2Y / ENABLE"
+          (effects
+            (font
+              (size 1 1))))
+        (number "6"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin tri_state line
+        (at 21.59 -2.54 180)
+        (length 2.54)
+        (name "3Y unused"
+          (effects
+            (font
+              (size 1 1))))
+        (number "8"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin tri_state line
+        (at 21.59 -12.7 180)
+        (length 2.54)
+        (name "4Y unused"
+          (effects
+            (font
+              (size 1 1))))
+        (number "11"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 21.59 -17.78 180)
+        (length 2.54)
+        (name "VCC"
+          (effects
+            (font
+              (size 1 1))))
+        (number "14"
+          (effects
+            (font
+              (size 1 1)))))
+      (pin power_in line
+        (at 21.59 -22.86 180)
+        (length 2.54)
+        (name "GND"
+          (effects
+            (font
+              (size 1 1))))
+        (number "7"
+          (effects
+            (font
+              (size 1 1))))))))

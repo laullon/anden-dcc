@@ -12,7 +12,7 @@ jobs:
           python-version: '3.13'
       - run: python3 tools/embed_web.py --check
       - run: python3 tests/check_dcc.py
-      - run: python3 tests/check_programming.py
+      - run: python3 tests/check_hardware.py
       - run: |
           python3 tools/draw_hardware.py
           git diff --exit-code -- docs/hardware

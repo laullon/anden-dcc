@@ -8,10 +8,6 @@ the assigned IP also works. There is no cloud service.
 | GET | `/` | English/Spanish roster panel; Setup closed by default |
 | GET | `/icon.svg` | SVG app icon |
 | GET | `/api/status` | Version, network and DCC state; no LED pulse |
-| POST | `/programming/address/read` | Prepared boundary; always 501 |
-| POST | `/programming/address/write` | `address=1..127`; 400 invalid / otherwise 501 |
-| POST | `/programming/cv/read` | `cv=1..1024`; 400 invalid / otherwise 501 |
-| POST | `/programming/cv/write` | `cv=1..1024`, `value=0..255`; 400 invalid / otherwise 501 |
 | POST | `/dcc/f0` | Form: existing roster `address=1..127`, `on=0|1` |
 | POST | `/locos/save` | Form: optional `id`, `address=1..127`, optional `name` |
 | POST | `/locos/remove` | Form: existing `id=1..8` |
@@ -72,20 +68,11 @@ Saving/removing entries does not restart a signal stopped by a failed OTA;
 an explicit F0 command does. A successful config save can still report
 `ready=false` if hardware resources were unavailable.
 
-## Programming preparation (0.5.1)
+## Scope
 
-`GET /api/status` also includes:
-
-```json
-{"programming":{"available":false,"state":"hardware-required","operations":[],"planned":["read-address","write-short-address","read-cv","write-cv"],"missing":["isolated-powered-output","calibrated-ack-input","service-mode-transmitter"]}}
-```
-
-Valid programming POST requests return **HTTP 501** with
-`error: "programming-unavailable"`. There is no enable flag or simulated success.
-They never send packets, stop/restart F0, alter CVs, or update the roster.
-Malformed numeric parameters return 400. Zero is valid for a CV value, not a
-CV number or short address. The UI keeps these operations disabled.
-See the [programming status and hardware plan](PROGRAMMING.md).
+Decoder programming was removed in 0.5.2. There is no programming capability
+object in status; the former `/programming/...` routes now return 404.
+Changing a roster address only changes the controller's roster, not the decoder.
 
 ## Wi-Fi and OTA
 

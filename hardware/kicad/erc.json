@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.kicad.org/erc.v1.json",
+  "coordinate_units": "mm",
+  "date": "2026-10-29",
+  "kicad_version": "8.0.6",
+  "sheets": [
+    {
+      "path": "/",
+      "uuid_path": "/ee875eab-ba12-5de8-b941-b707919bb72e",
+      "violations": []
+    }
+  ],
+  "source": "hardware/kicad/anden-dcc.kicad_sch"
+}

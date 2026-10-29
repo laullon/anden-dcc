@@ -19,14 +19,14 @@ some light, sound and, eventually, a little movement—without a full-size comma
 station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
 hardware, independent of browser and Wi-Fi activity.
 
-**Current release: 0.5.1.** A shared locomotive roster, independent F0/headlights
+**Current release: 0.5.2.** A shared locomotive roster, independent F0/headlights
 and short addresses are implemented. This is a **logic-output prototype**. Track
 power, motor control and current protection are not enabled in firmware. The
 Deek-Robot power assembly is a documented proposal for the next stage.
 
 [Quick start](#quick-start) · [Hardware & BOM](docs/hardware/README.md) ·
 [Signal verification](DCC-ANALYZER.md) · [Release validation](docs/VALIDATION.md) · [API](docs/API.md) ·
-[Programming](docs/PROGRAMMING.md) · [Build](#build-the-firmware) · [Español](README.es.md)
+[Build](#build-the-firmware) · [Español](README.es.md)
 
 ![English control panel preview](assets/ui-desktop.png)
 
@@ -43,9 +43,6 @@ Deek-Robot power assembly is a documented proposal for the next stage.
 - OTA updates through the panel; first installation and recovery use USB.
 - LED connected/disconnected feedback, with a brief dip on user requests.
   Automatic status polls do not trigger it.
-- **Programming preparation**: read-address/CV controls and packet helpers; actual
-  decoder reads/writes await the isolated powered output, ACK sensing and service
-  transmitter. [Status and hardware plan](docs/PROGRAMMING.md).
 - Self-contained UI: no external fonts, CDN, cloud account or internet required.
 
 The waveform illustration is not a live oscilloscope. Diagnostics show each
@@ -91,41 +88,28 @@ with no XOR errors. The new multi-loco DMA scheduler still needs a physical capt
 Half-bits measured 58.000–58.125 µs and 100.000–100.125 µs at 8 MS/s.
 [Full signal guide](DCC-ANALYZER.md).
 
-## Forgotten a decoder address?
-
-Open **Programming**, or **Edit → Don’t know the address?** Service-mode
-programming is the planned way to read it with one loco on an isolated track.
-**0.5.1 cannot read/program a physical decoder yet**: the powered programming
-output, current-response sensing and service-mode transmitter are still missing.
-The panel explains this and keeps read/write disabled; the API rejects requests.
-Changing a roster card only changes the roster. See the
-[programming plan](docs/PROGRAMMING.md) for the required next stage.
-
 ## Hardware & BOM
 
-Chosen hardware: **Pico W + Deek-Robot L298P**, one USB-C PD input, a 15 V trigger
-and the existing MP1584 set to 5 V. No Arduino board is required. The protected
-power proposal adds level translation, ADC dividers, a power-on-cleared arm
-latch and an independent current trip.
+**One DCC output feeds both tracks in parallel.** Each loco is still controlled
+independently by its address. The simple design keeps the **Pico W**, selected
+**Deek-Robot L298P**, **15 V USB-C PD trigger**, and **MP1584 set to 5.00 V**.
+Only one SN74AHCT125N level-shifter IC is added, plus five resistors, six
+capacitors, the VSYS diode, fuse and track-power switch. Bridge B is unused.
 
-The shield's 5 V CD4077 direction logic is why direct Pico-to-shield wiring is
-not proposed. The L298 input specification alone does not cover the whole shield.
+Decoder addresses are identified/set by another method.
 
 | Document | Contents |
 | --- | --- |
-| [Hardware guide](docs/hardware/README.md) | Power, logic levels, stages, pin plan and acceptance checks |
-| [BOM](docs/hardware/BOM.md) / [CSV](docs/hardware/bom.csv) | Quantities, existing/ordered parts and additions |
-| [Power](docs/hardware/power.svg) | USB-C PD, fuse, buck and VSYS diode |
-| [Control](docs/hardware/control.svg) | Pico → buffer → shield and current sensing |
-| [Protection](docs/hardware/protection.svg) | Proposed latched trip and emergency stop |
-| [Connections](docs/hardware/connections.csv) | Exact nets and component pins |
-| [Sources](docs/hardware/sources.md) | Manufacturer and project references |
+| [Hardware guide](docs/hardware/README.md) | Simple wiring, pin mapping and current-cutoff plan |
+| [Schematic PDF](docs/hardware/schematic.pdf) / [SVG](docs/hardware/schematic.svg) | One electrical sheet, Rev C proposal |
+| [Editable KiCad project](hardware/kicad/README.md) | Native schematic, ERC report and exported netlist |
+| [BOM](docs/hardware/BOM.md) / [CSV](docs/hardware/bom.csv) | Modules and the small set of additional parts |
+| [Connections](docs/hardware/connections.csv) | Exact circuit nets and pins |
+| [Sources](docs/hardware/sources.md) | Manufacturer references |
 
-![Proposed USB-C power distribution](docs/hardware/power.svg)
-
-**Only the Pico/analyzer stage is measured.** The power assembly still needs
-bench validation and arm/enable/ADC firmware before connecting trains. The
-present function-only firmware does not send motor stop packets.
+**The power assembly is not built or electrically validated.** Track enable,
+software current cutoff and startup stop packets still need implementation and
+bench tests before powering trains. Current firmware only emits GP2 logic.
 
 ## Build the firmware
 
@@ -151,7 +135,7 @@ after restart. **Do not upload UF2 over OTA.**
 The CLI helper verifies success and the running version:
 
 ```sh
-python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.5.1
+python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.5.2
 ```
 
 Use the Pico IP for `--host` if mDNS is slow. Normal firmware OTA preserves saved
@@ -162,7 +146,7 @@ Wi-Fi settings. BOOTSEL remains the recovery path.
 ```sh
 python3 tools/embed_web.py --check
 python3 tests/check_dcc.py
-python3 tests/check_programming.py
+python3 tests/check_hardware.py
 python3 tools/decode_dcc_csv.py path/to/digital.csv --expected '03 80 83'
 ```
 
@@ -186,7 +170,8 @@ responses, mobile layout, offline state and failed save/upload recovery. GitHub 
 Edit `web/index.html` and `web/icon.svg`, then run `tools/embed_web.py`.
 Generated `WebAssets.h` is checked in for direct Arduino IDE builds. If PIO
 changes, regenerate its header with the core's `pioasm`, then run the timing
-checks. `tools/draw_hardware.py` regenerates the SVG wiring sheets.
+checks. `tools/export_hardware.py` exports and checks the current KiCad schematic;
+`tools/draw_hardware.py` refreshes its offline print page.
 
 ```text
 firmware/anden-dcc/   Pico sketch, packet encoder and PIO generator
@@ -202,11 +187,9 @@ tools/               web embedding, OTA, capture decoding and UI checks
 - [x] Wi-Fi, web control and OTA without a USB connection.
 - [x] PIO DCC timing and F0 packets measured on hardware.
 - [x] English/Spanish UI with hidden-by-default Setup.
-- [ ] Build and validate the protected Deek-Robot power harness.
-- [ ] Implement arm/disarm, current sensing and startup stop packets.
+- [ ] Build and validate the simple, single-output Deek-Robot wiring.
+- [ ] Implement default-off track enable, software current cutoff and startup stop packets.
 - [x] Shared multi-locomotive roster and automatic F0 refresh.
-- [x] Programming UI, capability API and tested packet/address helpers.
-- [ ] Implement the programming output/ACK transport and validate real CV reads/writes.
 - [ ] Add sound functions and restricted movement.
 
 ## License

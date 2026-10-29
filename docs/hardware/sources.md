@@ -1,8 +1,8 @@
 # Hardware sources
 
-Primary sources checked on 29 October 2026. The custom latch is a proposed
-integration of these parts, not a manufacturer-approved circuit or an
-experimentally validated board.
+Primary sources checked on 29 October 2026. The simple circuit is a proposed
+integration of these parts, not a manufacturer-approved or electrically
+validated assembly. Rev C uses only one AHCT buffer and bridge A.
 
 | Source | Used for |
 | --- | --- |
@@ -12,9 +12,6 @@ experimentally validated board.
 | [DCC-EX Deek-Robot notes](https://dcc-ex.com/reference/hardware/motorboards/deek-robot-motor-shield.html) | Clone relationship and practical current/cooling limits |
 | [TI CD4077B](https://www.ti.com/lit/ds/symlink/cd4077b.pdf) | Minimum 3.5 V high input at a 5 V supply |
 | [TI SN74AHCT125](https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf) | TTL-compatible input, 5 V buffer and active-low output enable |
-| [TI SN74HCT74](https://www.ti.com/lit/ds/symlink/sn74hct74.pdf) | Rising-edge D latch, asynchronous clear, 5 V TTL-compatible logic |
-| [TI LM393](https://www.ti.com/lit/ds/symlink/lm393.pdf) | Dual open-collector comparator and ground-referenced input range |
-| [Microchip MCP120/130](https://ww1.microchip.com/downloads/aemDocuments/documents/APID/ProductDocuments/DataSheets/11184d.pdf) | Open-drain supply supervisor, -485 threshold and package bondout choices |
 | [ST L298](https://www.st.com/resource/en/datasheet/l298.pdf) | Supply/input ratings, bridge voltage loss and current limitations |
 | [MPS MP1584](https://www.monolithicpower.com/en/products/power-management/switching-converters-controllers/step-down-buck/converters/mp1584.html) | Existing buck module's IC operating range; module thermal capability remains unverified |
 

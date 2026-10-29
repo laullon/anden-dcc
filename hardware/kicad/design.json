@@ -1,0 +1,786 @@
+{
+  "revision": "C",
+  "source": "tools/draw_kicad.py",
+  "components": [
+    {
+      "sheet": "anden-dcc",
+      "reference": "M3",
+      "unit": 1,
+      "value": "USB-C PD / 15 V, >=3 A",
+      "symbol": "Anden:PD15",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "OUT+",
+          "net": "+15V_RAW"
+        },
+        {
+          "pin": "2",
+          "name": "OUT-",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "F1",
+      "unit": 1,
+      "value": "3 A / >=32 V DC",
+      "symbol": "Device:Fuse",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "+15V_RAW"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "+15V_FUSED"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "S1",
+      "unit": 1,
+      "value": "TRACK POWER / OFF",
+      "symbol": "Switch:SW_SPST",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "A",
+          "net": "+15V_FUSED"
+        },
+        {
+          "pin": "2",
+          "name": "B",
+          "net": "TRACK_VM"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "C1",
+      "unit": 1,
+      "value": "100 uF / 25 V",
+      "symbol": "Device:C_Polarized",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "TRACK_VM"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "M4",
+      "unit": 1,
+      "value": "MP1584 / SET 5.00 V",
+      "symbol": "Anden:MP1584",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "IN+",
+          "net": "+15V_FUSED"
+        },
+        {
+          "pin": "2",
+          "name": "IN-",
+          "net": "GND"
+        },
+        {
+          "pin": "3",
+          "name": "OUT+",
+          "net": "+5V_LOGIC"
+        },
+        {
+          "pin": "4",
+          "name": "OUT-",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "C2",
+      "unit": 1,
+      "value": "47 uF / >=10 V",
+      "symbol": "Device:C_Polarized",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "+5V_LOGIC"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "D1",
+      "unit": 1,
+      "value": "1N5819 / band to VSYS",
+      "symbol": "Device:D_Schottky",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "K",
+          "net": "PICO_VSYS"
+        },
+        {
+          "pin": "2",
+          "name": "A",
+          "net": "+5V_LOGIC"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "C5",
+      "unit": 1,
+      "value": "100 nF / Pico VSYS",
+      "symbol": "Device:C",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "PICO_VSYS"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "C3",
+      "unit": 1,
+      "value": "100 nF / U1",
+      "symbol": "Device:C",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "+5V_LOGIC"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "C4",
+      "unit": 1,
+      "value": "100 nF / shield",
+      "symbol": "Device:C",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "+5V_LOGIC"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "M1",
+      "unit": 1,
+      "value": "Raspberry Pi Pico W",
+      "symbol": "Anden:PicoW",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "GP0",
+          "net": null
+        },
+        {
+          "pin": "2",
+          "name": "GP1",
+          "net": null
+        },
+        {
+          "pin": "3",
+          "name": "GND",
+          "net": "GND"
+        },
+        {
+          "pin": "4",
+          "name": "GP2",
+          "net": "DCC_3V3"
+        },
+        {
+          "pin": "5",
+          "name": "GP3",
+          "net": null
+        },
+        {
+          "pin": "6",
+          "name": "GP4",
+          "net": null
+        },
+        {
+          "pin": "7",
+          "name": "GP5",
+          "net": null
+        },
+        {
+          "pin": "8",
+          "name": "GND",
+          "net": "GND"
+        },
+        {
+          "pin": "9",
+          "name": "GP6",
+          "net": "ENABLE_3V3"
+        },
+        {
+          "pin": "10",
+          "name": "GP7",
+          "net": null
+        },
+        {
+          "pin": "11",
+          "name": "GP8",
+          "net": null
+        },
+        {
+          "pin": "12",
+          "name": "GP9",
+          "net": null
+        },
+        {
+          "pin": "13",
+          "name": "GND",
+          "net": "GND"
+        },
+        {
+          "pin": "14",
+          "name": "GP10",
+          "net": null
+        },
+        {
+          "pin": "15",
+          "name": "GP11",
+          "net": null
+        },
+        {
+          "pin": "16",
+          "name": "GP12",
+          "net": null
+        },
+        {
+          "pin": "17",
+          "name": "GP13",
+          "net": null
+        },
+        {
+          "pin": "18",
+          "name": "GND",
+          "net": "GND"
+        },
+        {
+          "pin": "19",
+          "name": "GP14",
+          "net": null
+        },
+        {
+          "pin": "20",
+          "name": "GP15",
+          "net": null
+        },
+        {
+          "pin": "21",
+          "name": "GP16",
+          "net": null
+        },
+        {
+          "pin": "22",
+          "name": "GP17",
+          "net": null
+        },
+        {
+          "pin": "23",
+          "name": "GND",
+          "net": "GND"
+        },
+        {
+          "pin": "24",
+          "name": "GP18",
+          "net": null
+        },
+        {
+          "pin": "25",
+          "name": "GP19",
+          "net": null
+        },
+        {
+          "pin": "26",
+          "name": "GP20",
+          "net": null
+        },
+        {
+          "pin": "27",
+          "name": "GP21",
+          "net": null
+        },
+        {
+          "pin": "28",
+          "name": "GND",
+          "net": "GND"
+        },
+        {
+          "pin": "29",
+          "name": "GP22",
+          "net": null
+        },
+        {
+          "pin": "30",
+          "name": "RUN",
+          "net": null
+        },
+        {
+          "pin": "31",
+          "name": "GP26_ADC0",
+          "net": "SENSE_ADC"
+        },
+        {
+          "pin": "32",
+          "name": "GP27_ADC1",
+          "net": null
+        },
+        {
+          "pin": "33",
+          "name": "AGND",
+          "net": "GND"
+        },
+        {
+          "pin": "34",
+          "name": "GP28_ADC2",
+          "net": null
+        },
+        {
+          "pin": "35",
+          "name": "ADC_VREF",
+          "net": null
+        },
+        {
+          "pin": "36",
+          "name": "3V3_OUT",
+          "net": null
+        },
+        {
+          "pin": "37",
+          "name": "3V3_EN",
+          "net": null
+        },
+        {
+          "pin": "38",
+          "name": "GND",
+          "net": "GND"
+        },
+        {
+          "pin": "39",
+          "name": "VSYS",
+          "net": "PICO_VSYS"
+        },
+        {
+          "pin": "40",
+          "name": "VBUS_USB",
+          "net": null
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "U1",
+      "unit": 1,
+      "value": "SN74AHCT125N",
+      "symbol": "Anden:AHCT125",
+      "pins": [
+        {
+          "pin": "2",
+          "name": "1A / DCC",
+          "net": "DCC_3V3"
+        },
+        {
+          "pin": "1",
+          "name": "~{1OE}",
+          "net": "GND"
+        },
+        {
+          "pin": "5",
+          "name": "2A / ENABLE",
+          "net": "ENABLE_3V3"
+        },
+        {
+          "pin": "4",
+          "name": "~{2OE}",
+          "net": "GND"
+        },
+        {
+          "pin": "9",
+          "name": "3A unused",
+          "net": "GND"
+        },
+        {
+          "pin": "10",
+          "name": "~{3OE}",
+          "net": "+5V_LOGIC"
+        },
+        {
+          "pin": "12",
+          "name": "4A unused",
+          "net": "GND"
+        },
+        {
+          "pin": "13",
+          "name": "~{4OE}",
+          "net": "+5V_LOGIC"
+        },
+        {
+          "pin": "3",
+          "name": "1Y / DCC",
+          "net": "DCC_5V"
+        },
+        {
+          "pin": "6",
+          "name": "2Y / ENABLE",
+          "net": "ENABLE_5V"
+        },
+        {
+          "pin": "8",
+          "name": "3Y unused",
+          "net": null
+        },
+        {
+          "pin": "11",
+          "name": "4Y unused",
+          "net": null
+        },
+        {
+          "pin": "14",
+          "name": "VCC",
+          "net": "+5V_LOGIC"
+        },
+        {
+          "pin": "7",
+          "name": "GND",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "M2",
+      "unit": 1,
+      "value": "Deek-Robot L298P / A only",
+      "symbol": "Anden:DeekRobot",
+      "pins": [
+        {
+          "pin": "D12",
+          "name": "DIR_A",
+          "net": "DCC_5V"
+        },
+        {
+          "pin": "D13",
+          "name": "DIR_B",
+          "net": "GND"
+        },
+        {
+          "pin": "D3",
+          "name": "EN_A",
+          "net": "ENABLE_5V"
+        },
+        {
+          "pin": "D11",
+          "name": "EN_B",
+          "net": "GND"
+        },
+        {
+          "pin": "D9",
+          "name": "BRAKE_A",
+          "net": "GND"
+        },
+        {
+          "pin": "D8",
+          "name": "BRAKE_B",
+          "net": "GND"
+        },
+        {
+          "pin": "A0",
+          "name": "SNS_A",
+          "net": "SENSE_RAW"
+        },
+        {
+          "pin": "A1",
+          "name": "SNS_B",
+          "net": null
+        },
+        {
+          "pin": "A+",
+          "name": "DCC_A+",
+          "net": "RAIL_PLUS"
+        },
+        {
+          "pin": "A-",
+          "name": "DCC_A-",
+          "net": "RAIL_MINUS"
+        },
+        {
+          "pin": "B+",
+          "name": "B+ unused",
+          "net": null
+        },
+        {
+          "pin": "B-",
+          "name": "B- unused",
+          "net": null
+        },
+        {
+          "pin": "5V",
+          "name": "5V_LOGIC",
+          "net": "+5V_LOGIC"
+        },
+        {
+          "pin": "VIN",
+          "name": "VIN_MOTOR",
+          "net": "TRACK_VM"
+        },
+        {
+          "pin": "GND",
+          "name": "GND",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "R1",
+      "unit": 1,
+      "value": "10k",
+      "symbol": "Device:R",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "DCC_3V3"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "R2",
+      "unit": 1,
+      "value": "10k",
+      "symbol": "Device:R",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "ENABLE_3V3"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "R3",
+      "unit": 1,
+      "value": "10k",
+      "symbol": "Device:R",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "ENABLE_5V"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "R4",
+      "unit": 1,
+      "value": "10k 1%",
+      "symbol": "Device:R",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "SENSE_RAW"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "SENSE_ADC"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "R5",
+      "unit": 1,
+      "value": "10k 1%",
+      "symbol": "Device:R",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "SENSE_ADC"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "C6",
+      "unit": 1,
+      "value": "1 nF",
+      "symbol": "Device:C",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "SENSE_ADC"
+        },
+        {
+          "pin": "2",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "J1",
+      "unit": 1,
+      "value": "TRACK 1",
+      "symbol": "Connector_Generic:Conn_01x02",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "Pin_1",
+          "net": "RAIL_PLUS"
+        },
+        {
+          "pin": "2",
+          "name": "Pin_2",
+          "net": "RAIL_MINUS"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "J2",
+      "unit": 1,
+      "value": "TRACK 2",
+      "symbol": "Connector_Generic:Conn_01x02",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "Pin_1",
+          "net": "RAIL_PLUS"
+        },
+        {
+          "pin": "2",
+          "name": "Pin_2",
+          "net": "RAIL_MINUS"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "#FLG01",
+      "unit": 1,
+      "value": "PWR_FLAG",
+      "symbol": "power:PWR_FLAG",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "GND"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "#FLG02",
+      "unit": 1,
+      "value": "PWR_FLAG",
+      "symbol": "power:PWR_FLAG",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "PICO_VSYS"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "#FLG03",
+      "unit": 1,
+      "value": "PWR_FLAG",
+      "symbol": "power:PWR_FLAG",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "TRACK_VM"
+        }
+      ]
+    },
+    {
+      "sheet": "anden-dcc",
+      "reference": "#FLG04",
+      "unit": 1,
+      "value": "PWR_FLAG",
+      "symbol": "power:PWR_FLAG",
+      "pins": [
+        {
+          "pin": "1",
+          "name": "~",
+          "net": "+15V_FUSED"
+        }
+      ]
+    }
+  ]
+}

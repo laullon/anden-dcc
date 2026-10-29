@@ -9,3 +9,9 @@ __pycache__/
 *.pyc
 *.sal
 captures/
+
+# KiCad local state
+*.kicad_prl
+*.lck
+*_autosave.kicad_sch
+hardware/kicad/anden-dcc-backups/

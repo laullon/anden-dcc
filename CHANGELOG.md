@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2
+
+- Remove decoder-programming UI, API, packet helpers and tests; use another method for addresses.
+- Simplify hardware to one bridge output feeding both tracks, one AHCT level shifter and a current-sense divider.
+- Retire the programming/latch/comparator proposal; add a single-sheet native KiCad schematic, PDF, net list and matching BOM.
+- Native schematic ERC and key-net checks pass; track enable/current cutoff remain future firmware work.
+
 ## 0.5.1
 
 - Programming preparation panel in English/Spanish; hardware-required state and disabled read/write controls.

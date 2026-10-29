@@ -1,4 +1,27 @@
-# Release 0.5.1 · programming preparation validation
+# Release 0.5.2 · simple controller validation
+
+29 October 2026. Decoder programming has been removed. The current hardware
+proposal uses one bridge output for both tracks and one AHCT buffer IC.
+
+| Check | Result |
+| --- | --- |
+| Pico W / unchanged 1 MB sketch + 1 MB filesystem | Compiles: 469196 bytes program (44%), 74192 bytes globals (28%) |
+| Existing encoder / PIO / roster checks | Pass |
+| Mocked UI | Two-loco controls and all previous non-programming regressions pass; programming controls absent |
+| OTA / real browser | 0.5.2 deployed; both loco cards and saved settings retained; no JS errors |
+| Removed API | No programming status object; all former programming endpoints return 404 |
+| Native KiCad ERC | Zero violations on the single-sheet Rev C schematic |
+| Exported electrical connectivity | 21 circuit components; both tracks share A, B disabled, buffer input/output enables and pull-downs checked, ADC divider and VSYS diode polarity checked |
+| Documentation | BOM and pin list updated to Rev C; single-sheet SVG/PDF and editable native project provided |
+| Physical power / current cutoff | Not built or validated; enable/current cutoff firmware still required before track power |
+| Analyzer | User deferred troubleshooting; no new physical signal pass claimed |
+
+KiCad rules/netlist checks establish drawing consistency, not electrical or
+thermal performance. Firmware still drives only GP2 logic and reports
+`trackPower=false`. The GPIO waveform/roster engine was not changed by this
+release. Pre-OTA F0 states were restored after deployment.
+
+## Historical release 0.5.1 · programming preparation validation
 
 29 October 2026. This release prepares the UI and packet/address helpers;
 **physical decoder reading/writing is not implemented or tested**.
@@ -18,7 +41,7 @@
 The ordinary GP2 packet generator, DMA roster schedule and power-pin behavior
 are unchanged. Programming POST handlers only validate input and report
 unavailability. The service helpers cannot be passed into the current fixed
-three-byte transmitter. See [the implementation boundary and hardware plan](PROGRAMMING.md).
+three-byte transmitter. See the historical programming preparation (removed in 0.5.2).
 
 ## Historical release 0.5.0 validation
 

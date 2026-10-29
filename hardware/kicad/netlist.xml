@@ -1,0 +1,807 @@
+<?xml version='1.0' encoding='utf-8'?>
+<export version="E">
+  <design>
+    <source>hardware/kicad/anden-dcc.kicad_sch</source>
+    <date>2026-10-29</date>
+    <tool>Eeschema 8.0.6</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>anden-dcc / simple one-output wiring</title>
+        <company>anden-dcc / laullon</company>
+        <rev>C</rev>
+        <date>2026-10-29</date>
+        <source>anden-dcc.kicad_sch</source>
+        <comment number="1" value="NOT BUILT OR ELECTRICALLY VALIDATED" />
+        <comment number="2" value="Firmware 0.5.2: GP2 logic only; track power disabled" />
+        <comment number="3" value="" />
+        <comment number="4" value="" />
+        <comment number="5" value="" />
+        <comment number="6" value="" />
+        <comment number="7" value="" />
+        <comment number="8" value="" />
+        <comment number="9" value="" />
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="C1">
+      <value>100 uF / 25 V</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="C_Polarized" description="Polarized capacitor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="cap capacitor" />
+      <property name="ki_fp_filters" value="CP_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>efc768c8-9764-58ca-a0cf-a478482c3e15</tstamps>
+    </comp>
+    <comp ref="C2">
+      <value>47 uF / &gt;=10 V</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="C_Polarized" description="Polarized capacitor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="cap capacitor" />
+      <property name="ki_fp_filters" value="CP_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>5a87b2e8-89b1-5ff8-ac96-6f4e390c0cfd</tstamps>
+    </comp>
+    <comp ref="C3">
+      <value>100 nF / U1</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="cap capacitor" />
+      <property name="ki_fp_filters" value="C_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>3c77f5bf-6829-5dc1-8442-834343f31ae8</tstamps>
+    </comp>
+    <comp ref="C4">
+      <value>100 nF / shield</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="cap capacitor" />
+      <property name="ki_fp_filters" value="C_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>231ac962-9646-5b80-92ad-57a4b1a486cb</tstamps>
+    </comp>
+    <comp ref="C5">
+      <value>100 nF / Pico VSYS</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="cap capacitor" />
+      <property name="ki_fp_filters" value="C_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>682f0694-5d2e-5a2c-b4bb-391a5b43f798</tstamps>
+    </comp>
+    <comp ref="C6">
+      <value>1 nF</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="cap capacitor" />
+      <property name="ki_fp_filters" value="C_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>b94605c8-5c4d-5728-bebb-366eab9712f6</tstamps>
+    </comp>
+    <comp ref="D1">
+      <value>1N5819 / band to VSYS</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="D_Schottky" description="Schottky diode" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="diode Schottky" />
+      <property name="ki_fp_filters" value="TO-???* *_Diode_* *SingleDiode* D_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>c825c3b0-56e3-5d4a-806e-12ac5cb2a54e</tstamps>
+    </comp>
+    <comp ref="F1">
+      <value>3 A / &gt;=32 V DC</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="Fuse" description="Fuse" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="fuse" />
+      <property name="ki_fp_filters" value="*Fuse*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>68c2a085-bfaa-5416-a8aa-91bc0cb9b6c3</tstamps>
+    </comp>
+    <comp ref="J1">
+      <value>TRACK 1</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="connector" />
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>24c74d00-1363-5ae8-9ffe-dab98b561173</tstamps>
+    </comp>
+    <comp ref="J2">
+      <value>TRACK 2</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="connector" />
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>bf955501-a47a-5228-866e-95981bad7c61</tstamps>
+    </comp>
+    <comp ref="M1">
+      <value>Raspberry Pi Pico W</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Anden" part="PicoW" description="" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>a0efb75f-0ae8-5e37-b1cd-7a9cc5bf307a</tstamps>
+    </comp>
+    <comp ref="M2">
+      <value>Deek-Robot L298P / A only</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Anden" part="DeekRobot" description="" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>fab26878-629d-517d-9564-bb0d3753aad1</tstamps>
+    </comp>
+    <comp ref="M3">
+      <value>USB-C PD / 15 V, &gt;=3 A</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Anden" part="PD15" description="" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>9da8bf8e-609a-53f7-b13d-8cfda493ffef</tstamps>
+    </comp>
+    <comp ref="M4">
+      <value>MP1584 / SET 5.00 V</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Anden" part="MP1584" description="" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>9e661ea0-c087-56bc-b80a-377c8647bd21</tstamps>
+    </comp>
+    <comp ref="R1">
+      <value>10k</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="R res resistor" />
+      <property name="ki_fp_filters" value="R_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>d8eb79e9-c56b-59a2-bff5-35339af901e6</tstamps>
+    </comp>
+    <comp ref="R2">
+      <value>10k</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="R res resistor" />
+      <property name="ki_fp_filters" value="R_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>51861bd4-f199-5a61-b977-362b254a05dd</tstamps>
+    </comp>
+    <comp ref="R3">
+      <value>10k</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="R res resistor" />
+      <property name="ki_fp_filters" value="R_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>b991529d-8bb6-5f52-af48-72efb05bccef</tstamps>
+    </comp>
+    <comp ref="R4">
+      <value>10k 1%</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="R res resistor" />
+      <property name="ki_fp_filters" value="R_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>d5b12498-487b-5fa7-bd62-2ea8d454dc4b</tstamps>
+    </comp>
+    <comp ref="R5">
+      <value>10k 1%</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="R res resistor" />
+      <property name="ki_fp_filters" value="R_*" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>b416d579-bb77-52d4-b375-5d6c0e3a6ffa</tstamps>
+    </comp>
+    <comp ref="S1">
+      <value>TRACK POWER / OFF</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Switch" part="SW_SPST" description="Single Pole Single Throw (SPST) switch" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <property name="ki_keywords" value="switch lever" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>5630dafc-fe77-511d-9b46-463cff143598</tstamps>
+    </comp>
+    <comp ref="U1">
+      <value>SN74AHCT125N</value>
+      <fields>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <libsource lib="Anden" part="AHCT125" description="" />
+      <property name="Sheetname" value="" />
+      <property name="Sheetfile" value="anden-dcc.kicad_sch" />
+      <sheetpath names="/" tstamps="/" />
+      <tstamps>c3e76270-7c6f-578e-908f-0060053b8a53</tstamps>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Anden" part="AHCT125">
+      <fields>
+        <field name="Reference">M</field>
+        <field name="Value">SN74AHCT125N</field>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <pins>
+        <pin num="1" name="~{1OE}" type="input" />
+        <pin num="2" name="1A_/_DCC" type="input" />
+        <pin num="3" name="1Y_/_DCC" type="tri_state" />
+        <pin num="4" name="~{2OE}" type="input" />
+        <pin num="5" name="2A_/_ENABLE" type="input" />
+        <pin num="6" name="2Y_/_ENABLE" type="tri_state" />
+        <pin num="7" name="GND" type="power_in" />
+        <pin num="8" name="3Y_unused" type="tri_state" />
+        <pin num="9" name="3A_unused" type="input" />
+        <pin num="10" name="~{3OE}" type="input" />
+        <pin num="11" name="4Y_unused" type="tri_state" />
+        <pin num="12" name="4A_unused" type="input" />
+        <pin num="13" name="~{4OE}" type="input" />
+        <pin num="14" name="VCC" type="power_in" />
+      </pins>
+    </libpart>
+    <libpart lib="Anden" part="DeekRobot">
+      <fields>
+        <field name="Reference">M</field>
+        <field name="Value">Deek-Robot L298P</field>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <pins>
+        <pin num="5V" name="5V_LOGIC" type="power_in" />
+        <pin num="A+" name="DCC_A+" type="passive" />
+        <pin num="A-" name="DCC_A-" type="passive" />
+        <pin num="A0" name="SNS_A" type="output" />
+        <pin num="A1" name="SNS_B" type="output" />
+        <pin num="B+" name="B+_unused" type="passive" />
+        <pin num="B-" name="B-_unused" type="passive" />
+        <pin num="D3" name="EN_A" type="input" />
+        <pin num="D8" name="BRAKE_B" type="input" />
+        <pin num="D9" name="BRAKE_A" type="input" />
+        <pin num="D11" name="EN_B" type="input" />
+        <pin num="D12" name="DIR_A" type="input" />
+        <pin num="D13" name="DIR_B" type="input" />
+        <pin num="GND" name="GND" type="power_in" />
+        <pin num="VIN" name="VIN_MOTOR" type="power_in" />
+      </pins>
+    </libpart>
+    <libpart lib="Anden" part="MP1584">
+      <fields>
+        <field name="Reference">M</field>
+        <field name="Value">MP1584 module / 5.00 V</field>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <pins>
+        <pin num="1" name="IN+" type="power_in" />
+        <pin num="2" name="IN-" type="passive" />
+        <pin num="3" name="OUT+" type="power_out" />
+        <pin num="4" name="OUT-" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Anden" part="PD15">
+      <fields>
+        <field name="Reference">M</field>
+        <field name="Value">USB-C PD trigger / 15 V</field>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <pins>
+        <pin num="1" name="OUT+" type="power_out" />
+        <pin num="2" name="OUT-" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Anden" part="PicoW">
+      <fields>
+        <field name="Reference">M</field>
+        <field name="Value">Pico W \u00b7 physical pins</field>
+        <field name="Footprint" />
+        <field name="Datasheet" />
+        <field name="Description" />
+      </fields>
+      <pins>
+        <pin num="1" name="GP0" type="passive" />
+        <pin num="2" name="GP1" type="passive" />
+        <pin num="3" name="GND" type="power_in" />
+        <pin num="4" name="GP2" type="passive" />
+        <pin num="5" name="GP3" type="passive" />
+        <pin num="6" name="GP4" type="passive" />
+        <pin num="7" name="GP5" type="passive" />
+        <pin num="8" name="GND" type="power_in" />
+        <pin num="9" name="GP6" type="passive" />
+        <pin num="10" name="GP7" type="passive" />
+        <pin num="11" name="GP8" type="passive" />
+        <pin num="12" name="GP9" type="passive" />
+        <pin num="13" name="GND" type="power_in" />
+        <pin num="14" name="GP10" type="passive" />
+        <pin num="15" name="GP11" type="passive" />
+        <pin num="16" name="GP12" type="passive" />
+        <pin num="17" name="GP13" type="passive" />
+        <pin num="18" name="GND" type="power_in" />
+        <pin num="19" name="GP14" type="passive" />
+        <pin num="20" name="GP15" type="passive" />
+        <pin num="21" name="GP16" type="passive" />
+        <pin num="22" name="GP17" type="passive" />
+        <pin num="23" name="GND" type="power_in" />
+        <pin num="24" name="GP18" type="passive" />
+        <pin num="25" name="GP19" type="passive" />
+        <pin num="26" name="GP20" type="passive" />
+        <pin num="27" name="GP21" type="passive" />
+        <pin num="28" name="GND" type="power_in" />
+        <pin num="29" name="GP22" type="passive" />
+        <pin num="30" name="RUN" type="passive" />
+        <pin num="31" name="GP26_ADC0" type="passive" />
+        <pin num="32" name="GP27_ADC1" type="passive" />
+        <pin num="33" name="AGND" type="power_in" />
+        <pin num="34" name="GP28_ADC2" type="passive" />
+        <pin num="35" name="ADC_VREF" type="passive" />
+        <pin num="36" name="3V3_OUT" type="power_out" />
+        <pin num="37" name="3V3_EN" type="passive" />
+        <pin num="38" name="GND" type="power_in" />
+        <pin num="39" name="VSYS" type="power_in" />
+        <pin num="40" name="VBUS_USB" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x02">
+      <description>Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x02</field>
+        <field name="Footprint" />
+        <field name="Datasheet">~</field>
+        <field name="Description">Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive" />
+        <pin num="2" name="Pin_2" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Footprint" />
+        <field name="Datasheet">~</field>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive" />
+        <pin num="2" name="" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C_Polarized">
+      <description>Polarized capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>CP_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C_Polarized</field>
+        <field name="Footprint" />
+        <field name="Datasheet">~</field>
+        <field name="Description">Polarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive" />
+        <pin num="2" name="" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="D_Schottky">
+      <description>Schottky diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">D_Schottky</field>
+        <field name="Footprint" />
+        <field name="Datasheet">~</field>
+        <field name="Description">Schottky diode</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive" />
+        <pin num="2" name="A" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="Fuse">
+      <description>Fuse</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>*Fuse*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">F</field>
+        <field name="Value">Fuse</field>
+        <field name="Footprint" />
+        <field name="Datasheet">~</field>
+        <field name="Description">Fuse</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive" />
+        <pin num="2" name="" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Footprint" />
+        <field name="Datasheet">~</field>
+        <field name="Description">Resistor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive" />
+        <pin num="2" name="" type="passive" />
+      </pins>
+    </libpart>
+    <libpart lib="Switch" part="SW_SPST">
+      <description>Single Pole Single Throw (SPST) switch</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Value">SW_SPST</field>
+        <field name="Footprint" />
+        <field name="Datasheet">~</field>
+        <field name="Description">Single Pole Single Throw (SPST) switch</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A" type="passive" />
+        <pin num="2" name="B" type="passive" />
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Anden">
+      <uri>/Users/laullon/dev/anden-dcc/hardware/kicad/Anden.kicad_sym</uri>
+    </library>
+    <library logical="Connector_Generic">
+      <uri>/Applications/KiCad/KiCad.app/Contents/SharedSupport/symbols//Connector_Generic.kicad_sym</uri>
+    </library>
+    <library logical="Device">
+      <uri>/Applications/KiCad/KiCad.app/Contents/SharedSupport/symbols//Device.kicad_sym</uri>
+    </library>
+    <library logical="Switch">
+      <uri>/Applications/KiCad/KiCad.app/Contents/SharedSupport/symbols//Switch.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+5V_LOGIC">
+      <node ref="C2" pin="1" pintype="passive" />
+      <node ref="C3" pin="1" pintype="passive" />
+      <node ref="C4" pin="1" pintype="passive" />
+      <node ref="D1" pin="2" pinfunction="A" pintype="passive" />
+      <node ref="M2" pin="5V" pinfunction="5V_LOGIC" pintype="power_in" />
+      <node ref="M4" pin="3" pinfunction="OUT+" pintype="power_out" />
+      <node ref="U1" pin="10" pinfunction="~{3OE}" pintype="input" />
+      <node ref="U1" pin="13" pinfunction="~{4OE}" pintype="input" />
+      <node ref="U1" pin="14" pinfunction="VCC" pintype="power_in" />
+    </net>
+    <net code="2" name="+15V_FUSED">
+      <node ref="F1" pin="2" pintype="passive" />
+      <node ref="M4" pin="1" pinfunction="IN+" pintype="power_in" />
+      <node ref="S1" pin="1" pinfunction="A" pintype="passive" />
+    </net>
+    <net code="3" name="+15V_RAW">
+      <node ref="F1" pin="1" pintype="passive" />
+      <node ref="M3" pin="1" pinfunction="OUT+" pintype="power_out" />
+    </net>
+    <net code="4" name="DCC_3V3">
+      <node ref="M1" pin="4" pinfunction="GP2" pintype="passive" />
+      <node ref="R1" pin="1" pintype="passive" />
+      <node ref="U1" pin="2" pinfunction="1A_/_DCC" pintype="input" />
+    </net>
+    <net code="5" name="DCC_5V">
+      <node ref="M2" pin="D12" pinfunction="DIR_A" pintype="input" />
+      <node ref="U1" pin="3" pinfunction="1Y_/_DCC" pintype="tri_state" />
+    </net>
+    <net code="6" name="ENABLE_3V3">
+      <node ref="M1" pin="9" pinfunction="GP6" pintype="passive" />
+      <node ref="R2" pin="1" pintype="passive" />
+      <node ref="U1" pin="5" pinfunction="2A_/_ENABLE" pintype="input" />
+    </net>
+    <net code="7" name="ENABLE_5V">
+      <node ref="M2" pin="D3" pinfunction="EN_A" pintype="input" />
+      <node ref="R3" pin="1" pintype="passive" />
+      <node ref="U1" pin="6" pinfunction="2Y_/_ENABLE" pintype="tri_state" />
+    </net>
+    <net code="8" name="GND">
+      <node ref="C1" pin="2" pintype="passive" />
+      <node ref="C2" pin="2" pintype="passive" />
+      <node ref="C3" pin="2" pintype="passive" />
+      <node ref="C4" pin="2" pintype="passive" />
+      <node ref="C5" pin="2" pintype="passive" />
+      <node ref="C6" pin="2" pintype="passive" />
+      <node ref="M1" pin="13" pinfunction="GND" pintype="power_in" />
+      <node ref="M1" pin="18" pinfunction="GND" pintype="power_in" />
+      <node ref="M1" pin="23" pinfunction="GND" pintype="power_in" />
+      <node ref="M1" pin="28" pinfunction="GND" pintype="power_in" />
+      <node ref="M1" pin="3" pinfunction="GND" pintype="power_in" />
+      <node ref="M1" pin="33" pinfunction="AGND" pintype="power_in" />
+      <node ref="M1" pin="38" pinfunction="GND" pintype="power_in" />
+      <node ref="M1" pin="8" pinfunction="GND" pintype="power_in" />
+      <node ref="M2" pin="D11" pinfunction="EN_B" pintype="input" />
+      <node ref="M2" pin="D13" pinfunction="DIR_B" pintype="input" />
+      <node ref="M2" pin="D8" pinfunction="BRAKE_B" pintype="input" />
+      <node ref="M2" pin="D9" pinfunction="BRAKE_A" pintype="input" />
+      <node ref="M2" pin="GND" pinfunction="GND" pintype="power_in" />
+      <node ref="M3" pin="2" pinfunction="OUT-" pintype="passive" />
+      <node ref="M4" pin="2" pinfunction="IN-" pintype="passive" />
+      <node ref="M4" pin="4" pinfunction="OUT-" pintype="passive" />
+      <node ref="R1" pin="2" pintype="passive" />
+      <node ref="R2" pin="2" pintype="passive" />
+      <node ref="R3" pin="2" pintype="passive" />
+      <node ref="R5" pin="2" pintype="passive" />
+      <node ref="U1" pin="1" pinfunction="~{1OE}" pintype="input" />
+      <node ref="U1" pin="12" pinfunction="4A_unused" pintype="input" />
+      <node ref="U1" pin="4" pinfunction="~{2OE}" pintype="input" />
+      <node ref="U1" pin="7" pinfunction="GND" pintype="power_in" />
+      <node ref="U1" pin="9" pinfunction="3A_unused" pintype="input" />
+    </net>
+    <net code="9" name="PICO_VSYS">
+      <node ref="C5" pin="1" pintype="passive" />
+      <node ref="D1" pin="1" pinfunction="K" pintype="passive" />
+      <node ref="M1" pin="39" pinfunction="VSYS" pintype="power_in" />
+    </net>
+    <net code="10" name="RAIL_MINUS">
+      <node ref="J1" pin="2" pinfunction="Pin_2" pintype="passive" />
+      <node ref="J2" pin="2" pinfunction="Pin_2" pintype="passive" />
+      <node ref="M2" pin="A-" pinfunction="DCC_A-" pintype="passive" />
+    </net>
+    <net code="11" name="RAIL_PLUS">
+      <node ref="J1" pin="1" pinfunction="Pin_1" pintype="passive" />
+      <node ref="J2" pin="1" pinfunction="Pin_1" pintype="passive" />
+      <node ref="M2" pin="A+" pinfunction="DCC_A+" pintype="passive" />
+    </net>
+    <net code="12" name="SENSE_ADC">
+      <node ref="C6" pin="1" pintype="passive" />
+      <node ref="M1" pin="31" pinfunction="GP26_ADC0" pintype="passive" />
+      <node ref="R4" pin="2" pintype="passive" />
+      <node ref="R5" pin="1" pintype="passive" />
+    </net>
+    <net code="13" name="SENSE_RAW">
+      <node ref="M2" pin="A0" pinfunction="SNS_A" pintype="output" />
+      <node ref="R4" pin="1" pintype="passive" />
+    </net>
+    <net code="14" name="TRACK_VM">
+      <node ref="C1" pin="1" pintype="passive" />
+      <node ref="M2" pin="VIN" pinfunction="VIN_MOTOR" pintype="power_in" />
+      <node ref="S1" pin="2" pinfunction="B" pintype="passive" />
+    </net>
+    <net code="15" name="unconnected-(M1-3V3_EN-Pad37)">
+      <node ref="M1" pin="37" pinfunction="3V3_EN" pintype="passive+no_connect" />
+    </net>
+    <net code="16" name="unconnected-(M1-3V3_OUT-Pad36)">
+      <node ref="M1" pin="36" pinfunction="3V3_OUT" pintype="power_out+no_connect" />
+    </net>
+    <net code="17" name="unconnected-(M1-ADC_VREF-Pad35)">
+      <node ref="M1" pin="35" pinfunction="ADC_VREF" pintype="passive+no_connect" />
+    </net>
+    <net code="18" name="unconnected-(M1-GP0-Pad1)">
+      <node ref="M1" pin="1" pinfunction="GP0" pintype="passive+no_connect" />
+    </net>
+    <net code="19" name="unconnected-(M1-GP1-Pad2)">
+      <node ref="M1" pin="2" pinfunction="GP1" pintype="passive+no_connect" />
+    </net>
+    <net code="20" name="unconnected-(M1-GP3-Pad5)">
+      <node ref="M1" pin="5" pinfunction="GP3" pintype="passive+no_connect" />
+    </net>
+    <net code="21" name="unconnected-(M1-GP4-Pad6)">
+      <node ref="M1" pin="6" pinfunction="GP4" pintype="passive+no_connect" />
+    </net>
+    <net code="22" name="unconnected-(M1-GP5-Pad7)">
+      <node ref="M1" pin="7" pinfunction="GP5" pintype="passive+no_connect" />
+    </net>
+    <net code="23" name="unconnected-(M1-GP7-Pad10)">
+      <node ref="M1" pin="10" pinfunction="GP7" pintype="passive+no_connect" />
+    </net>
+    <net code="24" name="unconnected-(M1-GP8-Pad11)">
+      <node ref="M1" pin="11" pinfunction="GP8" pintype="passive+no_connect" />
+    </net>
+    <net code="25" name="unconnected-(M1-GP9-Pad12)">
+      <node ref="M1" pin="12" pinfunction="GP9" pintype="passive+no_connect" />
+    </net>
+    <net code="26" name="unconnected-(M1-GP10-Pad14)">
+      <node ref="M1" pin="14" pinfunction="GP10" pintype="passive+no_connect" />
+    </net>
+    <net code="27" name="unconnected-(M1-GP11-Pad15)">
+      <node ref="M1" pin="15" pinfunction="GP11" pintype="passive+no_connect" />
+    </net>
+    <net code="28" name="unconnected-(M1-GP12-Pad16)">
+      <node ref="M1" pin="16" pinfunction="GP12" pintype="passive+no_connect" />
+    </net>
+    <net code="29" name="unconnected-(M1-GP13-Pad17)">
+      <node ref="M1" pin="17" pinfunction="GP13" pintype="passive+no_connect" />
+    </net>
+    <net code="30" name="unconnected-(M1-GP14-Pad19)">
+      <node ref="M1" pin="19" pinfunction="GP14" pintype="passive+no_connect" />
+    </net>
+    <net code="31" name="unconnected-(M1-GP15-Pad20)">
+      <node ref="M1" pin="20" pinfunction="GP15" pintype="passive+no_connect" />
+    </net>
+    <net code="32" name="unconnected-(M1-GP16-Pad21)">
+      <node ref="M1" pin="21" pinfunction="GP16" pintype="passive+no_connect" />
+    </net>
+    <net code="33" name="unconnected-(M1-GP17-Pad22)">
+      <node ref="M1" pin="22" pinfunction="GP17" pintype="passive+no_connect" />
+    </net>
+    <net code="34" name="unconnected-(M1-GP18-Pad24)">
+      <node ref="M1" pin="24" pinfunction="GP18" pintype="passive+no_connect" />
+    </net>
+    <net code="35" name="unconnected-(M1-GP19-Pad25)">
+      <node ref="M1" pin="25" pinfunction="GP19" pintype="passive+no_connect" />
+    </net>
+    <net code="36" name="unconnected-(M1-GP20-Pad26)">
+      <node ref="M1" pin="26" pinfunction="GP20" pintype="passive+no_connect" />
+    </net>
+    <net code="37" name="unconnected-(M1-GP21-Pad27)">
+      <node ref="M1" pin="27" pinfunction="GP21" pintype="passive+no_connect" />
+    </net>
+    <net code="38" name="unconnected-(M1-GP22-Pad29)">
+      <node ref="M1" pin="29" pinfunction="GP22" pintype="passive+no_connect" />
+    </net>
+    <net code="39" name="unconnected-(M1-GP27_ADC1-Pad32)">
+      <node ref="M1" pin="32" pinfunction="GP27_ADC1" pintype="passive+no_connect" />
+    </net>
+    <net code="40" name="unconnected-(M1-GP28_ADC2-Pad34)">
+      <node ref="M1" pin="34" pinfunction="GP28_ADC2" pintype="passive+no_connect" />
+    </net>
+    <net code="41" name="unconnected-(M1-RUN-Pad30)">
+      <node ref="M1" pin="30" pinfunction="RUN" pintype="passive+no_connect" />
+    </net>
+    <net code="42" name="unconnected-(M1-VBUS_USB-Pad40)">
+      <node ref="M1" pin="40" pinfunction="VBUS_USB" pintype="passive+no_connect" />
+    </net>
+    <net code="43" name="unconnected-(M2-B+_unused-PadB+)">
+      <node ref="M2" pin="B+" pinfunction="B+_unused" pintype="passive+no_connect" />
+    </net>
+    <net code="44" name="unconnected-(M2-B-_unused-PadB-)">
+      <node ref="M2" pin="B-" pinfunction="B-_unused" pintype="passive+no_connect" />
+    </net>
+    <net code="45" name="unconnected-(M2-SNS_B-PadA1)">
+      <node ref="M2" pin="A1" pinfunction="SNS_B" pintype="output+no_connect" />
+    </net>
+    <net code="46" name="unconnected-(U1-3Y_unused-Pad8)">
+      <node ref="U1" pin="8" pinfunction="3Y_unused" pintype="tri_state+no_connect" />
+    </net>
+    <net code="47" name="unconnected-(U1-4Y_unused-Pad11)">
+      <node ref="U1" pin="11" pinfunction="4Y_unused" pintype="tri_state+no_connect" />
+    </net>
+  </nets>
+</export>
