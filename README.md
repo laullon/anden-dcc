@@ -101,3 +101,11 @@ Validación: compilado con Arduino-Pico 6.3.1; cargado por OTA desde 0.2.3 con
 respuesta «Update Success»; 0.2.4 respondió después del reinicio por IP y nombre
 mDNS, conservando la configuración Wi-Fi. Página principal y formulario OTA
 accesibles por el nombre local. No se ha ensayado cortar la conexión del router.
+
+Durante la validación hubo fallos transitorios de resolución y una muestra de
+estado desconectado durante el arranque/reconexión. Después, Bonjour descubrió
+el registro A y el servicio HTTP en ambas interfaces del Mac; una consulta mDNS
+UDP directa recibió respuesta de la Pico con su IP correcta, y la página,
+formulario OTA y API respondieron por el nombre local. Algunos intentos con
+límite de cinco segundos agotaron la espera de resolución. Se conserva el acceso
+por IP como alternativa; no se ha establecido la causa de esa latencia del cliente.
