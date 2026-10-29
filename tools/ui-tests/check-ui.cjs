@@ -8,7 +8,7 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
  const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),headless:true});
  try {
  const context=await browser.newContext({viewport:{width:1440,height:1100},deviceScaleFactor:1});
- let state={name:'anden-dcc',version:fs.readFileSync(path.join(root,'firmware/anden-dcc/anden-dcc.ino'),'utf8').match(/VERSION = "([^"]+)"/)[1],connected:true,mdnsReady:true,storageReady:true,ssid:'Studio Wi-Fi',ip:'192.168.1.42',trackPower:false,dcc:{ready:true,running:true,pin:2,maxLocos:8,locos:[makeLoco(1,3),makeLoco(2,4)]}},offline=false,rejectSave=false,delayStatus=null,saveCount=0;
+ let state={name:'anden-dcc',version:fs.readFileSync(path.join(root,'firmware/anden-dcc/anden-dcc.ino'),'utf8').match(/VERSION = "([^"]+)"/)[1],connected:true,mdnsReady:true,storageReady:true,ssid:'Studio Wi-Fi',ip:'192.168.1.42',trackPower:false,programming:{available:false,state:'hardware-required',operations:[],planned:['read-address','write-short-address','read-cv','write-cv']},dcc:{ready:true,running:true,pin:2,maxLocos:8,locos:[makeLoco(1,3),makeLoco(2,4)]}},offline=false,rejectSave=false,delayStatus=null,saveCount=0;
  await context.route('http://anden.test/**',async route=>{
   const u=new URL(route.request().url()),data=new URLSearchParams(route.request().postData());
   if(u.pathname==='/api/status') {
@@ -45,6 +45,23 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
  await page.goto('http://anden.test/');await waitReady();
  assert.equal(await page.locator('#setup').getAttribute('open'),null);assert.equal(await page.locator('#wifi').isVisible(),false);
  assert.equal(await page.locator('.train-card').count(),2);
+ assert.equal(await page.locator('#programming').getAttribute('open'),null);
+ await page.locator('#show-programming').click();
+ assert.equal(await page.locator('#programming').evaluate(el=>el.open),true);
+ assert.equal(await page.locator('#programming-status').textContent(),'Hardware needed');
+ assert.equal(await page.locator('#read-address').isDisabled(),true);
+ assert.equal(await page.locator('#write-address').isDisabled(),true);
+ assert.equal(await page.locator('.program-result').textContent(),'—');
+ await page.locator('.advanced-cvs>summary').click();
+ assert.equal(await page.locator('#program-cv').isDisabled(),true);
+ await page.screenshot({path:path.join(out,'ui-programming.png'),fullPage:true});
+ await page.locator('#programming>summary').click();
+ await card(1).locator('.edit-loco').click();await page.locator('#loco-name').fill('Unsaved draft');
+ assert.match(await page.locator('[data-i18n="rosterOnly"]').textContent(),/not the decoder/);
+ await page.locator('#forgot-address').click();assert.equal(await page.locator('#loco-dialog').evaluate(el=>el.open),false);
+ await page.locator('#back-to-card').click();assert.equal(await page.locator('#loco-name').inputValue(),'Unsaved draft');
+ await page.locator('#cancel-editor').click();await page.locator('#programming>summary').click();
+
  const first=await card(1).boundingBox(),second=await card(2).boundingBox();assert.equal(first.y,second.y);assert(second.x>first.x);
  await press(1,true);assert.equal(await light(2,false).getAttribute('aria-pressed'),'true');
  await press(2,true);await press(1,false);assert.equal(await light(2,true).getAttribute('aria-pressed'),'true');
@@ -70,22 +87,22 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
  for(let n=3;n<=8;n++){await page.locator('#add-loco').click();await page.locator('#loco-name').fill('Display train '+n);await save();}
  assert.equal(await page.locator('.train-card').count(),8);assert.equal(await page.locator('#add-loco').isDisabled(),true);
  for(const loco of [...state.dcc.locos].slice(2)){await card(loco.id).locator('.edit-loco').click();await page.locator('#remove-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);}
- await page.locator('[data-lang="es"]').click();assert.equal(await page.locator('h1').textContent(),'Dale vida a tu escena.');assert.equal(await card(1).locator('.edit-loco').textContent(),'Editar');
+ await page.locator('[data-lang="es"]').click();assert.equal(await page.locator('h1').textContent(),'Dale vida a tu escena.');assert.equal(await card(1).locator('.edit-loco').textContent(),'Editar');assert.equal(await page.locator('#programming-status').textContent(),'Falta el hardware');
  await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='es');assert.equal(await page.locator('#setup').getAttribute('open'),null);
  await page.locator('[data-lang="en"]').click();
  await page.locator('#setup>summary').click();await page.screenshot({path:path.join(out,'ui-setup.png'),fullPage:true});
  await page.locator('#firmware-file').setInputFiles({name:'test.bin',mimeType:'application/octet-stream',buffer:Buffer.from('UI mock upload')});await page.locator('#update-button').click();await page.waitForFunction(()=>document.getElementById('update-message').classList.contains('error'));assert.equal(await page.locator('#update-button').isDisabled(),false);
- await card(1).locator('.edit-loco').click();offline=true;await page.evaluate(()=>refresh());assert.equal(await page.locator('#offline-note').isVisible(),true);assert.equal(await light(1,true).isDisabled(),true);assert.equal(await page.locator('#add-loco').isDisabled(),true);assert.equal(await page.locator('#cancel-editor').isDisabled(),false);await page.locator('#cancel-editor').click();offline=false;await page.evaluate(()=>refresh());
+ await card(1).locator('.edit-loco').click();offline=true;await page.evaluate(()=>refresh());assert.equal(await page.locator('#offline-note').isVisible(),true);assert.equal(await light(1,true).isDisabled(),true);assert.equal(await page.locator('#add-loco').isDisabled(),true);assert.equal(await page.locator('#cancel-editor').isDisabled(),false);assert.equal(await page.locator('#programming-status').textContent(),'Controller offline');await page.locator('#cancel-editor').click();offline=false;await page.evaluate(()=>refresh());
  await page.goto('http://anden.test/?setup=firmware');await page.waitForFunction(()=>document.getElementById('setup').open);
  await page.setViewportSize({width:390,height:1800});await page.goto('http://anden.test/');await waitReady();
  const m1=await card(1).boundingBox(),m2=await card(2).boundingBox();assert(m2.y>m1.y);assert.equal(m1.x,m2.x);
  await page.screenshot({path:path.join(out,'ui-mobile.png')});await page.locator('[data-lang="es"]').click();await page.screenshot({path:path.join(out,'ui-mobile-es.png')});
- await page.setViewportSize({width:320,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await page.setViewportSize({width:320,height:900});await page.locator('#show-programming').click();await page.screenshot({path:path.join(out,'ui-programming-mobile-es.png'),fullPage:true});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await card(1).locator('.edit-loco').click();assert.equal(await page.evaluate(()=>document.getElementById('loco-dialog').scrollWidth>document.getElementById('loco-dialog').clientWidth),false);await page.locator('#cancel-editor').click();
  for(const loco of [...state.dcc.locos]){await card(loco.id).locator('.edit-loco').click();await page.locator('#remove-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);}
  assert.equal(await page.locator('#empty-roster').isVisible(),true);assert.equal(await page.locator('#add-loco').isDisabled(),false);
  await page.locator('#add-loco').click();await page.locator('#loco-name').fill('A new beginning');await save();assert.equal(await page.locator('.train-card').count(),1);
  assert.deepEqual(errors,[]);
- console.log('PASS: independent loco F0, shared roster, rename/address edits, duplicate prevention, failed save, draft preservation, stale-poll protection, add/remove/empty/max-8, safe names, EN/ES, setup/OTA/offline, desktop/mobile; no JS errors.');
+ console.log('PASS: independent loco F0, shared roster, rename/address edits, duplicate prevention, failed save, draft preservation, stale-poll protection, add/remove/empty/max-8, safe names, EN/ES, setup/OTA/offline, programming unavailable/gated, preserved editor draft, desktop/mobile; no JS errors.');
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

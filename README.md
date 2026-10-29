@@ -19,14 +19,14 @@ some light, sound and, eventually, a little movement—without a full-size comma
 station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
 hardware, independent of browser and Wi-Fi activity.
 
-**Current release: 0.5.0.** A shared locomotive roster, independent F0/headlights
+**Current release: 0.5.1.** A shared locomotive roster, independent F0/headlights
 and short addresses are implemented. This is a **logic-output prototype**. Track
 power, motor control and current protection are not enabled in firmware. The
 Deek-Robot power assembly is a documented proposal for the next stage.
 
 [Quick start](#quick-start) · [Hardware & BOM](docs/hardware/README.md) ·
 [Signal verification](DCC-ANALYZER.md) · [Release validation](docs/VALIDATION.md) · [API](docs/API.md) ·
-[Build](#build-the-firmware) · [Español](README.es.md)
+[Programming](docs/PROGRAMMING.md) · [Build](#build-the-firmware) · [Español](README.es.md)
 
 ![English control panel preview](assets/ui-desktop.png)
 
@@ -43,6 +43,9 @@ Deek-Robot power assembly is a documented proposal for the next stage.
 - OTA updates through the panel; first installation and recovery use USB.
 - LED connected/disconnected feedback, with a brief dip on user requests.
   Automatic status polls do not trigger it.
+- **Programming preparation**: read-address/CV controls and packet helpers; actual
+  decoder reads/writes await the isolated powered output, ACK sensing and service
+  transmitter. [Status and hardware plan](docs/PROGRAMMING.md).
 - Self-contained UI: no external fonts, CDN, cloud account or internet required.
 
 The waveform illustration is not a live oscilloscope. Diagnostics show each
@@ -87,6 +90,16 @@ Earlier single-loco Logic 2 captures decoded 14 complete packets per state
 with no XOR errors. The new multi-loco DMA scheduler still needs a physical capture.
 Half-bits measured 58.000–58.125 µs and 100.000–100.125 µs at 8 MS/s.
 [Full signal guide](DCC-ANALYZER.md).
+
+## Forgotten a decoder address?
+
+Open **Programming**, or **Edit → Don’t know the address?** Service-mode
+programming is the planned way to read it with one loco on an isolated track.
+**0.5.1 cannot read/program a physical decoder yet**: the powered programming
+output, current-response sensing and service-mode transmitter are still missing.
+The panel explains this and keeps read/write disabled; the API rejects requests.
+Changing a roster card only changes the roster. See the
+[programming plan](docs/PROGRAMMING.md) for the required next stage.
 
 ## Hardware & BOM
 
@@ -138,7 +151,7 @@ after restart. **Do not upload UF2 over OTA.**
 The CLI helper verifies success and the running version:
 
 ```sh
-python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.5.0
+python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.5.1
 ```
 
 Use the Pico IP for `--host` if mDNS is slow. Normal firmware OTA preserves saved
@@ -149,6 +162,7 @@ Wi-Fi settings. BOOTSEL remains the recovery path.
 ```sh
 python3 tools/embed_web.py --check
 python3 tests/check_dcc.py
+python3 tests/check_programming.py
 python3 tools/decode_dcc_csv.py path/to/digital.csv --expected '03 80 83'
 ```
 
@@ -191,6 +205,8 @@ tools/               web embedding, OTA, capture decoding and UI checks
 - [ ] Build and validate the protected Deek-Robot power harness.
 - [ ] Implement arm/disarm, current sensing and startup stop packets.
 - [x] Shared multi-locomotive roster and automatic F0 refresh.
+- [x] Programming UI, capability API and tested packet/address helpers.
+- [ ] Implement the programming output/ACK transport and validate real CV reads/writes.
 - [ ] Add sound functions and restricted movement.
 
 ## License

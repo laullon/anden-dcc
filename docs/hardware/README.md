@@ -98,6 +98,13 @@ can differ. Do not let a wheel bridge between independent A/B outputs.
 This is a proposed future pin assignment, not an instruction to power rails with
 0.5.0. GP2 changing while the bridge is disabled is intentional.
 
+## Decoder programming
+
+See [the programming hardware/transport plan](../PROGRAMMING.md). The existing
+roughly 1.2 A main-track trip is not a programming current limit. Independent
+output B, track isolation, a validated programming energy limit and calibrated
+ACK acquisition are required before decoder read/write can be implemented.
+
 ## Current measurement and trip latch
 
 Each shield sense output (A0/A1) passes through **10 kΩ over 10 kΩ**, with **1 nF**

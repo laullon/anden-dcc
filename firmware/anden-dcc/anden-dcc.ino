@@ -11,7 +11,7 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Logic-analyzer prototype: GP2 carries DCC; no power-stage pins are assigned.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.5.0";
+const char* VERSION = "0.5.1";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
@@ -145,6 +145,24 @@ bool saveRoster(const LocoRoster& value) {
   return ok;
 }
 
+// There is no programming transport or ACK input in this GPIO-only build.
+// Report this explicitly; never infer hardware readiness from a UI checkbox.
+String programmingStatus() {
+  return R"JSON({"available":false,"state":"hardware-required","operations":[],"planned":["read-address","write-short-address","read-cv","write-cv"],"missing":["isolated-powered-output","calibrated-ack-input","service-mode-transmitter"]})JSON";
+}
+
+void programmingUnavailable() {
+  server.send(501, "application/json", R"JSON({"error":"programming-unavailable","message":"Programming is not implemented on this logic-only build. An isolated powered output, calibrated ACK sensing and service-mode transport are required. No packets were sent and no CVs or roster entries were changed."})JSON");
+}
+
+int programmingNumber(const String& text, int low, int high) {
+  if (!text.length() || text.length() > 4) return -1;
+  for (size_t i = 0; i < text.length(); ++i)
+    if (text[i] < '0' || text[i] > '9') return -1;
+  int value = text.toInt();
+  return value >= low && value <= high ? value : -1;
+}
+
 String dccStatus() {
   String body = "{\"ready\":";
   body += DccSignal::ready() ? "true" : "false";
@@ -208,6 +226,7 @@ void setup() {
     bool connected = WiFi.status() == WL_CONNECTED && WiFi.localIP().isSet();
     String body = "{\"name\":\"anden-dcc\",\"version\":" + jsonString(VERSION);
     body += ",\"dccImplemented\":true,\"trackPower\":false,\"dcc\":" + dccStatus();
+    body += ",\"programming\":" + programmingStatus();
     body += ",\"connected\":";
     body += connected ? "true" : "false";
     body += ",\"mdnsReady\":"; body += mdnsReady ? "true" : "false";
@@ -217,6 +236,26 @@ void setup() {
     body += "}";
     server.sendHeader("Cache-Control", "no-store");
     server.send(200, "application/json", body);
+  });
+  server.on("/programming/address/read", HTTP_POST, programmingUnavailable);
+  server.on("/programming/address/write", HTTP_POST, []() {
+    if (programmingNumber(server.arg("address"), 1, 127) < 0) {
+      server.send(400, "application/json", "{\"error\":\"invalid-address\"}"); return;
+    }
+    programmingUnavailable();
+  });
+  server.on("/programming/cv/read", HTTP_POST, []() {
+    if (programmingNumber(server.arg("cv"), 1, 1024) < 0) {
+      server.send(400, "application/json", "{\"error\":\"invalid-cv\"}"); return;
+    }
+    programmingUnavailable();
+  });
+  server.on("/programming/cv/write", HTTP_POST, []() {
+    if (programmingNumber(server.arg("cv"), 1, 1024) < 0 ||
+        programmingNumber(server.arg("value"), 0, 255) < 0) {
+      server.send(400, "application/json", "{\"error\":\"invalid-cv-or-value\"}"); return;
+    }
+    programmingUnavailable();
   });
   server.on("/dcc/f0", HTTP_POST, []() {
     int address = number(server.arg("address"), 127);

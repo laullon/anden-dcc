@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1
+
+- Programming preparation panel in English/Spanish; hardware-required state and disabled read/write controls.
+- Forgotten-address link from the editor, with a return path that preserves drafts.
+- Explicit unavailable capability/API: valid programming operations return 501 with no transmission or changes.
+- Host-tested direct CV byte/bit packets, primary short/extended address decoding and known-short-address plans.
+- Programming hardware/transport plan; no real decoder programming is enabled.
+
 ## 0.5.0
 
 - Shared roster saved on the Pico: two default locomotives, up to eight.

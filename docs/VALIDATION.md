@@ -1,4 +1,26 @@
-# Release 0.5.0 validation
+# Release 0.5.1 · programming preparation validation
+
+29 October 2026. This release prepares the UI and packet/address helpers;
+**physical decoder reading/writing is not implemented or tested**.
+
+| Check | Result |
+| --- | --- |
+| Pico W / Arduino-Pico 6.3.1 / unchanged flash layout | Compiles: 480164 bytes program (45%), 74192 bytes globals (28%) |
+| Existing encoder, PIO model and multi-loco roster checks | Pass unchanged |
+| Service helpers | All CV1–1024 byte values / byte and bit operations, packet XOR, known vectors, short-address plans, short/extended address interpretation, explicit missing/ambiguous ACK outcomes pass on host |
+| Mocked browser | Programming collapsed initially, hardware-needed badge, disabled read/write, forgotten-address navigation with editor draft preserved, EN/ES and mobile layouts pass; existing F0/roster/OTA/offline regressions pass |
+| OTA / real browser | 0.5.1 deployed and verified; both locos retained; Programming panel and 320px layout pass; no JavaScript errors |
+| Real programming API refusal | 6 valid requests return 501 and 8 invalid requests return 400; DCC running state and full roster unchanged |
+| Saved settings | Wi-Fi and roster retained; pre-OTA F0 states restored after verification |
+| Actual CV I/O | Not attempted: no programming transport, powered isolated output or calibrated ACK acquisition exists |
+| Analyzer | Deferred at the user's request; no new waveform pass claimed |
+
+The ordinary GP2 packet generator, DMA roster schedule and power-pin behavior
+are unchanged. Programming POST handlers only validate input and report
+unavailability. The service helpers cannot be passed into the current fixed
+three-byte transmitter. See [the implementation boundary and hardware plan](PROGRAMMING.md).
+
+## Historical release 0.5.0 validation
 
 29 October 2026. Local tests and real Pico OTA/HTTP/browser checks.
 
