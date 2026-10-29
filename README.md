@@ -2,7 +2,7 @@
 
 Central DCC para diorama H0 con Raspberry Pi Pico W y Deek-Robot L298P.
 
-## Estado de la versión 0.2.5
+## Estado de la versión 0.2.6
 
 Compilado con Arduino-Pico 6.3.1 y cargado por USB en la Pico W. Arranque
 comprobado por diagnóstico serie. Conexión al router y acceso HTTP por IP
@@ -72,7 +72,10 @@ primer bloque está borrado; un fallo de montaje no fuerza un formateo destructi
 ## LED integrado
 
 - Parpadeo de un segundo (500 ms encendido y 500 ms apagado): sin conexión al router.
-- Encendido fijo: conectado a la red Wi-Fi configurada.
+- Encendido fijo: conectado a la red Wi-Fi configurada, sin actividad web.
+- Pulso apagado de 120 ms por petición HTTP; si llegan varias seguidas, el pulso
+  se prolonga hasta 120 ms después de la última. El panel consulta el estado
+  cada tres segundos, por lo que también indica que sigue abierto.
 - Si pierde la conexión, vuelve a parpadear. Conectar un móvil al punto de acceso
   no enciende el LED fijo; representa la conexión de la Pico al router.
 
@@ -117,3 +120,15 @@ comprobar el despliegue. Compilada con Arduino-Pico 6.3.1 y enviada mediante
 POST multipart a `/update` por la red doméstica, sin utilizar USB. El servidor
 respondió «Update Success» y, tras reiniciar, `/api/status` confirmó 0.2.5,
 conexión Wi-Fi, mDNS y almacenamiento disponibles. Conservó la configuración.
+
+## Actividad web en el LED (0.2.6)
+
+Un hook del servidor marca actividad para todas las rutas, incluidas las de OTA.
+El LED se apaga inmediatamente al recibir la petición y recupera su indicación
+normal con un temporizador basado en `millis()`, sin introducir esperas. Mientras
+se transmite un archivo OTA el bucle puede estar ocupado con la carga y el pulso
+puede durar más de 120 ms. Sin Wi-Fi se mantiene el parpadeo de conexión existente.
+
+Compilado y desplegado por OTA. Verificados el identificador de versión, el panel
+y el formulario de actualización mediante peticiones HTTP. La observación física
+del LED queda a cargo del usuario, ya que la Pico está conectada por red.

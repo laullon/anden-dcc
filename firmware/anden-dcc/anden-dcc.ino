@@ -8,7 +8,7 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Prototype: no GPIO is assigned to the motor shield.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.2.5";
+const char* VERSION = "0.2.6";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
@@ -19,6 +19,17 @@ bool wasConnected = false;
 bool ledOn = true;
 uint32_t lastAttempt = 0;
 uint32_t mdnsAttempt = 0;
+bool webActivity = false;
+uint32_t lastWebActivity = 0;
+constexpr uint32_t WEB_BLINK_MS = 120;
+
+void signalWebActivity() {
+  webActivity = true;
+  lastWebActivity = millis();
+  // Switch immediately, even if sending the response takes a while.
+  ledOn = false;
+  digitalWrite(LED_BUILTIN, LOW);
+}
 
 void stopMdns() {
   if (!mdnsReady) return;
@@ -89,7 +100,7 @@ const char PAGE[] = R"HTML(<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>anden-dcc</title>
 <style>body{font:18px system-ui;background:#14232b;color:#eef4f5;margin:0;padding:24px}main{max-width:640px;margin:auto}h1{font-size:42px}section{background:#223741;padding:24px;border-radius:16px;margin:16px 0}a,button{display:inline-block;background:#ffc567;color:#14232b;padding:12px 18px;border:0;border-radius:8px;text-decoration:none;font:inherit;cursor:pointer}small{color:#bdcdd4}label{display:block;margin:16px 0}input{display:block;box-sizing:border-box;width:100%;padding:12px;margin-top:8px;font:inherit;border-radius:8px;border:1px solid #bdcdd4}#message{white-space:pre-wrap}a.secondary{background:#bdcdd4}</style>
-<main><small>CENTRAL DEL DIORAMA · v0.2.5</small><h1>anden-dcc</h1>
+<main><small>CENTRAL DEL DIORAMA · v0.2.6</small><h1>anden-dcc</h1>
 <section><h2>Tu red Wi-Fi</h2><p id="status" role="status">Consultando conexión…</p>
 <p id="address"></p><p><small>Compatible con redes de 2,4 GHz. La red abierta anden-dcc sirve para configurar y recuperar el acceso. Se apaga al conectar al router.</small></p>
 <form id="wifi"><label>Nombre de la red (SSID)<input name="ssid" maxlength="32" required autocomplete="off"></label>
@@ -128,6 +139,10 @@ void setup() {
   WiFi.softAPConfig(IPAddress(192,168,42,1), IPAddress(192,168,42,1), IPAddress(255,255,255,0));
   if (!WiFi.softAP(AP_NAME)) while (true) delay(1000);
   accessPointRunning = true;
+  server.addHook([](const String&, const String&, WiFiClient*, HTTPServer::ContentTypeFunction) {
+    signalWebActivity();
+    return HTTPServer::CLIENT_REQUEST_CAN_CONTINUE;
+  });
   server.on("/", HTTP_GET, []() { server.send(200, "text/html; charset=utf-8", PAGE); });
   server.on("/api/status", HTTP_GET, []() {
     bool connected = WiFi.status() == WL_CONNECTED && WiFi.localIP().isSet();
@@ -174,8 +189,10 @@ void setup() {
 void loop() {
   server.handleClient();
   bool connected = WiFi.status() == WL_CONNECTED && WiFi.localIP().isSet();
-  // Non-blocking heartbeat: 500 ms on / 500 ms off until station connects.
-  bool desiredLed = connected || ((millis() / 500) % 2 == 0);
+  // Web requests briefly interrupt the steady connected LED. The normal
+  // disconnected heartbeat resumes after the same non-blocking activity pulse.
+  if (webActivity && uint32_t(millis() - lastWebActivity) >= WEB_BLINK_MS) webActivity = false;
+  bool desiredLed = !webActivity && (connected || ((millis() / 500) % 2 == 0));
   if (desiredLed != ledOn) {
     ledOn = desiredLed;
     digitalWrite(LED_BUILTIN, ledOn ? HIGH : LOW);
