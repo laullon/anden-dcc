@@ -19,8 +19,9 @@ needed; keep powering the Pico with its existing supply. Connect grounds first.
 ## Software and capture
 
 For a generic 8-channel / 24 MHz analyzer, use PulseView/sigrok with the `fx2lafw`
-driver if the device is FX2-based. The exact USB identity still needs checking
-when connected. Do not assume Saleae Logic 2 supports a generic unit.
+driver if the device is FX2-based. For this user’s unit, Logic 2 2.4.48 detected a physical Logic and
+its MCP server successfully captured real transitions; Logic 2 is verified
+for this particular analyzer. Compatibility with other generic units varies.
 
 - Enable D0, disable unused channels.
 - Sample at 8 MHz, capture 1 million samples (125 ms), or at least 30 ms.
@@ -104,10 +105,30 @@ and GPIO. There may be a few queued packets before the latest command appears.
 - Queued off/on update checked for a complete packet boundary switch.
 - Firmware compiled and deployed over OTA; Pico reports PIO ready and running.
 - Real HTTP F0 on/off returned the expected bytes; invalid inputs were rejected.
-- Physical pulse timing and voltage are still awaiting the external capture.
+- Physical digital timing now verified via Logic 2 MCP: 14 full packets each
+  for F0 off/on, expected bytes, no XOR errors and no invalid bit pairs.
+- One half-bits measured 58.000–58.125 us; zero half-bits 100.000–100.125 us;
+  high/low asymmetry at most 0.125 us at 8 MS/s.
+- Voltage, rise time and powered-track electrical characteristics are not measured.
 
 References:
 
 - NMRA S-9.1 timing: https://www.nmra.com/sites/default/files/standards/sandrp/DCC/S/s-9.1_electrical_standards_for_digital_command_control_2021.pdf
 - NMRA S-9.2 framing: https://www.nmra.org/sites/default/files/standards/sandrp/DCC/S/s-92-2004-07.pdf
 - NMRA S-9.2.1 function group one: https://www.nmra.org/sites/default/files/standards/sandrp/DCC/S/s-9.2.1_dcc_extended_packet_formats.pdf
+
+## Decode a real CSV capture
+
+```sh
+python3 tools/decode_dcc_csv.py path/to/digital.csv --expected '03 80 83'
+```
+
+This reads the actual Saleae transition export, ignores incomplete boundary
+half-bits, reconstructs the three-byte frames and checks their XOR. Measured
+half-bit windows, packet counts and periods are emitted as JSON. The tool exits
+nonzero on timing errors, checksum errors, no complete packets or an unexpected
+packet. It is deliberately limited to this prototype's symmetric bits and
+three-byte packets; it does not decode the whole DCC protocol.
+
+The GPIO waveform validation used the actual device through Logic 2 MCP.
+The original address/F0 setting was restored after capturing both states.

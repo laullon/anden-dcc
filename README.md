@@ -139,3 +139,12 @@ El hook ignora GET `/api/status` (también con query string). El panel puede
 seguir consultando el estado cada tres segundos sin alterar el LED. Las demás
 peticiones mantienen el pulso de actividad; no se introduce un temporizador que
 haga parpadear el LED por mantener abierta una página.
+
+## Verificación física mediante Logic 2 MCP
+
+Logic 2 2.4.48 detectó el analizador como un dispositivo físico Logic. Se
+capturaron 100 ms a 8 MS/s en D0 para F0 apagado y encendido: 14 paquetes
+completos por captura (`03 80 83` y `03 90 93`), sin errores XOR ni tiempos
+inválidos. Semibits medidos de 58.000–58.125 us y 100.000–100.125 us.
+Las capturas se exportaron desde MCP y se analizaron con
+`tools/decode_dcc_csv.py`; no se utilizó simulación en esta medición.
