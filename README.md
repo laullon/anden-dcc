@@ -2,11 +2,12 @@
 
 Central DCC para diorama H0 con Raspberry Pi Pico W y Deek-Robot L298P.
 
-## Estado de la versión 0.2.2
+## Estado de la versión 0.2.3
 
 Compilado con Arduino-Pico 6.3.1 y cargado por USB en la Pico W. Arranque
-comprobado por diagnóstico serie. Conexión a router, panel y OTA pendientes de
-prueba desde un cliente Wi-Fi. Incluye configuración persistente de red, reconexión
+comprobado por diagnóstico serie. Conexión al router y acceso HTTP por IP
+verificados desde el Mac. Transferencia OTA pendiente de prueba.
+Incluye configuración persistente de red, reconexión
 automática, punto de acceso Wi-Fi,
 página de estado y actualización web sin autenticación. No implementa DCC,
 protección de corriente ni salidas para el shield. Probar únicamente la Pico por USB.
@@ -30,11 +31,11 @@ Generar el UF2 para la primera carga USB mediante BOOTSEL.
 - Introducir el SSID y la contraseña de la red de 2,4 GHz en el formulario del panel.
 - Los datos se guardan en LittleFS, dentro de la Pico, sin incluirlos en el código ni Git.
 - Una contraseña vacía permite conectarse a una red abierta.
-- La Pico obtiene una IP por DHCP; el panel muestra el enlace al conectarse.
-- En la red doméstica también se anuncia `http://anden-dcc.local` mediante mDNS
-  (su disponibilidad depende del cliente y la red).
-- El punto de acceso abierto `anden-dcc` sigue disponible como recuperación;
-  al conectar al router puede cambiar de canal y requerir reconectar el cliente.
+- La Pico obtiene una IP por DHCP; se puede consultar por USB o en el router.
+- Abrir esa IP desde un equipo conectado a la misma red.
+- El nombre `anden-dcc.local` está temporalmente desactivado.
+- El punto de acceso abierto `anden-dcc` se apaga cuando hay conexión al router.
+  Si pierde la conexión, vuelve a habilitarlo al reintentar (hasta 30 segundos).
 - Si falla la conexión, reintenta cada 30 segundos. Se pueden corregir los datos
   desde el punto de acceso o borrarlos con «Olvidar red».
 - Actualización: `/update`, sin usuario ni contraseña.
@@ -74,13 +75,13 @@ primer bloque está borrado; un fallo de montaje no fuerza un formateo destructi
 
 El parpadeo usa `millis()` y no bloquea la atención del panel.
 
-## Corrección 0.2.2
+## Corrección de acceso por red (0.2.3)
 
-Las llamadas de inicio y cierre de SimpleMDNS se realizan bajo `LWIPMutex`,
-como exige el acceso a las API raw de lwIP en Arduino-Pico 6.3.1. Sin ese
-bloqueo, el anuncio del nombre local podía disparar una aserción al conectar
-al router y detener el firmware con el LED fijo. Se espera también una IP
-asignada antes de indicar conexión y arrancar mDNS.
+La versión con AP y STA simultáneos y mDNS llegaba a obtener una IP, pero
+no respondía por HTTP. Añadir bloqueo explícito a mDNS en 0.2.2 no resolvió
+el acceso. En 0.2.3 se ha retirado mDNS y se desconecta el AP tras obtener
+una IP del router. No se ha aislado cuál de esos dos cambios elimina el fallo.
+El acceso HTTP por IP funciona con esta configuración y la conexión guardada
+se ha conservado durante las cargas USB.
 
-Compilación verificada. La prueba de conexión real y el despliegue de esta
-corrección están pendientes de recuperar la placa mediante BOOTSEL.
+Se mantiene la comprobación de dirección DHCP antes de indicar conexión.
