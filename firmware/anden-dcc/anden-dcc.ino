@@ -6,9 +6,6 @@
 // Select a flash layout with at least 1 MB LittleFS for OTA staging.
 // Prototype only: no GPIO is assigned to the motor shield yet.
 const char* AP_NAME = "anden-dcc";
-const char* AP_PASSWORD = "AndenDCC2026";
-const char* UPDATE_USER = "admin";
-const char* UPDATE_PASSWORD = "AndenOTA2026";
 
 WebServer server(80);
 HTTPUpdateServer updater;
@@ -28,7 +25,7 @@ const char PAGE[] = R"HTML(<!doctype html>
 void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_AP);
-  if (!WiFi.softAP(AP_NAME, AP_PASSWORD)) {
+  if (!WiFi.softAP(AP_NAME)) {
     // No web service if the access point failed; reset to retry.
     while (true) { delay(1000); }
   }
@@ -38,7 +35,7 @@ void setup() {
   server.on("/api/status", HTTP_GET, []() {
     server.send(200, "application/json", "{\"name\":\"anden-dcc\",\"version\":\"0.1.0\",\"dccImplemented\":false,\"trackPower\":false}");
   });
-  updater.setup(&server, "/update", UPDATE_USER, UPDATE_PASSWORD);
+  updater.setup(&server, "/update");
   server.begin();
   Serial.print("anden-dcc: http://");
   Serial.println(WiFi.softAPIP());

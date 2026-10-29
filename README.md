@@ -5,7 +5,7 @@ Central DCC para diorama H0 con Raspberry Pi Pico W y Deek-Robot L298P.
 ## Estado de la versión 0.1.0
 
 Código inicial sin compilar ni probar en hardware. Incluye punto de acceso Wi-Fi,
-página de estado y actualización web con contraseña. No implementa DCC,
+página de estado y actualización web sin autenticación. No implementa DCC,
 protección de corriente ni salidas para el shield. Probar únicamente la Pico por USB.
 
 ## Compilación y primera carga
@@ -22,13 +22,12 @@ Generar el UF2 para la primera carga USB mediante BOOTSEL.
 ## Uso previsto
 
 - Red: `anden-dcc`
-- Contraseña Wi-Fi provisional: `AndenDCC2026`
+- Red Wi-Fi abierta, sin contraseña.
 - Abrir la IP del punto de acceso (normalmente http://192.168.42.1;
   confirmar por el puerto serie o la puerta de enlace de la conexión Wi-Fi).
-- Actualización: `/update`, usuario `admin`, contraseña provisional `AndenOTA2026`.
+- Actualización: `/update`, sin usuario ni contraseña.
 - Para OTA usar el `.bin` de una compilación compatible, no el `.uf2`.
 
-Cambiar las contraseñas antes de usar fuera de las pruebas locales.
 Conservar acceso al conector USB y BOOTSEL para recuperación.
 Antes de implementar DCC, incorporar apagado físico por defecto y deshabilitación
 del puente durante actualizaciones y reinicios. No basta con detener una señal GPIO.
