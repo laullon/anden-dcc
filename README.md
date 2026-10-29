@@ -2,15 +2,14 @@
 
 Central DCC para diorama H0 con Raspberry Pi Pico W y Deek-Robot L298P.
 
-## Estado de la versión 0.2.7
+## Estado de la versión 0.3.0
 
-Compilado con Arduino-Pico 6.3.1 y cargado por USB en la Pico W. Arranque
-comprobado por diagnóstico serie. Conexión al router y acceso HTTP por IP
-verificados desde el Mac. Actualización OTA de firmware y acceso por `anden-dcc.local` verificados.
-Incluye configuración persistente de red, reconexión
-automática, punto de acceso Wi-Fi,
-página de estado y actualización web sin autenticación. No implementa DCC,
-protección de corriente ni salidas para el shield. Probar únicamente la Pico por USB.
+Compilado con Arduino-Pico 6.3.1 y desplegado por OTA. Incluye Wi-Fi persistente,
+panel web, mDNS, OTA y un primer generador DCC de nivel lógico en GP2 con control
+F0 para direcciones cortas. No implementa velocidad, potencia de vías ni protección
+de corriente. Ver [DCC-ANALYZER.md](DCC-ANALYZER.md) para el cableado del analizador,
+paquetes esperados y validación. Las primeras versiones se cargaron por USB;
+las versiones actuales pueden cargarse por OTA.
 
 ## Compilación y primera carga
 

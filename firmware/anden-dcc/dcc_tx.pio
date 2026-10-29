@@ -1,0 +1,41 @@
+; 500 kHz instruction clock: 2 us/cycle.
+; FIFO word: address (8), separator (0), instruction (8), separator (0),
+; checksum (8), left aligned (26 bits). Preamble/start/end generated here.
+; X retains the previous full FIFO word between frames: pull noblock repeats
+; it if no new command is available. Updates therefore happen at boundaries.
+.program dcc_tx
+.wrap_target
+    pull noblock
+    mov isr, osr
+    set x, 15
+preamble:
+    set pins, 1 [28]
+    set pins, 0 [27]
+    jmp x-- preamble
+    ; First byte start bit: 100 us high and 100 us low including setup.
+    set pins, 1 [24]
+    nop [24]
+    set pins, 0 [24]
+    set x, 25
+    nop [21]
+data_bit:
+    out y, 1
+    jmp !y zero_bit
+    ; One: 29 cycles high; 25 + jump + loop + out + branch = 29 low.
+    set pins, 1 [28]
+    set pins, 0 [24]
+    jmp bit_end
+zero_bit:
+    set pins, 1 [24]
+    nop [24]
+    set pins, 0 [31]
+    nop [14]
+bit_end:
+    jmp x-- data_bit
+    ; Replace the out + branch cycles after the final payload bit.
+    nop [1]
+    ; Packet end one. Low includes mov/pull/mov/set at wrap: 29 cycles.
+    set pins, 1 [28]
+    set pins, 0 [24]
+    mov x, isr
+.wrap
