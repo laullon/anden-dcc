@@ -7,12 +7,13 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Prototype: no GPIO is assigned to the motor shield.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.2.0";
+const char* VERSION = "0.2.1";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
 bool storageReady = false, connectPending = false, mdnsReady = false;
 bool wasConnected = false;
+bool ledOn = true;
 uint32_t lastAttempt = 0;
 
 String jsonString(const String& value) {
@@ -68,7 +69,7 @@ const char PAGE[] = R"HTML(<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>anden-dcc</title>
 <style>body{font:18px system-ui;background:#14232b;color:#eef4f5;margin:0;padding:24px}main{max-width:640px;margin:auto}h1{font-size:42px}section{background:#223741;padding:24px;border-radius:16px;margin:16px 0}a,button{display:inline-block;background:#ffc567;color:#14232b;padding:12px 18px;border:0;border-radius:8px;text-decoration:none;font:inherit;cursor:pointer}small{color:#bdcdd4}label{display:block;margin:16px 0}input{display:block;box-sizing:border-box;width:100%;padding:12px;margin-top:8px;font:inherit;border-radius:8px;border:1px solid #bdcdd4}#message{white-space:pre-wrap}a.secondary{background:#bdcdd4}</style>
-<main><small>CENTRAL DEL DIORAMA · v0.2.0</small><h1>anden-dcc</h1>
+<main><small>CENTRAL DEL DIORAMA · v0.2.1</small><h1>anden-dcc</h1>
 <section><h2>Tu red Wi-Fi</h2><p id="status" role="status">Consultando conexión…</p>
 <p id="address"></p><p><small>Compatible con redes de 2,4 GHz. La red abierta anden-dcc permanece disponible en 192.168.42.1.</small></p>
 <form id="wifi"><label>Nombre de la red (SSID)<input name="ssid" maxlength="32" required autocomplete="off"></label>
@@ -87,6 +88,8 @@ refresh();setInterval(refresh,3000);
 
 void setup() {
   Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
   // Do not auto-format: a mount failure must not erase saved credentials.
   LittleFSConfig fsConfig;
   fsConfig.setAutoFormat(false);
@@ -147,6 +150,12 @@ void setup() {
 void loop() {
   server.handleClient();
   bool connected = WiFi.status() == WL_CONNECTED;
+  // Non-blocking heartbeat: 500 ms on / 500 ms off until station connects.
+  bool desiredLed = connected || ((millis() / 500) % 2 == 0);
+  if (desiredLed != ledOn) {
+    ledOn = desiredLed;
+    digitalWrite(LED_BUILTIN, ledOn ? HIGH : LOW);
+  }
   if (connected != wasConnected) {
     if (mdnsReady) { MDNS.end(); mdnsReady = false; }
     if (connected) {

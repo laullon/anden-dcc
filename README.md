@@ -2,7 +2,7 @@
 
 Central DCC para diorama H0 con Raspberry Pi Pico W y Deek-Robot L298P.
 
-## Estado de la versión 0.2.0
+## Estado de la versión 0.2.1
 
 Compilado con Arduino-Pico 6.3.1 y cargado por USB en la Pico W. Arranque
 comprobado por diagnóstico serie. Conexión a router, panel y OTA pendientes de
@@ -64,3 +64,12 @@ Diagnóstico serie USB a 115200: enviar `s` para consultar versión, estado DCC 
 El diagnóstico USB incluye el estado del almacenamiento y de la configuración,
 sin revelar la contraseña. La memoria se inicializa automáticamente solo si su
 primer bloque está borrado; un fallo de montaje no fuerza un formateo destructivo.
+
+## LED integrado
+
+- Parpadeo de un segundo (500 ms encendido y 500 ms apagado): sin conexión al router.
+- Encendido fijo: conectado a la red Wi-Fi configurada.
+- Si pierde la conexión, vuelve a parpadear. Conectar un móvil al punto de acceso
+  no enciende el LED fijo; representa la conexión de la Pico al router.
+
+El parpadeo usa `millis()` y no bloquea la atención del panel.
