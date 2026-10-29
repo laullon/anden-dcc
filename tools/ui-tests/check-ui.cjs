@@ -1,0 +1,30 @@
+const {chromium}=require('playwright');
+const fs=require('fs'),path=require('path');
+const root=path.resolve(__dirname,'../..');
+const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,{recursive:true});
+(async()=>{const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),headless:true});
+const context=await browser.newContext({viewport:{width:1440,height:1080},deviceScaleFactor:1});
+let state={name:'anden-dcc',version:fs.readFileSync(path.join(root,'firmware/anden-dcc/anden-dcc.ino'),'utf8').match(/VERSION = "([^"]+)"/)[1],connected:true,mdnsReady:true,storageReady:true,ssid:'Studio Wi-Fi',ip:'192.168.1.42',trackPower:false,dcc:{ready:true,running:true,pin:2,address:3,f0:false,bytes:'03 80 83'}},offline=false;
+await context.route('http://anden.test/**',async route=>{const u=new URL(route.request().url());if(u.pathname==='/api/status'){if(offline)return route.abort();return route.fulfill({json:state});}if(u.pathname==='/dcc/f0'){const data=new URLSearchParams(route.request().postData());state.dcc.address=Number(data.get('address'));state.dcc.f0=data.get('on')==='1';const a=state.dcc.address,f=state.dcc.f0?0x90:0x80;state.dcc.bytes=[a,f,a^f].map(x=>x.toString(16).toUpperCase().padStart(2,'0')).join(' ');return route.fulfill({json:state.dcc});}if(u.pathname==='/update')return route.fulfill({body:'Update error: test rejection',contentType:'text/html'});if(u.pathname==='/icon.svg')return route.fulfill({body:fs.readFileSync(path.join(root,'web/icon.svg'),'utf8'),contentType:'image/svg+xml'});return route.fulfill({body:fs.readFileSync(path.join(root,'web/index.html'),'utf8'),contentType:'text/html'});});
+const page=await context.newPage();let errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://anden.test/');await page.waitForFunction(()=>document.getElementById('connection-text').textContent==='Connected');
+if(await page.locator('#setup').getAttribute('open')!==null)throw Error('Setup expanded by default');
+if(await page.locator('#wifi').isVisible())throw Error('Wi-Fi form exposed by default');
+await page.screenshot({path:path.join(out,'ui-desktop.png'),fullPage:true});
+await page.locator('.dcc-action[data-on="1"]').click();await page.waitForFunction(()=>document.querySelector('.dcc-action[data-on="1"]').getAttribute('aria-pressed')==='true');
+await page.locator('#dcc-address').fill('37');await page.locator('.dcc-action[data-on="0"]').click();await page.waitForFunction(()=>document.getElementById('sent-address').textContent==='37');
+if(await page.locator('#dcc-address').inputValue()!=='37')throw Error('Address changed during render');
+await page.locator('#setup>summary').click();if(!await page.locator('#wifi').isVisible())throw Error('Setup did not open');await page.screenshot({path:path.join(out,'ui-setup.png'),fullPage:true});
+await page.locator('#firmware-file').setInputFiles({name:'test.bin',mimeType:'application/octet-stream',buffer:Buffer.from('UI mock upload')});await page.locator('#update-button').click();await page.waitForFunction(()=>document.getElementById('update-message').classList.contains('error'));if(await page.locator('#update-button').isDisabled())throw Error('OTA failure locked UI');
+await page.locator('[data-lang="es"]').click();if(await page.locator('h1').textContent()!=='Dale vida a tu escena.')throw Error('Spanish translation missing');await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='es');if(await page.locator('#setup').getAttribute('open')!==null)throw Error('Setup should be collapsed on reload');
+await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'ui-mobile-es.png'),fullPage:true});
+if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Mobile horizontal overflow');
+await page.locator('[data-lang="en"]').click();await page.screenshot({path:path.join(out,'ui-mobile.png'),fullPage:true});
+offline=true;await page.evaluate(()=>refresh());if(!await page.locator('#offline-note').isVisible())throw Error('Missing offline state');if(!await page.locator('.dcc-action[data-on="1"]').isDisabled())throw Error('Commands enabled offline');offline=false;await page.evaluate(()=>refresh());
+await page.goto('http://anden.test/?setup=firmware');await page.waitForFunction(()=>document.getElementById('setup').open);if(errors.length)throw Error(errors.join('\n'));
+// Fresh navigation at a tall mobile viewport avoids compositor tiling artifacts
+// seen when taking full-page screenshots immediately after desktop resizing.
+await page.setViewportSize({width:390,height:1500});await page.goto('http://anden.test/');await page.waitForFunction(()=>document.getElementById('connection-text').textContent==='Connected');
+await page.locator('[data-lang="es"]').click();await page.screenshot({path:path.join(out,'ui-mobile-es.png')});
+await page.locator('[data-lang="en"]').click();await page.screenshot({path:path.join(out,'ui-mobile.png')});
+await page.setViewportSize({width:320,height:900});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('320px horizontal overflow');
+console.log('PASS: English/Spanish, default closed Setup, F0 actions, address editing, OTA error recovery, offline state, mobile layout, legacy update link; no JS errors.');await browser.close();})().catch(e=>{console.error(e);process.exit(1)});

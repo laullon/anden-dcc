@@ -4,3 +4,8 @@ build/
 *.uf2
 *.bin
 secrets.h
+node_modules/
+__pycache__/
+*.pyc
+*.sal
+captures/

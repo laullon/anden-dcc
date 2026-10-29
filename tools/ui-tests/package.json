@@ -1,0 +1,6 @@
+{
+  "name": "anden-dcc-ui-checks",
+  "private": true,
+  "scripts": {"test": "node check-ui.cjs"},
+  "devDependencies": {"playwright": "1.61.1"}
+}
