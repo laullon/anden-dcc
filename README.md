@@ -2,7 +2,7 @@
 
 Central DCC para diorama H0 con Raspberry Pi Pico W y Deek-Robot L298P.
 
-## Estado de la versión 0.2.1
+## Estado de la versión 0.2.2
 
 Compilado con Arduino-Pico 6.3.1 y cargado por USB en la Pico W. Arranque
 comprobado por diagnóstico serie. Conexión a router, panel y OTA pendientes de
@@ -73,3 +73,14 @@ primer bloque está borrado; un fallo de montaje no fuerza un formateo destructi
   no enciende el LED fijo; representa la conexión de la Pico al router.
 
 El parpadeo usa `millis()` y no bloquea la atención del panel.
+
+## Corrección 0.2.2
+
+Las llamadas de inicio y cierre de SimpleMDNS se realizan bajo `LWIPMutex`,
+como exige el acceso a las API raw de lwIP en Arduino-Pico 6.3.1. Sin ese
+bloqueo, el anuncio del nombre local podía disparar una aserción al conectar
+al router y detener el firmware con el LED fijo. Se espera también una IP
+asignada antes de indicar conexión y arrancar mDNS.
+
+Compilación verificada. La prueba de conexión real y el despliegue de esta
+corrección están pendientes de recuperar la placa mediante BOOTSEL.
