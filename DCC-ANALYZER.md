@@ -1,4 +1,4 @@
-# DCC GPIO test — v0.3.0
+# DCC GPIO test
 
 This version emits a continuous 3.3 V logic signal on GP2. It does not drive
 rails, set motor speed, or enable a bridge. Connect only the logic analyzer
@@ -38,7 +38,7 @@ Apple Silicon. This project does not install or modify capture software.
 
 ## One function: F0 / lights
 
-Open http://anden-dcc.local (or the Pico's assigned IP). Under «DCC · Prueba F0»,
+Open http://anden-dcc.local (or the Pico's assigned IP). In the Locomotive card,
 choose a short address from 1 to 127 and press F0 on or off. Default after every
 boot: address 3, F0 off. Settings for this test function are not persisted.
 
@@ -132,3 +132,13 @@ three-byte packets; it does not decode the whole DCC protocol.
 
 The GPIO waveform validation used the actual device through Logic 2 MCP.
 The original address/F0 setting was restored after capturing both states.
+
+## UI release 0.4.0 follow-up
+
+The PIO engine and packet encoder were unchanged for the bilingual UI release.
+Host timing checks and real HTTP F0 control passed. A new capture attempt showed
+constant input on every analyzer channel. A controlled comparison with the
+previously measured 0.3.0 firmware also showed no transitions, after which 0.4.0
+was restored. This does not establish a fresh physical timing pass; the earlier
+real 0.3.0 captures remain the measurement reference. Probe/ground/input setup
+should be rechecked at the bench when available.

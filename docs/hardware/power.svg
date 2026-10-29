@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850">
+<rect width="1200" height="850" fill="#fffef9"/>
+<style>text{font-family:Arial,sans-serif;fill:#142d32} .mono{font-family:monospace}</style>
+<text x="42" y="40" font-size="14" fill="#142d32" style="fill:#142d32" font-weight="bold" text-anchor="start">anden-dcc / HARDWARE</text>
+<text x="1158" y="40" font-size="13" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="end">01 / REV A</text>
+<text x="42" y="86" font-size="29" fill="#142d32" style="fill:#142d32" font-weight="bold" text-anchor="start">One cable. Two voltage rails.</text>
+<text x="42" y="116" font-size="13" fill="#647676" style="fill:#647676" font-weight="normal" text-anchor="start">USB-C PD power distribution · star ground · motor power disconnected by emergency stop</text>
+<path d="M42 139H1158V139" fill="none" stroke="#d7dfd6" stroke-width="1"/>
+<rect x="42" y="768" width="1116" height="47" rx="8" fill="#f8e9da" stroke="#d7dfd6"/>
+<text x="58" y="790" font-size="12" fill="#a34030" style="fill:#a34030" font-weight="bold" text-anchor="start">PROPOSED POWER ASSEMBLY · NOT BUILT OR ELECTRICALLY VALIDATED</text>
+<text x="58" y="807" font-size="11" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">Firmware 0.4.0 drives GP2 only. Other pins are reservations. See hardware README and sources before assembly.</text>
+<rect x="50" y="192" width="192" height="117" rx="10" fill="#f4f2eb" stroke="#d7dfd6"/>
+<text x="65" y="219" font-size="15" fill="#142d32" style="fill:#142d32" font-weight="bold" text-anchor="start">M3 · USB-C PD trigger</text>
+<text x="65" y="243" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">15 V profile / ≥3 A</text>
+<text x="65" y="263" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">Select 0 / 1 / 1 only if</text>
+<text x="65" y="283" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">the delivered board agrees.</text>
+<text x="50" y="174" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">USB-C charger: explicit 15 V / 3 A profile</text>
+<path d="M242 247H285V247" fill="none" stroke="#b56a28" stroke-width="3"/>
+<path d="M285 247H295V247" fill="none" stroke="#142d32" stroke-width="2"/>
+<rect x="295" y="242" width="38" height="10" rx="0" fill="#fffef9" stroke="#142d32"/>
+<path d="M333 247H343V247" fill="none" stroke="#142d32" stroke-width="2"/>
+<text x="314" y="235" font-size="11" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="middle">F1 · 3 A fuse</text>
+<path d="M343 247H402V247" fill="none" stroke="#b56a28" stroke-width="3"/>
+<circle cx="402" cy="247" r="3.5" fill="#b56a28"/>
+<text x="383" y="225" font-size="12" fill="#b56a28" style="fill:#b56a28" font-weight="normal" text-anchor="start">+15V_FUSED</text>
+<path d="M402 247V412" fill="none" stroke="#b56a28" stroke-width="3"/>
+<rect x="463" y="189" width="202" height="115" rx="10" fill="#f4f2eb" stroke="#d7dfd6"/>
+<text x="478" y="216" font-size="15" fill="#142d32" style="fill:#142d32" font-weight="bold" text-anchor="start">S1 · Emergency stop</text>
+<text x="478" y="240" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">NC contact opens track</text>
+<text x="478" y="260" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">supply; NO contact grounds</text>
+<text x="478" y="280" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">latch /CLR on sheet 03.</text>
+<path d="M402 247H463V247" fill="none" stroke="#b56a28" stroke-width="3"/>
+<path d="M665 247H737V247" fill="none" stroke="#b56a28" stroke-width="3"/>
+<rect x="737" y="192" width="193" height="112" rx="10" fill="#f4f2eb" stroke="#d7dfd6"/>
+<text x="752" y="219" font-size="15" fill="#142d32" style="fill:#142d32" font-weight="bold" text-anchor="start">M2 · Deek-Robot</text>
+<text x="752" y="243" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">VIN motor screw terminal</text>
+<text x="752" y="263" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">NOT the 5V logic header</text>
+<text x="752" y="283" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">A/B → isolated rail pairs</text>
+<path d="M930 247H984V247" fill="none" stroke="#b56a28" stroke-width="3"/>
+<text x="990" y="242" font-size="13" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">Track A / B</text>
+<text x="990" y="264" font-size="11" fill="#647676" style="fill:#647676" font-weight="normal" text-anchor="start">bridge outputs</text>
+<circle cx="702" cy="247" r="3.5" fill="#b56a28"/>
+<path d="M702 247V312" fill="none" stroke="#b56a28" stroke-width="2"/>
+<path d="M691 312h22m-22 7h22M702 319v19" fill="none" stroke="#b56a28" stroke-width="2"/>
+<path d="M702 338v9m-12 0h24m-18 5h12m-9 5h6" fill="none" stroke="#3b6f9d" stroke-width="1.8"/>
+<text x="728" y="322" font-size="11" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">C1</text>
+<text x="728" y="339" font-size="11" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">100 µF / 25 V</text>
+<rect x="318" y="412" width="230" height="120" rx="10" fill="#f4f2eb" stroke="#d7dfd6"/>
+<text x="333" y="439" font-size="15" fill="#142d32" style="fill:#142d32" font-weight="bold" text-anchor="start">M4 · MP1584 module</text>
+<text x="333" y="463" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">Adjust to 5.00 V first</text>
+<text x="333" y="483" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">IN+ = +15V_FUSED</text>
+<text x="333" y="503" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">IN− / OUT− = GND</text>
+<path d="M402 412H402V412" fill="none" stroke="#b56a28" stroke-width="3"/>
+<path d="M548 470H618V470" fill="none" stroke="#437d65" stroke-width="3"/>
+<circle cx="618" cy="470" r="3.5" fill="#437d65"/>
+<text x="560" y="451" font-size="12" fill="#437d65" style="fill:#437d65" font-weight="normal" text-anchor="start">+5V_LOGIC</text>
+<rect x="725" y="390" width="235" height="105" rx="10" fill="#f4f2eb" stroke="#d7dfd6"/>
+<text x="740" y="417" font-size="15" fill="#142d32" style="fill:#142d32" font-weight="bold" text-anchor="start">Shield + external logic</text>
+<text x="740" y="441" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">Shield 5V header</text>
+<text x="740" y="461" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">U1/U2/U3/U4 VCC</text>
+<text x="740" y="481" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">100 nF at each IC supply</text>
+<path d="M618 470V441H725" fill="none" stroke="#437d65" stroke-width="3"/>
+<path d="M618 470V582H700" fill="none" stroke="#437d65" stroke-width="3"/>
+<text x="629" y="565" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">D1 · 1N5819</text>
+<path d="M700 568L724 582L700 596ZM726 568V596" fill="none" stroke="#437d65" stroke-width="2"/>
+<path d="M726 582H810V582" fill="none" stroke="#437d65" stroke-width="3"/>
+<text x="753" y="565" font-size="11" fill="#437d65" style="fill:#437d65" font-weight="normal" text-anchor="start">cathode →</text>
+<rect x="810" y="535" width="299" height="111" rx="10" fill="#f4f2eb" stroke="#d7dfd6"/>
+<text x="825" y="562" font-size="15" fill="#142d32" style="fill:#142d32" font-weight="bold" text-anchor="start">M1 · Pico W</text>
+<text x="825" y="586" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">VSYS = physical pin 39</text>
+<text x="825" y="606" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">GND = pin 3 or other GND</text>
+<text x="825" y="626" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">Leave VBUS and 3V3 isolated.</text>
+<circle cx="685" cy="441" r="3.5" fill="#437d65"/>
+<path d="M685 441V479" fill="none" stroke="#437d65" stroke-width="2"/>
+<path d="M674 479h22m-22 7h22M685 486v17" fill="none" stroke="#437d65" stroke-width="2"/>
+<path d="M685 503v9m-12 0h24m-18 5h12m-9 5h6" fill="none" stroke="#3b6f9d" stroke-width="1.8"/>
+<text x="708" y="520" font-size="11" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">C2 · 47 µF / 10 V</text>
+<path d="M70 690H1110V690" fill="none" stroke="#3b6f9d" stroke-width="3"/>
+<text x="70" y="718" font-size="13" fill="#3b6f9d" style="fill:#3b6f9d" font-weight="normal" text-anchor="start">GND: PD−, buck IN−/OUT−, shield GND, Pico GND and all logic GND.</text>
+<text x="800" y="355" font-size="12" fill="#647676" style="fill:#647676" font-weight="normal" text-anchor="start">DCC rails are bipolar.</text>
+<text x="800" y="375" font-size="12" fill="#647676" style="fill:#647676" font-weight="normal" text-anchor="start">Allow for L298 voltage loss.</text>
+<text x="50" y="746" font-size="12" fill="#142d32" style="fill:#142d32" font-weight="normal" text-anchor="start">D1 allows Pico USB recovery without backfeeding the external 5 V rail. No Arduino is used.</text>
+</svg>

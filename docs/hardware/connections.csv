@@ -1,0 +1,29 @@
+Net,Endpoints,Notes
+GND,PD OUT−; MP1584 IN−/OUT−; Pico GND; Shield GND; U1.7; U2.7; U3.4; U4 VSS; Q1 emitter,Common return; star heavy-current returns away from ADC return
++15V_RAW,PD OUT+; F1 input,Measure negotiated 15 V; do not connect to Pico
++15V_FUSED,F1 output; MP1584 IN+; S1 NC common,Main power split
+TRACK_VM,S1 NC output; Shield VIN motor screw; C1 +,C1 − to GND; S1 opens motor supply
++5V_LOGIC,MP1584 OUT+; Shield 5V header; U1.14; U2.14; U3.8; U4 VDD; D1 anode; R19 top; R16 top; R17 top; U2.2; U2.4; U2.10; U2.13,"Adjust to 5.00 V first; C2+, C3–C7 bypass to GND"
+PICO_VSYS,D1 cathode; Pico physical pin 39; C8 top,C8 bottom GND; no direct VBUS tie
+DCC_A_3V3,Pico GP2 / pin 4; U1.2; R1 top,R1 bottom GND; only currently active signal
+DCC_B_3V3,Pico GP3 / pin 5; U1.5; R2 top,R2 bottom GND; reserved
+ENA_3V3,Pico GP6 / pin 9; U1.9; R3 top,R3 bottom GND; reserved
+ENB_3V3,Pico GP7 / pin 10; U1.12; R4 top,R4 bottom GND; reserved
+DIRA_5V,U1.3; Shield D12 DIRA,
+DIRB_5V,U1.6; Shield D13 DIRB,
+ENA_5V,U1.8; Shield D3 PWMA; R5 top,R5 bottom GND
+ENB_5V,U1.11; Shield D11 PWMB; R6 top,R6 bottom GND
+BRAKE_LOW,Shield D9 BRAKEA; Shield D8 BRAKEB; GND,
+BUFFER_DISABLE,U2.6 (/Q1); U1.1; U1.4; U1.10; U1.13; R16 bottom; R13 top,High disables buffers
+LATCH_FEEDBACK,R13 bottom; R14 top; Pico GP28 / pin 34; C12 top,"R14/C12 bottom GND; divided analog status, not direct 5 V GPIO"
+ARM_CLOCK,Pico GP4 / pin 6; U2.3; R7 top,R7 bottom GND; rising edge arms only if CLEAR_N high
+DISARM_BASE,Pico GP5 / pin 7; R8 input,R8 output to Q1 base and R18 top; R18 bottom to emitter/GND
+CLEAR_N,U2.1; R17 bottom; U3.1; U3.7; U4 RST; Q1 collector; S1 NO common,S1 NO output GND; all other clearing sources are open collector/drain
+SNSA_RAW,Shield A0; R9 top,
+SNSA_DIV,R9 bottom; R10 top; U3.2 (−); Pico GP26 / pin 31; C10 top,R10/C10 bottom GND
+SNSB_RAW,Shield A1; R11 top,
+SNSB_DIV,R11 bottom; R12 top; U3.6 (−); Pico GP27 / pin 32; C11 top,R12/C11 bottom GND
+VREF,R19 bottom; R15 top; C9 top; U3.3 (+); U3.5 (+),R15/C9 bottom GND; nominal 0.996 V
+UNUSED_FF2,U2.11 (CLK2); U2.12 (D2); GND,"U2 outputs 5,8,9 unconnected; PRE2/CLR2 already tied high"
+TRACK_A,Shield A+; Track A rail 1,Shield A− to track A rail 2; neither to GND
+TRACK_B,Shield B+; Track B rail 1,Shield B− to track B rail 2; isolate outputs A/B
