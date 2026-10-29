@@ -1,0 +1,6 @@
+.DS_Store
+.pio/
+build/
+*.uf2
+*.bin
+secrets.h
