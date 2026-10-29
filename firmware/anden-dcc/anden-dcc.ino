@@ -25,6 +25,7 @@ const char PAGE[] = R"HTML(<!doctype html>
 void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(IPAddress(192, 168, 42, 1), IPAddress(192, 168, 42, 1), IPAddress(255, 255, 255, 0));
   if (!WiFi.softAP(AP_NAME)) {
     // No web service if the access point failed; reset to retry.
     while (true) { delay(1000); }
@@ -43,5 +44,9 @@ void setup() {
 
 void loop() {
   server.handleClient();
+  if (Serial.available() && Serial.read() == 's') {
+    Serial.print("anden-dcc v0.1.0 ready; DCC disabled; http://");
+    Serial.println(WiFi.softAPIP());
+  }
   delay(1);
 }
