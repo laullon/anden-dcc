@@ -8,7 +8,7 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Prototype: no GPIO is assigned to the motor shield.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.2.4";
+const char* VERSION = "0.2.5";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
@@ -89,7 +89,7 @@ const char PAGE[] = R"HTML(<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>anden-dcc</title>
 <style>body{font:18px system-ui;background:#14232b;color:#eef4f5;margin:0;padding:24px}main{max-width:640px;margin:auto}h1{font-size:42px}section{background:#223741;padding:24px;border-radius:16px;margin:16px 0}a,button{display:inline-block;background:#ffc567;color:#14232b;padding:12px 18px;border:0;border-radius:8px;text-decoration:none;font:inherit;cursor:pointer}small{color:#bdcdd4}label{display:block;margin:16px 0}input{display:block;box-sizing:border-box;width:100%;padding:12px;margin-top:8px;font:inherit;border-radius:8px;border:1px solid #bdcdd4}#message{white-space:pre-wrap}a.secondary{background:#bdcdd4}</style>
-<main><small>CENTRAL DEL DIORAMA · v0.2.4</small><h1>anden-dcc</h1>
+<main><small>CENTRAL DEL DIORAMA · v0.2.5</small><h1>anden-dcc</h1>
 <section><h2>Tu red Wi-Fi</h2><p id="status" role="status">Consultando conexión…</p>
 <p id="address"></p><p><small>Compatible con redes de 2,4 GHz. La red abierta anden-dcc sirve para configurar y recuperar el acceso. Se apaga al conectar al router.</small></p>
 <form id="wifi"><label>Nombre de la red (SSID)<input name="ssid" maxlength="32" required autocomplete="off"></label>

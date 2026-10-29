@@ -2,7 +2,7 @@
 
 Central DCC para diorama H0 con Raspberry Pi Pico W y Deek-Robot L298P.
 
-## Estado de la versión 0.2.4
+## Estado de la versión 0.2.5
 
 Compilado con Arduino-Pico 6.3.1 y cargado por USB en la Pico W. Arranque
 comprobado por diagnóstico serie. Conexión al router y acceso HTTP por IP
@@ -109,3 +109,11 @@ UDP directa recibió respuesta de la Pico con su IP correcta, y la página,
 formulario OTA y API respondieron por el nombre local. Algunos intentos con
 límite de cinco segundos agotaron la espera de resolución. Se conserva el acceso
 por IP como alternativa; no se ha establecido la causa de esa latencia del cliente.
+
+## Prueba OTA sin USB (0.2.5)
+
+Versión 0.2.5 equivalente funcionalmente a 0.2.4; cambia el identificador para
+comprobar el despliegue. Compilada con Arduino-Pico 6.3.1 y enviada mediante
+POST multipart a `/update` por la red doméstica, sin utilizar USB. El servidor
+respondió «Update Success» y, tras reiniciar, `/api/status` confirmó 0.2.5,
+conexión Wi-Fi, mDNS y almacenamiento disponibles. Conservó la configuración.
