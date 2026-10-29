@@ -7,6 +7,8 @@ the assigned IP also works. There is no cloud service.
 | --- | --- | --- |
 | GET | `/` | English/Spanish roster panel; Setup closed by default |
 | GET | `/icon.svg` | SVG app icon |
+| GET | `/favicon.svg` | Small SVG browser-tab icon |
+| GET | `/favicon.ico` | Binary ICO fallback, 16/32px |
 | GET | `/api/status` | Version, network and DCC state; no LED pulse |
 | POST | `/dcc/f0` | Form: existing roster `address=1..127`, `on=0|1` |
 | POST | `/locos/save` | Form: optional `id`, `address=1..127`, optional `name` |

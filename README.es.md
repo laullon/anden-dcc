@@ -17,7 +17,7 @@ Una pequeña central para un diorama H0, con **Raspberry Pi Pico W**, control we
 Wi-Fi y OTA. La interfaz arranca en inglés; **ES** cambia al español y recuerda
 la preferencia en ese navegador.
 
-**Versión 0.5.2:** F0/luces y direcciones cortas 1–127. Los pulsos DCC de 3,3 V
+**Versión 0.5.3:** F0/luces y direcciones cortas 1–127. Los pulsos DCC de 3,3 V
 en GP2 se midieron en la versión de una locomotora; la nueva planificación DMA
 para varias locomotoras está pendiente de captura física.
 **Todavía no se habilita la potencia ni el movimiento**.

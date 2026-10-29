@@ -19,7 +19,7 @@ some light, sound and, eventually, a little movement—without a full-size comma
 station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
 hardware, independent of browser and Wi-Fi activity.
 
-**Current release: 0.5.2.** A shared locomotive roster, independent F0/headlights
+**Current release: 0.5.3.** A shared locomotive roster, independent F0/headlights
 and short addresses are implemented. This is a **logic-output prototype**. Track
 power, motor control and current protection are not enabled in firmware. The
 Deek-Robot power assembly is a documented proposal for the next stage.
@@ -135,7 +135,7 @@ after restart. **Do not upload UF2 over OTA.**
 The CLI helper verifies success and the running version:
 
 ```sh
-python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.5.2
+python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.5.3
 ```
 
 Use the Pico IP for `--host` if mDNS is slow. Normal firmware OTA preserves saved
@@ -168,6 +168,9 @@ Setup, independent commands, roster edits, duplicates, capacity, stale status
 responses, mobile layout, offline state and failed save/upload recovery. GitHub Actions runs host checks, compilation and UI checks when hosted.
 
 Edit `web/index.html` and `web/icon.svg`, then run `tools/embed_web.py`.
+The browser tab uses `web/favicon.svg` plus a conventional ICO fallback. After
+changing that SVG, run `node tools/build_favicon.cjs` with the UI dependencies
+and Chromium installed, then embed the updated assets. `CHROME_PATH` is supported.
 Generated `WebAssets.h` is checked in for direct Arduino IDE builds. If PIO
 changes, regenerate its header with the core's `pioasm`, then run the timing
 checks. `tools/export_hardware.py` exports and checks the current KiCad schematic;

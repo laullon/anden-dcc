@@ -32,6 +32,8 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
   }
   if(u.pathname==='/locos/remove'){state.dcc.locos=state.dcc.locos.filter(l=>l.id!==Number(data.get('id')));return route.fulfill({json:state.dcc});}
   if(u.pathname==='/update')return route.fulfill({body:'Update error: test rejection',contentType:'text/html'});
+  if(u.pathname==='/favicon.svg')return route.fulfill({body:fs.readFileSync(path.join(root,'web/favicon.svg'),'utf8'),contentType:'image/svg+xml'});
+  if(u.pathname==='/favicon.ico')return route.fulfill({body:fs.readFileSync(path.join(root,'web/favicon.ico')),contentType:'image/x-icon'});
   if(u.pathname==='/icon.svg')return route.fulfill({body:fs.readFileSync(path.join(root,'web/icon.svg'),'utf8'),contentType:'image/svg+xml'});
   return route.fulfill({body:fs.readFileSync(path.join(root,'web/index.html'),'utf8'),contentType:'text/html'});
  });

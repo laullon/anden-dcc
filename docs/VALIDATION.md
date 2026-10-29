@@ -1,4 +1,15 @@
-# Release 0.5.2 · simple controller validation
+# Release 0.5.3 · favicon validation
+
+30 October 2026. SVG train favicon plus a classic 16/32px ICO fallback.
+
+- Pico W build: 475636 bytes program (45%), 74192 bytes globals (28%).
+- Existing DCC/roster and browser regression checks pass; web assets match their generated header.
+- ICO headers/dimensions checked; macOS and Chrome decode it successfully.
+- Live Pico SVG/ICO responses match the source bytes, including MIME types and version-query URLs.
+- OTA 0.5.3 verified; existing locomotive settings retained and prior F0 states restored.
+- No changes to the DCC waveform, hardware design or track-power behavior.
+
+## Historical release 0.5.2 · simple controller validation
 
 29 October 2026. Decoder programming has been removed. The current hardware
 proposal uses one bridge output for both tracks and one AHCT buffer IC.

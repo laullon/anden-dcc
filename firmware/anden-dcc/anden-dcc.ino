@@ -11,7 +11,7 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Logic-analyzer prototype: GP2 carries DCC; no power-stage pins are assigned.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.5.2";
+const char* VERSION = "0.5.3";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
@@ -199,6 +199,14 @@ void setup() {
   server.on("/icon.svg", HTTP_GET, []() {
     server.sendHeader("Cache-Control", "public, max-age=86400");
     server.send(200, "image/svg+xml", ICON_SVG);
+  });
+  server.on("/favicon.svg", HTTP_GET, []() {
+    server.sendHeader("Cache-Control", "public, max-age=86400");
+    server.send(200, "image/svg+xml", FAVICON_SVG);
+  });
+  server.on("/favicon.ico", HTTP_GET, []() {
+    server.sendHeader("Cache-Control", "public, max-age=86400");
+    server.send(200, "image/x-icon", reinterpret_cast<const char*>(FAVICON_ICO), sizeof(FAVICON_ICO));
   });
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Location", "/?setup=firmware");

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.3
+
+- Add a small train favicon, with SVG and 16/32px ICO formats.
+- Serve the standard favicon path with binary-safe responses and versioned links.
+
 ## 0.5.2
 
 - Remove decoder-programming UI, API, packet helpers and tests; use another method for addresses.
