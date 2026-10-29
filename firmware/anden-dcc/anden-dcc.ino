@@ -2,19 +2,38 @@
 #include <WebServer.h>
 #include <HTTPUpdateServer.h>
 #include <LittleFS.h>
+#include <SimpleMDNS.h>
+#include <lwip_wrap.h>
 
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Prototype: no GPIO is assigned to the motor shield.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.2.3";
+const char* VERSION = "0.2.4";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
 bool storageReady = false, connectPending = false;
 bool accessPointRunning = false;
+bool mdnsReady = false;
 bool wasConnected = false;
 bool ledOn = true;
 uint32_t lastAttempt = 0;
+uint32_t mdnsAttempt = 0;
+
+void stopMdns() {
+  if (!mdnsReady) return;
+  LWIPMutex networkLock;
+  MDNS.end();
+  mdnsReady = false;
+}
+
+void startMdns() {
+  // Start only with the STA interface active and DHCP complete. Protect the
+  // whole interface traversal as well as the individual wrapped lwIP calls.
+  LWIPMutex networkLock;
+  mdnsReady = MDNS.begin(AP_NAME);
+  if (mdnsReady) MDNS.addService("http", "tcp", 80);
+}
 
 String jsonString(const String& value) {
   String result = "\"";
@@ -57,7 +76,8 @@ void loadNetwork() {
 }
 
 void printStatus() {
-  Serial.printf("anden-dcc v%s; DCC disabled; AP http://192.168.42.1; ", VERSION);
+  Serial.printf("anden-dcc v%s; DCC disabled; AP=%s; mDNS=%s; ", VERSION,
+                accessPointRunning ? "192.168.42.1" : "off", mdnsReady ? "ready" : "off");
   Serial.printf("storage=%s; configured=%s; ", storageReady ? "ready" : "error", networkName.length() ? "yes" : "no");
   if (WiFi.status() == WL_CONNECTED && WiFi.localIP().isSet()) {
     Serial.print("LAN http://"); Serial.println(WiFi.localIP());
@@ -69,7 +89,7 @@ const char PAGE[] = R"HTML(<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>anden-dcc</title>
 <style>body{font:18px system-ui;background:#14232b;color:#eef4f5;margin:0;padding:24px}main{max-width:640px;margin:auto}h1{font-size:42px}section{background:#223741;padding:24px;border-radius:16px;margin:16px 0}a,button{display:inline-block;background:#ffc567;color:#14232b;padding:12px 18px;border:0;border-radius:8px;text-decoration:none;font:inherit;cursor:pointer}small{color:#bdcdd4}label{display:block;margin:16px 0}input{display:block;box-sizing:border-box;width:100%;padding:12px;margin-top:8px;font:inherit;border-radius:8px;border:1px solid #bdcdd4}#message{white-space:pre-wrap}a.secondary{background:#bdcdd4}</style>
-<main><small>CENTRAL DEL DIORAMA · v0.2.3</small><h1>anden-dcc</h1>
+<main><small>CENTRAL DEL DIORAMA · v0.2.4</small><h1>anden-dcc</h1>
 <section><h2>Tu red Wi-Fi</h2><p id="status" role="status">Consultando conexión…</p>
 <p id="address"></p><p><small>Compatible con redes de 2,4 GHz. La red abierta anden-dcc sirve para configurar y recuperar el acceso. Se apaga al conectar al router.</small></p>
 <form id="wifi"><label>Nombre de la red (SSID)<input name="ssid" maxlength="32" required autocomplete="off"></label>
@@ -80,7 +100,7 @@ const char PAGE[] = R"HTML(<!doctype html>
 <a href="/update">Actualizar firmware</a><p><small>Sube un .bin compilado con la misma distribución de memoria.</small></p></section></main>
 <script>
 const statusLine=document.getElementById('status'),address=document.getElementById('address'),message=document.getElementById('message');
-async function refresh(){try{const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error();const s=await r.json();statusLine.textContent=s.connected?'Conectado a '+s.ssid:s.ssid?'Intentando conectar a '+s.ssid+'… Revisa los datos si no conecta.':'No hay ninguna red configurada.';address.replaceChildren();if(s.connected){const a=document.createElement('a');a.href='http://'+s.ip+'/';a.textContent='Abrir en tu red: '+s.ip;address.append(a);}if(!s.storageReady)message.textContent='No se pudo abrir la memoria de configuración.';}catch(e){statusLine.textContent='Sin respuesta. Reconecta a anden-dcc o abre la nueva IP desde tu red.';}}
+async function refresh(){try{const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error();const s=await r.json();statusLine.textContent=s.connected?'Conectado a '+s.ssid:s.ssid?'Intentando conectar a '+s.ssid+'… Revisa los datos si no conecta.':'No hay ninguna red configurada.';address.replaceChildren();if(s.connected){const a=document.createElement('a');a.href='http://'+s.ip+'/';a.textContent='Abrir en tu red: '+s.ip;address.append(a);if(s.mdnsReady){const local=document.createElement('a');local.href='http://anden-dcc.local/';local.textContent='anden-dcc.local';local.style.marginTop='12px';address.append(document.createElement('br'),local);}}if(!s.storageReady)message.textContent='No se pudo abrir la memoria de configuración.';}catch(e){statusLine.textContent='Sin respuesta. Reconecta a anden-dcc o abre la nueva IP desde tu red.';}}
 document.getElementById('wifi').onsubmit=async e=>{e.preventDefault();message.textContent='Guardando…';try{const r=await fetch('/wifi/save',{method:'POST',body:new URLSearchParams(new FormData(e.target))});message.textContent=await r.text();if(r.ok)e.target.elements.password.value='';}catch(e){message.textContent='No se ha confirmado el guardado. Comprueba la conexión.';}};
 document.getElementById('forget').onclick=async()=>{try{const r=await fetch('/wifi/forget',{method:'POST'});message.textContent=await r.text();await refresh();}catch(e){message.textContent='No se pudo confirmar el borrado.';}};
 refresh();setInterval(refresh,3000);
@@ -114,6 +134,7 @@ void setup() {
     String body = "{\"name\":\"anden-dcc\",\"version\":" + jsonString(VERSION);
     body += ",\"dccImplemented\":false,\"trackPower\":false,\"connected\":";
     body += connected ? "true" : "false";
+    body += ",\"mdnsReady\":"; body += mdnsReady ? "true" : "false";
     body += ",\"storageReady\":"; body += storageReady ? "true" : "false";
     body += ",\"ssid\":" + jsonString(networkName);
     body += ",\"ip\":" + jsonString(connected ? WiFi.localIP().toString() : "");
@@ -140,6 +161,7 @@ void setup() {
       server.send(500, "text/plain; charset=utf-8", "No se pudo borrar la configuración."); return;
     }
     networkName = ""; networkPassword = ""; connectPending = false;
+    stopMdns();
     WiFi.disconnect(); WiFi.mode(WIFI_AP_STA);
     if (!accessPointRunning) accessPointRunning = WiFi.softAP(AP_NAME);
     server.send(200, "text/plain; charset=utf-8", "Red olvidada. Sigue disponible anden-dcc.");
@@ -159,6 +181,8 @@ void loop() {
     digitalWrite(LED_BUILTIN, ledOn ? HIGH : LOW);
   }
   if (connected != wasConnected) {
+    stopMdns();
+    mdnsAttempt = millis();
     // Use the radio exclusively for the router once DHCP has completed.
     if (connected && accessPointRunning) {
       WiFi.disconnectAP();
@@ -168,6 +192,7 @@ void loop() {
     printStatus(); wasConnected = connected;
   }
   if (networkName.length() && (connectPending || (!connected && uint32_t(millis()-lastAttempt) >= 30000))) {
+    stopMdns();
     connectPending = false; lastAttempt = millis();
     if (!accessPointRunning) {
       WiFi.mode(WIFI_AP_STA);
@@ -178,6 +203,13 @@ void loop() {
     // Core 6.3.1 changes its mode flag in beginNoBlock; retain AP during retries.
     WiFi.mode(WIFI_AP_STA);
   }
+  if (connected && !connectPending && !accessPointRunning && !mdnsReady &&
+      uint32_t(millis() - mdnsAttempt) >= 1000) {
+    mdnsAttempt = millis();
+    startMdns();
+    printStatus();
+  }
+  if (mdnsReady) MDNS.update();
   if (Serial.available() && Serial.read() == 's') printStatus();
   delay(1);
 }

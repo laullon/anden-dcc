@@ -2,11 +2,11 @@
 
 Central DCC para diorama H0 con Raspberry Pi Pico W y Deek-Robot L298P.
 
-## Estado de la versión 0.2.3
+## Estado de la versión 0.2.4
 
 Compilado con Arduino-Pico 6.3.1 y cargado por USB en la Pico W. Arranque
 comprobado por diagnóstico serie. Conexión al router y acceso HTTP por IP
-verificados desde el Mac. Transferencia OTA pendiente de prueba.
+verificados desde el Mac. Actualización OTA de firmware y acceso por `anden-dcc.local` verificados.
 Incluye configuración persistente de red, reconexión
 automática, punto de acceso Wi-Fi,
 página de estado y actualización web sin autenticación. No implementa DCC,
@@ -33,7 +33,10 @@ Generar el UF2 para la primera carga USB mediante BOOTSEL.
 - Una contraseña vacía permite conectarse a una red abierta.
 - La Pico obtiene una IP por DHCP; se puede consultar por USB o en el router.
 - Abrir esa IP desde un equipo conectado a la misma red.
-- El nombre `anden-dcc.local` está temporalmente desactivado.
+- Abrir `http://anden-dcc.local` desde la misma red (mDNS/Bonjour).
+- mDNS arranca un segundo después de obtener IP y apagar el punto de acceso.
+  Se detiene antes de cambiar de red y se reinicia al reconectar.
+- La IP sigue funcionando aunque el cliente no resuelva nombres mDNS.
 - El punto de acceso abierto `anden-dcc` se apaga cuando hay conexión al router.
   Si pierde la conexión, vuelve a habilitarlo al reintentar (hasta 30 segundos).
 - Si falla la conexión, reintenta cada 30 segundos. Se pueden corregir los datos
@@ -85,3 +88,16 @@ El acceso HTTP por IP funciona con esta configuración y la conexión guardada
 se ha conservado durante las cargas USB.
 
 Se mantiene la comprobación de dirección DHCP antes de indicar conexión.
+
+## mDNS y OTA verificados (0.2.4)
+
+mDNS se inicia únicamente en modo STA, tras apagar el AP de configuración y
+obtener una IP por DHCP. La operación completa de inicio y cierre de SimpleMDNS
+usa `LWIPMutex` para proteger el recorrido de interfaces. Se anuncia HTTP en el
+puerto 80. El panel enlaza tanto a la IP como a `http://anden-dcc.local` y
+`/api/status` informa del estado de mDNS.
+
+Validación: compilado con Arduino-Pico 6.3.1; cargado por OTA desde 0.2.3 con
+respuesta «Update Success»; 0.2.4 respondió después del reinicio por IP y nombre
+mDNS, conservando la configuración Wi-Fi. Página principal y formulario OTA
+accesibles por el nombre local. No se ha ensayado cortar la conexión del router.
