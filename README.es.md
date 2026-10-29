@@ -2,10 +2,7 @@
 
 # anden-dcc
 
-## Licencia y garantía de humo mágico
-
-[Licencia MIT](LICENSE). Úsalo, modifícalo, compártelo, véndelo o monta tu propio
-imperio ferroviario en miniatura. Conserva el aviso de licencia en las copias.
+## Garantía de humo mágico
 
 **Úsalo bajo tu propio criterio y riesgo.** Es un proyecto de aficionado,
 ofrecido tal cual y sin garantía. Si libera el humo mágico de tu Pico, puente H,
@@ -13,10 +10,6 @@ decóder o locomotora favorita, enhorabuena: has descubierto el efecto especial
 menos útil del modelismo ferroviario. Los autores no se hacen responsables del
 hardware dañado, las tardes descarriladas ni del humo que se niegue a volver al
 chip. El sentido común y los electrones de repuesto los pones tú.
-
-Las condiciones formales de garantía y responsabilidad están en la
-[licencia MIT](LICENSE). Esta explicación con humo no añade restricciones a la
-licencia.
 
 Una pequeña central para un diorama H0, con **Raspberry Pi Pico W**, control web,
 Wi-Fi y OTA. La interfaz arranca en inglés; **ES** cambia al español y recuerda
@@ -50,3 +43,12 @@ encendido `03 90 93`.
 La documentación técnica está en inglés. Los datos Wi-Fi se guardan en la Pico,
 no en el código. La red de configuración y OTA siguen abiertos por decisión del
 proyecto para este prototipo local.
+
+## Licencia
+
+[Licencia MIT](LICENSE). Úsalo, modifícalo, compártelo, véndelo o monta tu propio
+imperio ferroviario en miniatura. Conserva el aviso de licencia en las copias.
+
+Las condiciones formales de garantía y responsabilidad están en la
+[licencia MIT](LICENSE). Esta explicación con humo no añade restricciones a la
+licencia.

@@ -2,10 +2,7 @@
 
 <p align="center"><strong>Pico W · hardware-timed DCC · Wi-Fi · OTA · English / Español</strong></p>
 
-## License & the magic smoke guarantee
-
-[MIT licensed](LICENSE). Build it, change it, share it, sell it, or teach your
-model railway to run a tiny empire. Keep the license notice with your copies.
+## The magic smoke guarantee
 
 **Use at your own discretion and risk.** This is a hobby project, provided
 as-is, with no warranty. If it liberates the magic smoke from your Pico, motor
@@ -14,9 +11,6 @@ least useful special effect in railway modelling. The authors accept no
 responsibility for damaged hardware, derailed afternoons, or smoke that refuses
 to go back inside the chip. Bring your own judgement; replacement electrons are
 not included.
-
-The formal warranty and liability terms are in the [MIT license](LICENSE).
-This smoke-themed explanation adds no extra license restrictions.
 
 **anden-dcc** is a small controller for an H0 railway diorama: give your trains
 some light, sound and, eventually, a little movement—without a full-size command
@@ -186,5 +180,13 @@ tools/               web embedding, OTA, capture decoding and UI checks
 - [ ] Build and validate the protected Deek-Robot power harness.
 - [ ] Implement arm/disarm, current sensing and startup stop packets.
 - [ ] Add a second refreshed locomotive, sound and restricted movement.
+
+## License
+
+[MIT licensed](LICENSE). Build it, change it, share it, sell it, or teach your
+model railway to run a tiny empire. Keep the license notice with your copies.
+
+The formal warranty and liability terms are in the [MIT license](LICENSE).
+This smoke-themed explanation adds no extra license restrictions.
 
 [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
