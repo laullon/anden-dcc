@@ -11,6 +11,8 @@ menos útil del modelismo ferroviario. Los autores no se hacen responsables del
 hardware dañado, las tardes descarriladas ni del humo que se niegue a volver al
 chip. El sentido común y los electrones de repuesto los pones tú.
 
+---
+
 Una pequeña central para un diorama H0, con **Raspberry Pi Pico W**, control web,
 Wi-Fi y OTA. La interfaz arranca en inglés; **ES** cambia al español y recuerda
 la preferencia en ese navegador.

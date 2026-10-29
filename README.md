@@ -12,6 +12,8 @@ responsibility for damaged hardware, derailed afternoons, or smoke that refuses
 to go back inside the chip. Bring your own judgement; replacement electrons are
 not included.
 
+---
+
 **anden-dcc** is a small controller for an H0 railway diorama: give your trains
 some light, sound and, eventually, a little movement—without a full-size command
 station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
