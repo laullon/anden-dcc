@@ -1,4 +1,31 @@
-# Release 0.4.0 validation
+# Release 0.5.0 validation
+
+29 October 2026. Local tests and real Pico OTA/HTTP/browser checks.
+
+| Check | Result |
+| --- | --- |
+| Arduino-Pico 6.3.1, Pico W, unchanged 1 MB application / 1 MB FS layout | Compiles: 469196 bytes program (44%), 74192 bytes globals (28%) |
+| Production C++ roster | Independent F0, rename preservation, address-change reset, duplicate/invalid/full rejection, removal and ID reuse pass |
+| Assembled PIO model | All 254 address/F0 cases and 2/3/8-loco schedules repeat complete frames at exact nominal 58/100 µs half-bit timing |
+| Empty roster | Host test emits valid `FF 00 FF` idle frames; UI empty/add flow passes |
+| Mocked browser | Two desktop cards / stacked mobile, independent F0, add/edit/remove up to eight, duplicate prevention, failed saves, draft preservation and stale-poll protection pass |
+| UI regression | EN/ES persistence, collapsed Setup, failed OTA recovery, offline disabled controls, dismissible offline editor, 320/390px layouts and safe text rendering pass; no JS errors |
+| Live Pico API and two browser contexts | Naming, independent F0, add/remove, input rejection, cross-browser state, Spanish and mobile pass |
+| Actual OTA restart | Shared roster IDs/names/addresses and Wi-Fi survive; all F0 reset off; original test state restored |
+| Final firmware | 0.5.0 deployed over Wi-Fi; GP2 logic only; track power remains false |
+| Physical multi-address waveform | Pending: Logic 2 MCP reports no connected devices; earlier 0.3.0 captures validate the original single-address pulses, not the new DMA scheduler |
+| Powered track | Still a proposed assembly; no bridge, track power or movement enabled |
+
+The PIO program/encoder are unchanged. Two claimed DMA channels now feed an
+eight-word aligned read ring and reload it without CPU callbacks. Host schedule
+checks exercise packet selection and timing; they do not prove the physical DMA
+transfer loop or voltage. Capture both addresses on GP2 at the bench next.
+
+Screenshots in `assets/` use synthetic names and network details. No router
+configuration or credentials were changed. Live tests restored the initial two
+slots (addresses 3 and 4, empty names, F0 off).
+
+## Historical release 0.4.0 validation
 
 29 October 2026. Tests were performed locally; the GitHub workflow is prepared
 but has not run on a hosted repository.

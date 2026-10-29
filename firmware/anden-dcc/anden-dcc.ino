@@ -11,10 +11,11 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Logic-analyzer prototype: GP2 carries DCC; no power-stage pins are assigned.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.4.0";
+const char* VERSION = "0.5.0";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
+LocoRoster roster;
 bool storageReady = false, connectPending = false;
 bool accessPointRunning = false;
 bool mdnsReady = false;
@@ -98,17 +99,69 @@ void printStatus() {
   } else Serial.println("LAN not connected");
 }
 
+
+int number(const String& value, int maximum) {
+  if (!value.length() || value.length() > 3) return -1;
+  for (size_t i = 0; i < value.length(); ++i)
+    if (value[i] < '0' || value[i] > '9') return -1;
+  int result = value.toInt();
+  return result >= 1 && result <= maximum ? result : -1;
+}
+
+void loadRoster() {
+  // Default two display slots; neither presumes your actual decoder address.
+  roster.save(0, 3, "");
+  roster.save(0, 4, "");
+  if (!storageReady || !LittleFS.exists("/locos.cfg")) return;
+  File file = LittleFS.open("/locos.cfg", "r");
+  if (!file || file.size() > 1024 || file.readStringUntil('\n') != "anden-roster-1") return;
+  LocoRoster loaded;
+  while (file.available()) {
+    String line = file.readStringUntil('\n');
+    int first = line.indexOf('\t'), second = line.indexOf('\t', first + 1);
+    if (first < 0 || second < 0) return;
+    int id = number(line.substring(0, first), LocoRoster::CAPACITY);
+    int address = number(line.substring(first + 1, second), 127);
+    if (id < 0 || address < 0 || loaded.findId(id) >= 0) return;
+    if (loaded.save(0, address, line.substring(second + 1).c_str()) != LocoRoster::Result::Ok) return;
+    loaded.entries[loaded.count - 1].id = id;
+  }
+  roster = loaded; // A valid empty roster is intentional.
+}
+
+bool saveRoster(const LocoRoster& value) {
+  if (!storageReady) return false;
+  File file = LittleFS.open("/locos.tmp", "w");
+  if (!file) return false;
+  String data = "anden-roster-1\n";
+  for (uint8_t i = 0; i < value.count; ++i) {
+    const auto& loco = value.entries[i];
+    data += String(loco.id) + "\t" + String(loco.address) + "\t" + loco.name + "\n";
+  }
+  bool ok = file.print(data) == data.length();
+  file.close();
+  if (ok) ok = LittleFS.rename("/locos.tmp", "/locos.cfg");
+  if (!ok) LittleFS.remove("/locos.tmp");
+  return ok;
+}
+
 String dccStatus() {
-  char bytes[9];
-  snprintf(bytes, sizeof(bytes), "%02X %02X %02X", DccSignal::address(),
-           DccPacket::instruction(DccSignal::f0()), DccPacket::checksum(DccSignal::address(), DccSignal::f0()));
   String body = "{\"ready\":";
   body += DccSignal::ready() ? "true" : "false";
   body += ",\"running\":"; body += DccSignal::running() ? "true" : "false";
-  body += ",\"pin\":2,\"address\":" + String(DccSignal::address());
-  body += ",\"f0\":"; body += DccSignal::f0() ? "true" : "false";
-  body += ",\"bytes\":" + jsonString(bytes) + "}";
-  return body;
+  body += ",\"pin\":2,\"maxLocos\":8,\"locos\":[";
+  for (uint8_t i = 0; i < roster.count; ++i) {
+    const auto& loco = roster.entries[i];
+    char bytes[9];
+    snprintf(bytes, sizeof(bytes), "%02X %02X %02X", loco.address,
+        DccPacket::instruction(loco.f0), DccPacket::checksum(loco.address, loco.f0));
+    if (i) body += ',';
+    body += "{\"id\":" + String(loco.id) + ",\"name\":" + jsonString(loco.name);
+    body += ",\"address\":" + String(loco.address) + ",\"f0\":";
+    body += loco.f0 ? "true" : "false";
+    body += ",\"bytes\":" + jsonString(bytes) + "}";
+  }
+  return body + "]}";
 }
 
 void setup() {
@@ -129,11 +182,12 @@ void setup() {
     if (erased && LittleFS.format()) storageReady = LittleFS.begin();
   }
   loadNetwork();
+  loadRoster();
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(IPAddress(192,168,42,1), IPAddress(192,168,42,1), IPAddress(255,255,255,0));
   if (!WiFi.softAP(AP_NAME)) while (true) delay(1000);
   accessPointRunning = true;
-  DccSignal::begin();
+  DccSignal::begin(roster);
   server.addHook([](const String& method, const String& url, WiFiClient*, HTTPServer::ContentTypeFunction) {
     // Background status refreshes should not look like user activity.
     bool statusPoll = method == "GET" && (url == "/api/status" || url.startsWith("/api/status?"));
@@ -165,16 +219,46 @@ void setup() {
     server.send(200, "application/json", body);
   });
   server.on("/dcc/f0", HTTP_POST, []() {
-    String target = server.arg("address"), value = server.arg("on");
-    bool valid = target.length() > 0 && target.length() <= 3;
-    for (size_t i = 0; i < target.length(); ++i) valid &= target[i] >= '0' && target[i] <= '9';
-    int address = target.toInt();
-    if (!valid || address < 1 || address > 127 || (value != "0" && value != "1")) {
-      server.send(400, "text/plain; charset=utf-8", "Address must be 1–127. F0 must be 0 or 1."); return;
+    int address = number(server.arg("address"), 127);
+    String value = server.arg("on");
+    if (address < 0 || (value != "0" && value != "1")) {
+      server.send(400, "text/plain", "Address must be 1-127. F0 must be 0 or 1."); return;
     }
-    if (!DccSignal::setF0(address, value == "1")) {
-      server.send(503, "text/plain; charset=utf-8", "Signal generator unavailable or queue full. Try again."); return;
+    int index = roster.findAddress(address);
+    if (index < 0) { server.send(404, "text/plain", "Add this locomotive to the roster first."); return; }
+    LocoRoster changed = roster;
+    changed.entries[index].f0 = value == "1";
+    if (!DccSignal::setRoster(changed, true)) {
+      server.send(503, "text/plain", "Signal generator unavailable."); return;
     }
+    roster = changed;
+    server.send(200, "application/json", dccStatus());
+  });
+  server.on("/locos/save", HTTP_POST, []() {
+    int id = server.arg("id").length() ? number(server.arg("id"), LocoRoster::CAPACITY) : 0;
+    int address = number(server.arg("address"), 127);
+    String name = server.arg("name"); name.trim();
+    if (id < 0 || address < 0) { server.send(400, "text/plain", "Invalid locomotive ID or address."); return; }
+    LocoRoster changed = roster;
+    auto result = changed.save(id, address, name.c_str());
+    if (result != LocoRoster::Result::Ok) {
+      int code = result == LocoRoster::Result::Missing ? 404 :
+          result == LocoRoster::Result::Invalid ? 400 : 409;
+      server.send(code, "text/plain", "Invalid name, duplicate address, missing locomotive or full roster."); return;
+    }
+    if (!saveRoster(changed)) { server.send(500, "text/plain", "Could not save locomotive settings."); return; }
+    roster = changed;
+    DccSignal::setRoster(roster);
+    server.send(200, "application/json", dccStatus());
+  });
+  server.on("/locos/remove", HTTP_POST, []() {
+    int id = number(server.arg("id"), LocoRoster::CAPACITY);
+    if (id < 0) { server.send(400, "text/plain", "Invalid locomotive ID."); return; }
+    LocoRoster changed = roster;
+    if (!changed.remove(id)) { server.send(404, "text/plain", "Locomotive not found."); return; }
+    if (!saveRoster(changed)) { server.send(500, "text/plain", "Could not save locomotive settings."); return; }
+    roster = changed;
+    DccSignal::setRoster(roster);
     server.send(200, "application/json", dccStatus());
   });
   server.on("/wifi/save", HTTP_POST, []() {

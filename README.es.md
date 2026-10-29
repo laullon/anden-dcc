@@ -17,16 +17,26 @@ Una pequeña central para un diorama H0, con **Raspberry Pi Pico W**, control we
 Wi-Fi y OTA. La interfaz arranca en inglés; **ES** cambia al español y recuerda
 la preferencia en ese navegador.
 
-**Versión 0.4.0:** F0/luces y direcciones cortas 1–127. La señal DCC de 3,3 V en
-GP2 ya está medida. **Todavía no se habilita la potencia ni el movimiento**.
+**Versión 0.5.0:** F0/luces y direcciones cortas 1–127. Los pulsos DCC de 3,3 V
+en GP2 se midieron en la versión de una locomotora; la nueva planificación DMA
+para varias locomotoras está pendiente de captura física.
+**Todavía no se habilita la potencia ni el movimiento**.
 El circuito de potencia está documentado como propuesta, pendiente de montaje,
 pruebas y firmware de protección.
 
 1. Conecta a `anden-dcc` y abre `http://192.168.42.1`.
 2. Abre **Configuración**, introduce tu Wi-Fi de 2,4 GHz y guarda.
 3. Vuelve a tu red y abre `http://anden-dcc.local` o la IP de la Pico.
-4. Selecciona la dirección y usa los botones de luces F0.
-5. Los archivos `.bin` se instalan en **Configuración → Actualizar firmware**.
+4. Usa **Editar** para dar nombre y dirección a cada locomotora; controla sus luces F0 por separado.
+5. **Añadir locomotora** amplía la lista hasta ocho tarjetas.
+6. Los archivos `.bin` se instalan en **Configuración → Actualizar firmware**.
+
+La lista empieza con dos tarjetas (direcciones 3 y 4): ajústalas a tus decóderes.
+Los nombres y direcciones se guardan en la Pico y se comparten entre navegadores.
+Todas las locomotoras reciben sus paquetes F0 aunque cierres la página. Al
+reiniciar, las luces empiezan apagadas. Al cambiar de dirección también; renombrar
+conserva F0. Al eliminar o cambiar de dirección, el decodificador anterior
+conserva su último estado: apaga sus luces antes si lo deseas.
 
 Configuración está cerrada por defecto. El LED queda fijo conectado, parpadea
 sin conexión y hace un pulso por peticiones de usuario; el sondeo automático de

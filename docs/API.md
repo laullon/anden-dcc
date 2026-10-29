@@ -5,33 +5,79 @@ the assigned IP also works. There is no cloud service.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET | `/` | English/Spanish panel; Setup closed by default |
+| GET | `/` | English/Spanish roster panel; Setup closed by default |
 | GET | `/icon.svg` | SVG app icon |
 | GET | `/api/status` | Version, network and DCC state; no LED pulse |
-| POST | `/dcc/f0` | Form: `address=1..127`, `on=0|1` |
+| POST | `/dcc/f0` | Form: existing roster `address=1..127`, `on=0|1` |
+| POST | `/locos/save` | Form: optional `id`, `address=1..127`, optional `name` |
+| POST | `/locos/remove` | Form: existing `id=1..8` |
 | POST | `/wifi/save` | Form: `ssid`, `password`; stored on Pico |
 | POST | `/wifi/forget` | Erase network and restore setup AP |
 | GET | `/update` | 303 to `/?setup=firmware` |
 | POST | `/update` | Multipart `firmware` field with compatible `.bin` |
 
-Status includes version, connection, mDNS, storage, SSID, IP, `trackPower`, and:
+Status includes version, connection, mDNS, storage, SSID, IP, `trackPower`, and
+this object under `dcc` (schema changed in 0.5.0):
 
 ```json
-{"ready":true,"running":true,"pin":2,"address":3,"f0":false,"bytes":"03 80 83"}
+{
+  "ready": true,
+  "running": true,
+  "pin": 2,
+  "maxLocos": 8,
+  "locos": [
+    {"id": 1, "name": "Evening express", "address": 3, "f0": true, "bytes": "03 90 93"},
+    {"id": 2, "name": "Shunter", "address": 4, "f0": false, "bytes": "04 80 84"}
+  ]
+}
 ```
 
-That object is under `dcc`. `trackPower` is always false in 0.4.0. DCC state is
-the last queued request, not decoder readback. Queued packets precede the latest
-command. F1–F4 are off. No speed, programming or second refreshed address exists.
+All three DCC/roster POST endpoints return that `dcc` object on success.
+`trackPower` is always false. State is requested state, not decoder readback;
+old complete packets can remain briefly in the DMA ring/FIFO before a change
+reaches the GPIO. Every roster address is refreshed without browser polling.
+F1–F4 remain off. No speed, programming or other functions exist yet.
 
-F0: 200 with state, 400 invalid fields, 503 unavailable/full queue.
+## Roster
+
+Two slots at addresses 3 and 4 are provided when no valid roster file exists.
+Create by omitting `id` or leaving it empty; edit by sending an existing ID.
+IDs are stable across edits and restarts, but may be reused after removal.
+Addresses must be unique. Names are optional, at most 48 UTF-8 bytes, with no
+ASCII control characters. An empty name gets a translated fallback in the UI.
+Names are escaped in JSON and displayed as text, never HTML.
+
+Names and addresses persist in `/locos.cfg` on Pico LittleFS. Writes use a
+temporary file followed by rename; failed saves do not change the RAM roster.
+The valid empty roster persists and generates idle packets (`FF 00 FF`).
+F0 lives in RAM and always starts off after reboot. Changing a loco's address
+starts its F0 off; changing only its name preserves F0. Removing a loco or
+changing its address stops refreshing the old decoder without sending an off
+or stop command. Its last state may remain, so turn lights off first if desired.
+
+```sh
+curl --data-urlencode 'name=Evening express' --data 'id=1&address=3' http://anden-dcc.local/locos/save
+curl --data 'address=3&on=1' http://anden-dcc.local/dcc/f0
+curl --data 'id=2&address=4&name=Shunter' http://anden-dcc.local/locos/save
+curl --data 'id=2' http://anden-dcc.local/locos/remove
+```
+
+Errors: 400 invalid input; 404 unknown ID/address; 409 duplicate address or
+roster full; 500 persistence failure; 503 unavailable signal generator (F0).
+Saving/removing entries does not restart a signal stopped by a failed OTA;
+an explicit F0 command does. A successful config save can still report
+`ready=false` if hardware resources were unavailable.
+
+## Wi-Fi and OTA
+
 Wi-Fi: 400 invalid data, 500 persistence failure. Password empty means an open
 network, not "keep password". SSID: 1–32 bytes; password empty or 8–63 bytes.
 
 The updater can return **HTTP 200 for an error**. Check `Update Success` in the
-body, then verify the version after reboot. POST stops GP2 before upload; if it
-fails, a new F0 command restarts the signal. Use `.bin`, not UF2 or filesystem
-images, with the unchanged 1 MB sketch / 1 MB filesystem layout.
+body, then verify the version after reboot. POST stops DMA and PIO before upload;
+if it fails, a new F0 command restarts the signal. Use `.bin`, not UF2 or filesystem
+images, with the unchanged 1 MB sketch / 1 MB filesystem layout. Normal firmware
+OTA preserves both the Wi-Fi configuration and the roster, resetting F0 off.
 
 The future power stage must also physically disarm its bridge during updates;
 this release only stops the logic signal.

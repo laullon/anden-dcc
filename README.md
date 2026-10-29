@@ -19,8 +19,8 @@ some light, sound and, eventually, a little movement—without a full-size comma
 station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
 hardware, independent of browser and Wi-Fi activity.
 
-**Current release: 0.4.0.** F0/headlights and short addresses are implemented;
-the logic waveform is measured. This is a **logic-output prototype**. Track
+**Current release: 0.5.0.** A shared locomotive roster, independent F0/headlights
+and short addresses are implemented. This is a **logic-output prototype**. Track
 power, motor control and current protection are not enabled in firmware. The
 Deek-Robot power assembly is a documented proposal for the next stage.
 
@@ -32,7 +32,10 @@ Deek-Robot power assembly is a documented proposal for the next stage.
 
 ## A place for your trains
 
-- Focused **F0/headlights control**, with short addresses **1–127**.
+- **A shared locomotive roster**: two cards to start, room for up to **eight**.
+- Name each train; edit its address and control **F0/headlights independently**.
+- Names and short addresses **1–127** are saved on the Pico, shared by browsers.
+- Every roster address keeps receiving its own F0 packet with the page closed.
 - **English by default**; an EN/ES switch is remembered by your browser.
 - **Setup, closed by default**, contains Wi-Fi and firmware updates.
 - Saved 2.4 GHz Wi-Fi settings, reconnection and a setup access point.
@@ -42,8 +45,8 @@ Deek-Robot power assembly is a documented proposal for the next stage.
   Automatic status polls do not trigger it.
 - Self-contained UI: no external fonts, CDN, cloud account or internet required.
 
-The waveform illustration is not a live oscilloscope. Diagnostics show the last
-queued packet and nominal timings. Measurements come from an external analyzer.
+The waveform illustration is not a live oscilloscope. Diagnostics show each
+locomotive's requested packet and nominal timings. Measurements come from an external analyzer.
 
 ## Quick start
 
@@ -51,11 +54,16 @@ queued packet and nominal timings. Measurements come from an external analyzer.
 2. Open **`http://192.168.42.1`**, expand **Setup**, and enter your 2.4 GHz network.
 3. Return to your usual Wi-Fi when the Pico's setup network disappears.
 4. Open **`http://anden-dcc.local`** or the address assigned by your router.
-5. Enter a short DCC address and switch **Headlights / F0** on or off.
+5. Use **Edit** on each locomotive to set its name and decoder address.
+6. Switch its **Headlights / F0** independently; **Add locomotive** expands the roster.
 
-Default after boot: **address 3, F0 off**. F0 is not persisted; network settings
-are. Changing the address stops refreshing the old one without sending it off.
-The function-group packet also sets F1–F4 off.
+A new controller starts with **two slots at addresses 3 and 4**; change them to
+match your decoders. Names and addresses survive restarts and normal OTA updates.
+**All F0 states start off after reboot**; changing a card to a different address
+also starts its F0 off. Renaming keeps its current F0 state. Removing a card or
+changing its address stops refreshing the previous decoder; it keeps its last
+state, so turn its lights off first if desired. Each function-group packet also
+sets F1–F4 off. An empty roster sends DCC idle packets.
 
 The network and updater are intentionally open for this local prototype. Your
 router password is entered in Setup and stored on the Pico, not in source.
@@ -75,7 +83,8 @@ powered DCC rails require a different measurement interface.
 | F0 off | `03 80 83` | 58 µs for 1, 100 µs for 0 |
 | F0 on | `03 90 93` | 58 µs for 1, 100 µs for 0 |
 
-Real Logic 2 captures decoded 14 complete packets per state with no XOR errors.
+Earlier single-loco Logic 2 captures decoded 14 complete packets per state
+with no XOR errors. The new multi-loco DMA scheduler still needs a physical capture.
 Half-bits measured 58.000–58.125 µs and 100.000–100.125 µs at 8 MS/s.
 [Full signal guide](DCC-ANALYZER.md).
 
@@ -129,7 +138,7 @@ after restart. **Do not upload UF2 over OTA.**
 The CLI helper verifies success and the running version:
 
 ```sh
-python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.4.0
+python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.5.0
 ```
 
 Use the Pico IP for `--host` if mDNS is slow. Normal firmware OTA preserves saved
@@ -143,9 +152,9 @@ python3 tests/check_dcc.py
 python3 tools/decode_dcc_csv.py path/to/digital.csv --expected '03 80 83'
 ```
 
-The host check executes the C++ encoder and models **assembled PIO opcodes** for
-all 254 address/F0 combinations, pulse lengths, repeated frames and complete
-packet updates. The CSV decoder independently checks real analyzer exports.
+The host check executes the C++ encoder and roster, and models **assembled PIO
+opcodes** for all 254 address/F0 combinations, pulse lengths, repeated frames,
+complete packet updates, 2/3/8-loco schedules and empty-roster idle packets. The CSV decoder independently checks real analyzer exports.
 
 Browser checks use a mocked controller, never your Wi-Fi settings or trains:
 
@@ -157,8 +166,8 @@ npm test --prefix tools/ui-tests
 
 Set `CHROME_PATH` to an installed Chrome to skip the browser download.
 Screenshots go to `build/ui/` or `UI_ARTIFACTS`. Checks cover language, collapsed
-Setup, commands, address editing, mobile layout, offline state and failed upload
-recovery. GitHub Actions runs host checks, compilation and UI checks when hosted.
+Setup, independent commands, roster edits, duplicates, capacity, stale status
+responses, mobile layout, offline state and failed save/upload recovery. GitHub Actions runs host checks, compilation and UI checks when hosted.
 
 Edit `web/index.html` and `web/icon.svg`, then run `tools/embed_web.py`.
 Generated `WebAssets.h` is checked in for direct Arduino IDE builds. If PIO
@@ -181,7 +190,8 @@ tools/               web embedding, OTA, capture decoding and UI checks
 - [x] English/Spanish UI with hidden-by-default Setup.
 - [ ] Build and validate the protected Deek-Robot power harness.
 - [ ] Implement arm/disarm, current sensing and startup stop packets.
-- [ ] Add a second refreshed locomotive, sound and restricted movement.
+- [x] Shared multi-locomotive roster and automatic F0 refresh.
+- [ ] Add sound functions and restricted movement.
 
 ## License
 

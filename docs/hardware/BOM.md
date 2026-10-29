@@ -3,7 +3,7 @@
 **Revision A — quantities for the proposed two-track protected assembly.**
 
 The Pico/analyzer stage is already measured. The power stage is not built or
-validated, and firmware 0.4.0 does not drive its enable/arm/ADC pins. Treat this
+validated, and firmware 0.5.0 does not drive its enable/arm/ADC pins. Treat this
 as a planning BOM; confirm the actual shield and component availability before
 ordering the protection parts. Prices and supplier stock are intentionally not assumed.
 

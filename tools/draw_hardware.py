@@ -11,7 +11,7 @@ class Sheet:
   self.text(42,40,'anden-dcc / HARDWARE',14,weight='bold');self.text(1158,40,f'{number} / REV A',13,anchor='end')
   self.text(42,86,title,29,weight='bold');self.text(42,116,subtitle,13,color=GRAY)
   self.line(42,139,1158,139,'#d7dfd6',1)
-  self.rect(42,768,1116,47,8,'#f8e9da');self.text(58,790,'PROPOSED POWER ASSEMBLY · NOT BUILT OR ELECTRICALLY VALIDATED',12,color=RED,weight='bold');self.text(58,807,'Firmware 0.4.0 drives GP2 only. Other pins are reservations. See hardware README and sources before assembly.',11)
+  self.rect(42,768,1116,47,8,'#f8e9da');self.text(58,790,'PROPOSED POWER ASSEMBLY · NOT BUILT OR ELECTRICALLY VALIDATED',12,color=RED,weight='bold');self.text(58,807,'Firmware 0.5.0 drives GP2 only. Other pins are reservations. See hardware README and sources before assembly.',11)
  def text(self,x,y,t,size=13,color=INK,weight='normal',anchor='start'):
   self.s.append(f'<text x="{x}" y="{y}" font-size="{size}" fill="{color}" style="fill:{color}" font-weight="{weight}" text-anchor="{anchor}">{escape(str(t))}</text>')
  def line(self,x,y,a,b,color=INK,width=2,dash=None):

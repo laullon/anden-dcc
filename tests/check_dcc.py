@@ -105,3 +105,68 @@ assert simulate([words[3, 0], words[3, 1]]) == [expected(3, 0), expected(3, 1), 
 assert words[3, 0] == 0x034020c0
 assert words[3, 1] == 0x034824c0
 print('PASS: 254 address/F0 combinations; repeat and boundary update; all half-bits exactly 58/100 us.')
+
+# Exercise the production roster and feed its real multi-address schedule into
+# the assembled-PIO model above. This catches loss of another loco's state.
+with tempfile.TemporaryDirectory() as directory:
+    source = Path(directory) / 'roster.cpp'
+    executable = Path(directory) / 'roster'
+    source.write_text(r'''
+#include "LocoRoster.h"
+#include <cassert>
+#include <cstdio>
+#include <string>
+using Result = LocoRoster::Result;
+void output(const LocoRoster& roster) {
+  uint32_t words[8]; roster.schedule(words);
+  for (auto word : words) std::printf("%u ", word);
+  std::puts("");
+}
+int main() {
+  LocoRoster r;
+  output(r); // Empty roster generates idle packets, never stale loco state.
+  assert(r.save(0, 3, "Evening express") == Result::Ok);
+  assert(r.save(0, 4, "Shunter") == Result::Ok);
+  r.entries[0].f0 = true;
+  assert(!r.entries[1].f0);
+  output(r);
+  assert(r.save(0, 127, "Third train") == Result::Ok);
+  r.entries[2].f0 = true;
+  output(r);
+  assert(r.save(1, 3, "Renamed") == Result::Ok && r.entries[0].f0);
+  assert(r.save(1, 4, "Duplicate") == Result::Duplicate && r.entries[0].address == 3);
+  assert(r.save(1, 5, "New decoder") == Result::Ok && !r.entries[0].f0);
+  assert(r.entries[2].f0); // Changing one decoder cannot change another.
+  assert(r.save(8, 8, "Missing") == Result::Missing);
+  assert(r.save(0, 0, "Invalid") == Result::Invalid);
+  assert(r.save(0, 128, "Invalid") == Result::Invalid);
+  assert(r.save(0, 9, "Line\nbreak") == Result::Invalid);
+  assert(r.save(0, 9, std::string(49, 'a').c_str()) == Result::Invalid);
+  assert(r.remove(2)); assert(!r.remove(2));
+  output(r);
+  assert(r.save(0, 6, "Reused ID") == Result::Ok);
+  assert(r.entries[2].id == 2);
+  for (uint8_t a = 10; r.count < 8; ++a) assert(r.save(0, a, "More trains") == Result::Ok);
+  assert(r.save(0, 90, "Too many") == Result::Full);
+  assert(r.save(1, 5, std::string(48, 'a').c_str()) == Result::Ok);
+  for (uint8_t i = 0; i < r.count; ++i) r.entries[i].f0 = i % 2;
+  output(r);
+  while (r.count) assert(r.remove(r.entries[0].id));
+  output(r);
+}
+''')
+    subprocess.run(['c++', '-std=c++17', '-I', str(SKETCH), str(source), '-o', str(executable)], check=True)
+    schedules = subprocess.check_output([str(executable)], text=True).splitlines()
+
+for schedule in schedules:
+    ring = list(map(int, schedule.split()))
+    assert len(ring) == 8
+    wanted = []
+    for word in ring:
+        address, instruction = word >> 24, (word >> 15) & 255
+        frame = [1] * 16
+        for byte in [address, instruction, address ^ instruction]:
+            frame += [0] + [(byte >> shift) & 1 for shift in range(7, -1, -1)]
+        wanted.append(frame + [1])
+    assert simulate(ring * 2, frames=16) == wanted * 2
+print('PASS: roster independence, rename/address reset, duplicates, limits, removal/ID reuse, empty idle and 2/3/8-loco PIO schedules.')

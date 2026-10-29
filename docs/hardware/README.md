@@ -3,7 +3,7 @@
 **Revision A — design proposal, 29 October 2026.** Only the Pico-to-analyzer
 connection is built and measured. The powered stage and trip circuit below are
 specified for review and bench validation; they are not a tested construction
-release. Firmware 0.4.0 still drives **GP2 only** and never arms a power stage.
+release. Firmware 0.5.0 still drives **GP2 only** and never arms a power stage.
 
 ## What is already verified
 
@@ -81,7 +81,7 @@ can differ. Do not let a wheel bridge between independent A/B outputs.
 
 ## Proposed firmware pin allocation
 
-| Pico GPIO | Physical pin | Purpose | Firmware 0.4.0 |
+| Pico GPIO | Physical pin | Purpose | Firmware 0.5.0 |
 | --- | ---: | --- | --- |
 | GP2 | 4 | DCC-A → U1 → shield D12 | Active, measured logic signal |
 | GP3 | 5 | DCC-B → U1 → shield D13 | Reserved, not driven |
@@ -96,7 +96,7 @@ can differ. Do not let a wheel bridge between independent A/B outputs.
 | GND | 3 / other GND | Common signal return | Required |
 
 This is a proposed future pin assignment, not an instruction to power rails with
-0.4.0. GP2 changing while the bridge is disabled is intentional.
+0.5.0. GP2 changing while the bridge is disabled is intentional.
 
 ## Current measurement and trip latch
 

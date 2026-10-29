@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+- Shared roster saved on the Pico: two default locomotives, up to eight.
+- Responsive two-column locomotive cards, names, addresses and independent F0.
+- Add/edit/remove dialog with duplicate prevention and English/Spanish labels.
+- Names/addresses persist across normal OTA and reboot; F0 resets off at boot.
+- Hardware DMA ring refreshes every roster address through the existing PIO.
+- Idle packets for an empty roster; DMA and PIO stop before OTA.
+- Host roster/multi-packet tests and expanded browser regression coverage.
+
 ## 0.4.0
 
 - Responsive train-first UI, SVG app identity and GitHub banner.
