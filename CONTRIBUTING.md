@@ -13,5 +13,5 @@ Keep credentials, keys, build files and local captures out of commits. Use a
 synthetic SSID in previews. Label measurements with instrument, sample rate
 and whether physical or simulated.
 
-No project license has been selected yet. Settle licensing before a public
-release; third-party tools and referenced code retain their own licenses.
+Project contributions are provided under the [MIT license](LICENSE).
+Third-party tools and referenced code retain their own licenses.

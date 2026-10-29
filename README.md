@@ -171,4 +171,20 @@ tools/               web embedding, OTA, capture decoding and UI checks
 - [ ] Implement arm/disarm, current sensing and startup stop packets.
 - [ ] Add a second refreshed locomotive, sound and restricted movement.
 
-[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
+## License & the magic smoke guarantee
+
+[MIT licensed](LICENSE). Build it, change it, share it, sell it, or teach your
+model railway to run a tiny empire. Keep the license notice with your copies.
+
+**Use at your own discretion and risk.** This is a hobby project, provided
+as-is, with no warranty. If it liberates the magic smoke from your Pico, motor
+shield, decoder, or prized locomotive, congratulations: you have discovered the
+least useful special effect in railway modelling. The authors accept no
+responsibility for damaged hardware, derailed afternoons, or smoke that refuses
+to go back inside the chip. Bring your own judgement; replacement electrons are
+not included.
+
+The formal warranty and liability terms are in the [MIT license](LICENSE).
+This smoke-themed explanation adds no extra license restrictions.
+
+[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
