@@ -11,11 +11,12 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Logic-analyzer prototype: GP2 carries DCC; no power-stage pins are assigned.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.5.3";
+const char* VERSION = "0.6.0";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
 LocoRoster roster;
+AddressFinder finder;
 bool storageReady = false, connectPending = false;
 bool accessPointRunning = false;
 bool mdnsReady = false;
@@ -145,6 +146,28 @@ bool saveRoster(const LocoRoster& value) {
   return ok;
 }
 
+String finderStatus() {
+  return "{\"stage\":" + jsonString(finder.name()) + ",\"active\":" +
+      (finder.active()?"true":"false") + ",\"step\":" + String(finder.step) +
+      ",\"first\":" + String(finder.first) + ",\"last\":" + String(finder.last) +
+      ",\"low\":" + String(finder.low) + ",\"high\":" + String(finder.high) +
+      ",\"middle\":" + String(finder.middle()) + ",\"result\":" + String(finder.result) +
+      ",\"waitMs\":" + String(finder.wait(millis())) + "}";
+}
+
+void serviceFinder() {
+  bool wasActive=finder.active();
+  if(finder.tick(millis())) DccSignal::setFinder(finder);
+  if(wasActive && !finder.active()) DccSignal::setRoster(roster,true);
+}
+
+bool finderLocked() {
+  serviceFinder();
+  if(!finder.active()) return false;
+  server.send(409,"text/plain","Finish or cancel the address search first.");
+  return true;
+}
+
 String dccStatus() {
   String body = "{\"ready\":";
   body += DccSignal::ready() ? "true" : "false";
@@ -161,7 +184,7 @@ String dccStatus() {
     body += loco.f0 ? "true" : "false";
     body += ",\"bytes\":" + jsonString(bytes) + "}";
   }
-  return body + "]}";
+  return body + "],\"finder\":" + finderStatus() + "}";
 }
 
 void setup() {
@@ -189,10 +212,13 @@ void setup() {
   accessPointRunning = true;
   DccSignal::begin(roster);
   server.addHook([](const String& method, const String& url, WiFiClient*, HTTPServer::ContentTypeFunction) {
+    const String path = url.indexOf('?') >= 0 ? url.substring(0,url.indexOf('?')) : url;
     // Background status refreshes should not look like user activity.
-    bool statusPoll = method == "GET" && (url == "/api/status" || url.startsWith("/api/status?"));
+    bool statusPoll = method == "GET" && path == "/api/status";
     if (!statusPoll) signalWebActivity();
-    if (method == "POST" && url == "/update") DccSignal::stop();
+    if (method == "POST" && (path == "/update" || path == "/wifi/save" || path == "/wifi/forget") && finderLocked())
+      return HTTPServer::CLIENT_REQUEST_IS_HANDLED;
+    if (method == "POST" && path == "/update") DccSignal::stop();
     return HTTPServer::CLIENT_REQUEST_CAN_CONTINUE;
   });
   server.on("/", HTTP_GET, []() { server.send(200, "text/html; charset=utf-8", PAGE); });
@@ -226,7 +252,37 @@ void setup() {
     server.sendHeader("Cache-Control", "no-store");
     server.send(200, "application/json", body);
   });
+  server.on("/finder/start", HTTP_POST, []() {
+    serviceFinder();
+    int lo=number(server.arg("first"),127), hi=number(server.arg("last"),127);
+    if(lo<0 || hi<0 || lo>hi) {server.send(400,"text/plain","Choose an ordered short-address range within 1-127. Address 0 is excluded.");return;}
+    if(finderLocked()) return;
+    if(!DccSignal::ready()) {server.send(503,"text/plain","Signal generator unavailable.");return;}
+    finder.start(lo,hi,millis());DccSignal::setFinder(finder);
+    server.send(200,"application/json",dccStatus());
+  });
+  server.on("/finder/answer", HTTP_POST, []() {
+    serviceFinder();
+    String answer=server.arg("answer");
+    if(answer!="on" && answer!="off" && answer!="retry") {server.send(400,"text/plain","Answer on, off or retry.");return;}
+    if(server.arg("step")!=String(finder.step) || !finder.active() || finder.wait(millis())) {
+      server.send(409,"text/plain","Search changed or still settling. Refresh and try again.");return;
+    }
+    bool ok=answer=="retry" ? finder.retry(finder.step,millis()) : finder.answer(answer=="on",finder.step,millis());
+    if(!ok) {server.send(409,"text/plain","No question is pending.");return;}
+    DccSignal::setFinder(finder);server.send(200,"application/json",dccStatus());
+  });
+  server.on("/finder/cancel", HTTP_POST, []() {
+    serviceFinder();
+    // Require the displayed step so a stale tab cannot cancel a newer search.
+    if(server.arg("step")!=String(finder.step)) {server.send(409,"text/plain","Search changed. Refresh first.");return;}
+    if(finder.active() && finder.stage!=AddressFinder::Stage::Cleanup) {
+      finder.cancel(millis());DccSignal::setFinder(finder);
+    } else if(!finder.active()) finder.dismiss();
+    server.send(200,"application/json",dccStatus());
+  });
   server.on("/dcc/f0", HTTP_POST, []() {
+    if(finderLocked()) return;
     int address = number(server.arg("address"), 127);
     String value = server.arg("on");
     if (address < 0 || (value != "0" && value != "1")) {
@@ -243,6 +299,7 @@ void setup() {
     server.send(200, "application/json", dccStatus());
   });
   server.on("/locos/save", HTTP_POST, []() {
+    if(finderLocked()) return;
     int id = server.arg("id").length() ? number(server.arg("id"), LocoRoster::CAPACITY) : 0;
     int address = number(server.arg("address"), 127);
     String name = server.arg("name"); name.trim();
@@ -260,6 +317,7 @@ void setup() {
     server.send(200, "application/json", dccStatus());
   });
   server.on("/locos/remove", HTTP_POST, []() {
+    if(finderLocked()) return;
     int id = number(server.arg("id"), LocoRoster::CAPACITY);
     if (id < 0) { server.send(400, "text/plain", "Invalid locomotive ID."); return; }
     LocoRoster changed = roster;
@@ -299,6 +357,7 @@ void setup() {
 }
 
 void loop() {
+  serviceFinder();
   server.handleClient();
   bool connected = WiFi.status() == WL_CONNECTED && WiFi.localIP().isSet();
   // Web requests briefly interrupt the steady connected LED. The normal

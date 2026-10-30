@@ -11,10 +11,10 @@ PIO engine = nullptr;
 int machine = -1, dataChannel = -1, reloadChannel = -1;
 uint offset = 0;
 bool active = false;
-// The DMA read ring must be aligned to its 32-byte size. Aligned word stores
+// The DMA read ring must be aligned to its 512-byte size. Aligned word stores
 // let updates replace complete packets without tearing a packet mid-frame.
-alignas(32) volatile uint32_t packets[LocoRoster::CAPACITY] = {};
-uint32_t ringTransfers = LocoRoster::CAPACITY;
+alignas(512) volatile uint32_t packets[AddressFinder::WORDS] = {};
+uint32_t ringTransfers = AddressFinder::WORDS;
 
 void start() {
   pio_sm_set_enabled(engine, machine, false);
@@ -26,13 +26,13 @@ void start() {
   pio_sm_set_pins_with_mask(engine, machine, 0, 1u << PIN);
   pio_sm_set_consecutive_pindirs(engine, machine, PIN, 1, true);
 
-  // A streams eight words, wrapping its read pointer. B reloads A's transfer
+  // A streams 128 words, wrapping its read pointer. B reloads A's transfer
   // count and triggers it again. Both run without CPU/HTTP/flash callbacks.
   auto data = dma_channel_get_default_config(dataChannel);
   channel_config_set_transfer_data_size(&data, DMA_SIZE_32);
   channel_config_set_read_increment(&data, true);
   channel_config_set_write_increment(&data, false);
-  channel_config_set_ring(&data, false, 5);
+  channel_config_set_ring(&data, false, 9);
   channel_config_set_dreq(&data, pio_get_dreq(engine, machine, true));
   channel_config_set_chain_to(&data, reloadChannel);
   auto reload = dma_channel_get_default_config(reloadChannel);
@@ -77,9 +77,19 @@ bool setRoster(const LocoRoster& roster, bool resume) {
   if (!ready()) return false;
   uint32_t words[LocoRoster::CAPACITY];
   roster.schedule(words);
-  for (uint8_t i = 0; i < LocoRoster::CAPACITY; ++i) packets[i] = words[i];
+  for (unsigned i = 0; i < AddressFinder::WORDS; ++i) packets[i] = words[i % LocoRoster::CAPACITY];
   __dmb();
   if (!active && resume) start();
+  return true;
+}
+
+bool setFinder(const AddressFinder& finder) {
+  if (!ready()) return false;
+  uint32_t words[AddressFinder::WORDS];
+  finder.schedule(words);
+  for (unsigned i=0; i<AddressFinder::WORDS; ++i) packets[i]=words[i];
+  __dmb();
+  if (!active) start();
   return true;
 }
 

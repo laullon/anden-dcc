@@ -10,6 +10,7 @@
 .roster-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.roster-toolbar h2{font-size:19px;margin:0;font-weight:650}.roster-count{font-size:12px;color:var(--muted);margin:4px 0 0}.roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.roster:has(>.train-card:only-child){grid-template-columns:minmax(0,600px)}.train-card{min-height:0}.train-card .card-top{padding:20px 24px 0}.edit-loco{border:1px solid #486366;border-radius:7px;background:transparent;color:#dbe7df;font-size:11px;padding:6px 12px;min-height:34px}.loco-identity{padding:12px 24px 0;display:flex;align-items:center;justify-content:space-between;gap:15px}.loco-name{font-size:25px;line-height:1.2;letter-spacing:-.6px;margin:0;overflow-wrap:anywhere;min-width:0}.loco-address{white-space:nowrap;flex-shrink:0}.train-art{height:145px}.train-art>svg{height:125px;max-width:340px}.train-card:nth-child(even) .train-art>svg>rect:first-of-type{fill:#b4c9db}.train-card:nth-child(even) .train-art>svg>path:nth-of-type(2){fill:#e4eaf2}.function-row{border-top:1px solid #335054;padding:19px 24px}.function-name h4{font-size:16px;margin:0;font-weight:600}.train-card .notice{padding:0 24px 12px;min-height:24px}.signal-strip{margin-top:22px}.signal-strip .side{display:grid;grid-template-columns:1.5fr 1fr;gap:20px}.signal-card{padding:20px 24px;border-radius:16px}.signal-card>.eyebrow{margin-bottom:7px}.signal-card .wave{height:35px;margin:14px 0}.signal-details{padding-top:10px}.signal-details strong{display:inline;font-size:12px;margin-left:8px}.signal-card p:last-child{margin-top:10px}.bench-card{align-items:center}.packet-list{display:grid;gap:7px;margin-top:16px}.packet-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:16px;font-family:var(--mono);font-size:11px;padding:9px 0;border-bottom:1px solid var(--line)}.packet-row>span:first-child{overflow-wrap:anywhere}.empty-roster{padding:48px 24px;text-align:center;border:1px dashed #b6c4b7;border-radius:18px;color:var(--muted)}.empty-roster strong{font-size:19px;color:var(--ink)}.empty-roster p{margin-bottom:0}dialog{border:1px solid var(--line);border-radius:20px;background:var(--white);color:var(--ink);padding:26px;width:min(480px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-shadow:0 25px 100px #142d3240}dialog::backdrop{background:#102b3280;backdrop-filter:blur(4px)}.editor-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.editor-heading h2{font-size:22px;letter-spacing:-.5px;margin:0}.icon-button{border:0;background:none;color:var(--muted);font-size:25px;width:36px;height:36px}.editor-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;margin-top:22px}.editor-actions>div{display:flex;gap:8px;margin-left:auto}.editor-actions button{font-size:12px}#loco-address{font-family:var(--mono);font-size:20px}button:disabled{cursor:not-allowed}button:not(:disabled):hover{filter:brightness(1.08)}.edit-loco:hover{background:#29464a}
 @media(max-width:760px){.roster{grid-template-columns:1fr}.roster:has(>.train-card:only-child){grid-template-columns:1fr}.signal-strip .side{grid-template-columns:1fr 1fr}.loco-identity{padding-inline:21px}.train-art{height:138px}.roster-toolbar .small-button{padding:10px;font-size:11px}.roster-toolbar h2{font-size:17px}.loco-name{font-size:24px}}
 @media(max-width:420px){.signal-strip .side{grid-template-columns:1fr}.roster-toolbar{gap:10px}.roster-count{font-size:11px}.function-row{padding-inline:21px}.packet-row{gap:9px;font-size:10px}dialog{padding:20px}.editor-actions{gap:12px}.editor-actions button{padding-inline:11px}}
+.roster-tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.finder-panel{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:26px;margin:0 0 24px;scroll-margin-top:20px}.finder-panel h2{font-size:26px;letter-spacing:-.7px;margin:8px 0 12px}.finder-panel p{line-height:1.6;max-width:760px}.finder-panel .range-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:420px}.finder-panel .range-fields input{width:100%;box-sizing:border-box}.finder-panel .finder-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.finder-panel .finder-actions button{white-space:normal}.finder-panel #finder-count{font-family:var(--mono);color:var(--accent);font-size:13px}.finder-panel #finder-question{font-size:24px;margin-bottom:5px}.finder-panel #finder-wait{font-weight:600}.finder-panel .field-note{font-size:12px;color:var(--muted)}@media(max-width:600px){.roster-toolbar{align-items:flex-start;flex-direction:column}.roster-tools{justify-content:flex-start}.finder-panel{padding:20px}.finder-panel h2{font-size:23px}.finder-panel .finder-actions button{flex:1 1 140px}}
 </style>
 </head>
 <body>
@@ -19,7 +20,15 @@
 <div id="offline-note" class="offline-note" role="status" hidden data-i18n="offlineNote">The controller is not responding. Check your Wi-Fi connection.</div>
 <section class="intro"><div><p class="eyebrow" data-i18n="eyebrow">A place for your trains</p><h1 data-i18n="headline">Bring the scene to life.</h1><p class="intro-copy" data-i18n="intro">A little light. A railway of your own.</p></div><span class="mode-badge"><i class="dot"></i><span data-i18n="benchMode">BENCH MODE · LOGIC ONLY</span></span></section>
 <section class="roster-section" aria-labelledby="roster-title">
-<div class="roster-toolbar"><div><h2 id="roster-title" data-i18n="rosterTitle">Your locomotives</h2><p id="roster-count" class="roster-count"></p></div><button id="add-loco" class="small-button" type="button" disabled><span aria-hidden="true">+</span><span data-i18n="addLoco">Add locomotive</span></button></div>
+<div class="roster-toolbar"><div><h2 id="roster-title" data-i18n="rosterTitle">Your locomotives</h2><p id="roster-count" class="roster-count"></p></div><div class="roster-tools"><button id="find-address" class="small-button outline" type="button" disabled data-i18n="findAddress">Find an address</button><button id="add-loco" class="small-button" type="button" disabled><span aria-hidden="true">+</span><span data-i18n="addLoco">Add locomotive</span></button></div></div>
+<section id="finder-panel" class="finder-panel" aria-labelledby="finder-title" hidden>
+<span class="eyebrow">F0 · <span data-i18n="findAddress">Find an address</span></span><h2 id="finder-title" data-i18n="finderTitle">A little detective work.</h2>
+<p data-i18n="finderHelp"></p><p class="field-note" data-i18n="finderBench"></p>
+<form id="finder-range"><div class="range-fields"><div><label for="finder-first" data-i18n="finderFirst"></label><input id="finder-first" type="number" min="1" max="127" step="1" value="1" required></div><div><label for="finder-last" data-i18n="finderLast"></label><input id="finder-last" type="number" min="1" max="127" step="1" value="100" required></div></div><div class="finder-actions"><button class="small-button" type="submit" data-i18n="finderStart"></button></div></form>
+<div id="finder-current" hidden><p id="finder-count"></p><h3 id="finder-question"></h3><p id="finder-detail"></p><p id="finder-wait" role="status"></p></div>
+<div id="finder-answers" class="finder-actions" hidden><button class="small-button" type="button" data-finder-answer="on" data-i18n="finderOn"></button><button class="small-button outline" type="button" data-finder-answer="off" data-i18n="finderOff"></button><button class="small-button outline" type="button" data-finder-answer="retry" data-i18n="finderRetry"></button></div>
+<div id="finder-result-actions" class="finder-actions" hidden><button id="finder-add" class="small-button" type="button" data-i18n="finderAdd"></button><button id="finder-again" class="small-button outline" type="button" data-i18n="finderAgain"></button></div>
+<p id="finder-lock-note" class="field-note" data-i18n="finderRestoring"></p><p id="finder-message" class="notice" role="status"></p><div class="finder-actions"><button id="finder-cancel" class="small-button outline" type="button" data-i18n="cancel" hidden></button><button id="finder-close" class="small-button outline" type="button" data-i18n="finderClose"></button></div></section>
 <div id="roster" class="roster"></div>
 <div id="empty-roster" class="empty-roster" hidden><strong data-i18n="emptyTitle">A platform waiting for its first train.</strong><p data-i18n="emptyHelp">Add a locomotive with the short address stored in its decoder.</p></div>
 <p id="roster-message" class="notice" role="status"></p></section>
@@ -118,15 +127,15 @@ function renderRoster() {
     card.querySelector('.light-state').textContent=t(loco.f0?'stateOn':'stateOff');
     card.querySelector('.light-buttons').setAttribute('aria-label','F0 '+t('lights')+' · '+locoName(loco));
     card.querySelectorAll('.dcc-action').forEach(button=>{
-      button.disabled=busy||updating||!reachable||!state?.dcc?.ready;
+      button.disabled=busy||updating||!reachable||!state?.dcc?.ready||searchActive();
       button.setAttribute('aria-pressed',String(Number(button.dataset.on)===Number(loco.f0)));
     });
-    card.querySelector('.edit-loco').disabled=busy||updating||!reachable;
+    card.querySelector('.edit-loco').disabled=busy||updating||!reachable||searchActive();
     const message=cardMessages.get(loco.id), el=card.querySelector('.loco-message');
     el.textContent=message?t(message.key,message.values):'';
     el.classList.toggle('error',Boolean(message?.error));
   }
-  $('add-loco').disabled=busy||updating||!reachable||items.length>=(state?.dcc?.maxLocos||8);
+  $('add-loco').disabled=busy||updating||!reachable||searchActive()||items.length>=(state?.dcc?.maxLocos||8);
   $('roster-count').textContent=state?t('rosterCount',{count:items.length,max:state.dcc.maxLocos||8}):t('connecting');
   $('empty-roster').hidden=!state||items.length>0;
   $('packet-list').replaceChildren();
@@ -146,8 +155,9 @@ function render() {
   $('signal-status').classList.toggle('live',Boolean(reachable&&state?.dcc?.running));
   $('signal-text').textContent=t(reachable&&state?.dcc?.running?'active':'stopped');
   renderRoster();
+  renderFinder();
   $('loco-form').querySelectorAll('button,input').forEach(el=>el.disabled=busy||updating||(!reachable&&!['close-editor','cancel-editor'].includes(el.id)));
-  $('update-button').disabled=busy||updating;
+  $('update-button').disabled=busy||updating||searchActive();
   if(!state) return;
   document.querySelectorAll('[data-version]').forEach(el=>el.textContent='v'+state.version);
   $('wifi-status').textContent=t(state.connected?'networkConnected':state.ssid?'networkTrying':'networkEmpty',{ssid:state.ssid||''});
@@ -167,17 +177,17 @@ async function refresh() {
     if(!response.ok) throw Error();
     const next=await response.json();
     // A status request started before a user command must not overwrite its result.
-    if(!busy&&!updating&&startedAt===revision) {state=next;reachable=true;}
+    if(!busy&&!updating&&startedAt===revision) {state=next;finderSeenAt=Date.now();reachable=true;}
   } catch(e) {if(!busy&&!updating&&startedAt===revision) reachable=false;}
   finally {polling=false;render();}
 }
 async function command(path,body) {
   const response=await fetch(path,{method:'POST',body:new URLSearchParams(body),signal:AbortSignal.timeout(10000)});
   if(!response.ok) {const error=new Error();error.status=response.status;throw error;}
-  state.dcc=await response.json();reachable=true;
+  state.dcc=await response.json();finderSeenAt=Date.now();reachable=true;
 }
 async function sendF0(id,on) {
-  if(busy||updating||!reachable) return;
+  if(busy||updating||!reachable||searchActive()) return;
   const loco=locos().find(l=>l.id===id);if(!loco) return;
   busy=true;revision++;cardMessages.set(id,{key:'sending'});render();
   try {
@@ -187,7 +197,7 @@ async function sendF0(id,on) {
   finally {busy=false;render();}
 }
 function openEditor(id=null) {
-  if(busy||updating||!reachable) return;
+  if(busy||updating||!reachable||searchActive()) return;
   const loco=locos().find(l=>l.id===id);
   $('loco-id').value=loco?.id||'';$('loco-name').value=loco?.name||'';
   let address=3;while(locos().some(l=>l.address===address)&&address<127) address++;
@@ -202,7 +212,7 @@ $('close-editor').onclick=closeEditor;$('cancel-editor').onclick=closeEditor;
 $('loco-dialog').addEventListener('cancel',e=>{if(busy||updating)e.preventDefault();});
 $('add-loco').onclick=()=>openEditor();
 $('loco-form').onsubmit=async e=>{
-  e.preventDefault();if(busy||updating||!reachable) return;
+  e.preventDefault();if(busy||updating||!reachable||searchActive()) return;
   const name=$('loco-name').value.trim(),address=Number($('loco-address').value),id=$('loco-id').value;
   if(new TextEncoder().encode(name).length>48||/[\x00-\x1f\x7f]/.test(name)){notice('editor-message','invalidName',true);return;}
   if(locos().some(l=>l.address===address&&String(l.id)!==id)){notice('editor-message','duplicateAddress',true);return;}
@@ -212,7 +222,7 @@ $('loco-form').onsubmit=async e=>{
   finally {busy=false;render();}
 };
 $('remove-loco').onclick=async()=>{
-  if(busy||updating||!reachable)return;
+  if(busy||updating||!reachable||searchActive())return;
   const id=$('loco-id').value,loco=locos().find(l=>String(l.id)===id);
   if(!loco||!confirm(t('confirmRemove',{name:locoName(loco)})))return;
   busy=true;revision++;render();
@@ -226,7 +236,84 @@ document.querySelectorAll('[data-lang]').forEach(button=>button.onclick=()=>{
 
 $('wifi').onsubmit=async e=>{e.preventDefault();notice('wifi-message','saving');const submit=e.target.querySelector('[type=submit]');submit.disabled=true;try{const r=await fetch('/wifi/save',{method:'POST',body:new URLSearchParams(new FormData(e.target))});if(!r.ok)throw Error();$('password').value='';notice('wifi-message','saved');}catch(e){notice('wifi-message','saveError',true);}finally{submit.disabled=false;}};
 $('forget').onclick=async()=>{if(!window.confirm(t('confirmForget')))return;try{const r=await fetch('/wifi/forget',{method:'POST'});if(!r.ok)throw Error();notice('wifi-message','forgotten');await refresh();}catch(e){notice('wifi-message','forgetError',true);}};
-$('firmware').onsubmit=async e=>{e.preventDefault();if(busy||updating)return;revision++;const file=$('firmware-file').files[0];if(!file||!file.name.toLowerCase().endsWith('.bin')){notice('update-message','invalidFile',true);return;}const form=new FormData();form.append('firmware',file);updating=true;render();$('update-button').disabled=true;notice('update-message','uploading');$('upload-progress').hidden=false;const request=new XMLHttpRequest();request.open('POST','/update');request.upload.onprogress=event=>{if(event.lengthComputable)$('upload-progress').value=event.loaded/event.total*100;};request.onload=()=>{if(request.status===200&&request.responseText.includes('Update Success')){notice('update-message','uploadSuccess');setTimeout(()=>location.reload(),12000);}else finishError();};request.onerror=finishError;function finishError(){updating=false;$('update-button').disabled=false;$('upload-progress').hidden=true;notice('update-message','uploadError',true);render();}request.send(form);};
+$('firmware').onsubmit=async e=>{e.preventDefault();if(busy||updating||searchActive())return;revision++;const file=$('firmware-file').files[0];if(!file||!file.name.toLowerCase().endsWith('.bin')){notice('update-message','invalidFile',true);return;}const form=new FormData();form.append('firmware',file);updating=true;render();$('update-button').disabled=true;notice('update-message','uploading');$('upload-progress').hidden=false;const request=new XMLHttpRequest();request.open('POST','/update');request.upload.onprogress=event=>{if(event.lengthComputable)$('upload-progress').value=event.loaded/event.total*100;};request.onload=()=>{if(request.status===200&&request.responseText.includes('Update Success')){notice('update-message','uploadSuccess');setTimeout(()=>location.reload(),12000);}else finishError();};request.onerror=finishError;function finishError(){updating=false;$('update-button').disabled=false;$('upload-progress').hidden=true;notice('update-message','uploadError',true);render();}request.send(form);};
+Object.assign(translations.en,{
+ findAddress:'Find an address',finderTitle:'A little detective work.',finderHelp:'Watch one loco throughout. We will use its headlights to find its short address. All locos in the range receive F0 tests (F1-F4 off). This does not read or program CVs.',
+ finderFirst:'First address',finderLast:'Last address',finderStart:'Start search',finderRangeError:'Choose a whole-number range within 1-127, first address no greater than last. Address 0 is excluded.',
+ finderVerifyOn:'First check: are the lights ON?',finderVerifyOff:'Second check: are the lights OFF?',finderSplit:'Are this loco’s lights on?',finderConfirmOn:'Confirm this address: are the lights ON?',finderConfirmOff:'And now, are the lights OFF?',
+ finderQuestion:'Answer what you see on the same loco.',finderOn:'Lights are ON',finderOff:'Lights are OFF',finderRetry:'Not sure / Retry',finderWait:'Sending the light test… wait {seconds}s.',
+ finderCandidates:'{low}-{high} · {count} possible addresses',finderSplitHelp:'ON: {low}-{middle}. OFF: the rest of the original range.',finderAllOn:'Sending lights ON across {first}-{last}.',finderAllOff:'Sending lights OFF across {first}-{last}.',finderSingleOn:'Only address {address} receives lights ON.',
+ finderCleanup:'Finishing up…',finderCleanupHelp:'Turning lights off across the original range, then restoring the roster’s requested lights. Please wait.',finderFound:'Address {address}, found!',finderFoundHelp:'You confirmed that this address turns the lights on and off. Ready to give this train a place on your platform?',
+ finderFailed:'No address confirmed.',finderFailedHelp:'The lights did not match the check, the search was cancelled, or it timed out. Check the range and the loco’s F0 headlights, then try again. Long addresses and 14-step lighting are not supported.',
+ finderAdd:'Add this loco',finderExisting:'Already in your roster. Edit this loco',finderFull:'The roster is full. Remove a card before adding this loco.',finderAgain:'New search',finderClose:'Close',finderError:'Could not update the search. The controller may have accepted the request; refreshing its current step.',finderRestoring:'Normal roster controls are paused during the search. It ends automatically after 3 minutes without an answer.',finderBench:'Logic only: the search can be checked with an analyzer now; it cannot light a locomotive until the power stage is ready.'
+});
+Object.assign(translations.es,{
+ findAddress:'Buscar una dirección',finderTitle:'Un poco de investigación.',finderHelp:'Observa siempre la misma locomotora. Usaremos sus luces para encontrar su dirección corta. Todas las direcciones del rango reciben pruebas F0 (F1-F4 apagadas). No lee ni programa CV.',
+ finderFirst:'Primera dirección',finderLast:'Última dirección',finderStart:'Empezar búsqueda',finderRangeError:'Elige un rango entero entre 1 y 127, ordenado de menor a mayor. Se excluye la dirección 0.',
+ finderVerifyOn:'Primera prueba: ¿luces ENCENDIDAS?',finderVerifyOff:'Segunda prueba: ¿luces APAGADAS?',finderSplit:'¿Están encendidas las luces?',finderConfirmOn:'Confirma la dirección: ¿luces ENCENDIDAS?',finderConfirmOff:'¿Y ahora están APAGADAS?',
+ finderQuestion:'Responde lo que ves en la misma locomotora.',finderOn:'Están ENCENDIDAS',finderOff:'Están APAGADAS',finderRetry:'No estoy seguro / Repetir',finderWait:'Enviando la prueba… espera {seconds}s.',
+ finderCandidates:'{low}-{high} · {count} direcciones posibles',finderSplitHelp:'Encendidas: {low}-{middle}. Apagadas: el resto del rango original.',finderAllOn:'Encendiendo luces en {first}-{last}.',finderAllOff:'Apagando luces en {first}-{last}.',finderSingleOn:'Solo la dirección {address} recibe luces encendidas.',
+ finderCleanup:'Terminando…',finderCleanupHelp:'Apagando el rango original antes de restaurar las luces solicitadas en las tarjetas. Espera un momento.',finderFound:'¡Dirección {address} encontrada!',finderFoundHelp:'Has confirmado que esta dirección enciende y apaga las luces. Ya puedes añadir la locomotora.',
+ finderFailed:'Ninguna dirección confirmada.',finderFailedHelp:'Las luces no coincidieron, se canceló la búsqueda o se agotó el tiempo. Revisa el rango y las luces F0 antes de repetir. No admite direcciones largas ni luces en modo de 14 pasos.',
+ finderAdd:'Añadir esta locomotora',finderExisting:'Ya está guardada. Editar locomotora',finderFull:'No quedan plazas. Elimina una tarjeta para añadirla.',finderAgain:'Nueva búsqueda',finderClose:'Cerrar',finderError:'No se pudo actualizar la búsqueda. La central puede haber recibido la petición; consultando el paso actual.',finderRestoring:'Los controles normales quedan en pausa. La búsqueda termina tras 3 minutos sin respuesta.',finderBench:'Solo señal: puedes comprobarla con el analizador; no encenderá una locomotora hasta que esté lista la etapa de potencia.'
+});
+let finderSeenAt=Date.now(),finderNew=false;
+const searchState=()=>state?.dcc?.finder||{stage:'idle',active:false};
+const searchActive=()=>Boolean(searchState().active);
+function renderFinder(){
+ const f=searchState(),stage=!f.active&&finderNew?'idle':f.stage;
+ $('finder-lock-note').hidden=!f.active;
+ if(f.active)$('finder-panel').hidden=false;
+ $('find-address').disabled=busy||updating||!reachable||!state?.dcc?.ready;
+ $('finder-range').hidden=stage!=='idle';
+ $('finder-current').hidden=stage==='idle';
+ const question=['verifyOn','verifyOff','split','confirmOn','confirmOff'].includes(stage);
+ $('finder-answers').hidden=!question;
+ $('finder-result-actions').hidden=!['found','failed'].includes(stage);
+ $('finder-cancel').hidden=!f.active;
+ $('finder-close').hidden=f.active;
+ const left=Math.max(0,(f.waitMs||0)-(Date.now()-finderSeenAt));
+ $('finder-answers').querySelectorAll('button').forEach(b=>b.disabled=busy||updating||!reachable||left>0);
+ $('finder-range').querySelectorAll('button,input').forEach(b=>b.disabled=busy||updating||!reachable);
+ $('finder-cancel').disabled=busy||!reachable||stage==='cleanup';
+ $('finder-add').disabled=busy||updating||!reachable;
+ $('finder-again').disabled=busy||updating||!reachable;
+ $('finder-close').disabled=busy||updating;
+ const keys={verifyOn:'finderVerifyOn',verifyOff:'finderVerifyOff',split:'finderSplit',confirmOn:'finderConfirmOn',confirmOff:'finderConfirmOff',cleanup:'finderCleanup',found:'finderFound',failed:'finderFailed'};
+ $('finder-question').textContent=t(keys[stage]||'finderTitle',{address:f.result||f.low});
+ $('finder-count').textContent=question?t('finderCandidates',{low:f.low,high:f.high,count:f.high-f.low+1}):'';
+ const helper=stage==='verifyOn'?'finderAllOn':stage==='split'?'finderSplitHelp':stage==='confirmOn'?'finderSingleOn':stage==='cleanup'?'finderCleanupHelp':stage==='found'?'finderFoundHelp':stage==='failed'?'finderFailedHelp':'finderAllOff';
+ $('finder-detail').textContent=t(helper,{...f,address:f.low});
+ $('finder-wait').textContent=question?(left>0?t('finderWait',{seconds:Math.ceil(left/1000)}):t('finderQuestion')):'';
+ const existing=locos().find(l=>l.address===f.result);
+ $('finder-add').hidden=stage!=='found';
+ $('finder-add').textContent=t(existing?'finderExisting':'finderAdd');
+ if(!existing&&locos().length>=(state?.dcc?.maxLocos||8)){$('finder-add').disabled=true;$('finder-detail').textContent=t('finderFull');}
+}
+$('find-address').onclick=()=>{$('finder-panel').hidden=!$('finder-panel').hidden;renderFinder();if(!$('finder-panel').hidden)$('finder-panel').scrollIntoView({behavior:'smooth',block:'start'});};
+async function finderCommand(path,body){
+ if(busy||updating||!reachable)return;
+ busy=true;revision++;$('finder-message').textContent='';delete $('finder-message').dataset.noticeKey;render();
+ try{await command(path,body);finderNew=false;}
+ catch(e){notice('finder-message','finderError',true);}
+ finally{busy=false;render();await refresh();}
+}
+$('finder-range').onsubmit=e=>{
+ e.preventDefault();const first=Number($('finder-first').value),last=Number($('finder-last').value);
+ if(!Number.isInteger(first)||!Number.isInteger(last)||first<1||last>127||first>last){notice('finder-message','finderRangeError',true);return;}
+ finderCommand('/finder/start',{first,last});
+};
+document.querySelectorAll('[data-finder-answer]').forEach(b=>b.onclick=()=>finderCommand('/finder/answer',{step:searchState().step,answer:b.dataset.finderAnswer}));
+$('finder-cancel').onclick=()=>finderCommand('/finder/cancel',{step:searchState().step});
+$('finder-again').onclick=()=>{finderNew=true;$('finder-message').textContent='';delete $('finder-message').dataset.noticeKey;renderFinder();$('finder-first').focus();};
+$('finder-close').onclick=async()=>{if(searchState().stage!=='idle')await finderCommand('/finder/cancel',{step:searchState().step});$('finder-panel').hidden=true;};
+$('finder-add').onclick=()=>{
+ const f=searchState();if(f.stage!=='found'||f.active)return;
+ const existing=locos().find(l=>l.address===f.result);
+ openEditor(existing?.id);$('loco-address').value=f.result;
+};
+setInterval(()=>{if(!$('finder-panel').hidden)renderFinder();},250);
+
 if(new URLSearchParams(location.search).get('setup')==='firmware')$('setup').open=true;
 applyLanguage();refresh();setInterval(refresh,3000);
 </script>

@@ -38,7 +38,7 @@ All three DCC/roster POST endpoints return that `dcc` object on success.
 `trackPower` is always false. State is requested state, not decoder readback;
 old complete packets can remain briefly in the DMA ring/FIFO before a change
 reaches the GPIO. Every roster address is refreshed without browser polling.
-F1–F4 remain off. No speed, programming or other functions exist yet.
+F1–F4 remain off. No speed, programming or other function groups exist yet.
 
 ## Roster
 
@@ -89,3 +89,42 @@ OTA preserves both the Wi-Fi configuration and the roster, resetting F0 off.
 
 The future power stage must also physically disarm its bridge during updates;
 this release only stops the logic signal.
+
+
+## Guided F0 address finder (0.6.0)
+
+POST `/finder/start` with `first=1..127` and `last=1..127`, ordered and inclusive.
+Default UI range: 1-100. Address 0 is never transmitted. POST `/finder/answer`
+with the current `step` and `answer=on|off|retry`. Answers describe the actual
+lights, even when the question asks whether they are OFF. POST `/finder/cancel`
+with the current `step`. If no search is active, cancel dismisses the last result
+without changing the DCC output. All return the normal `dcc` object, including `finder`.
+
+Example finder status (also under `dcc.finder` in GET `/api/status`):
+
+```json
+{"stage":"split","active":true,"step":3,"first":1,"last":100,
+ "low":1,"high":100,"middle":50,"result":0,"waitMs":4000}
+```
+
+Stages: `idle`, `verifyOn`, `verifyOff`, `split`, `confirmOn`, `confirmOff`,
+`cleanup`, `found`, `failed`. The finder is shared by all clients, kept in RAM
+and reset on reboot. Each pattern has a 4000 ms settling interval; early answers,
+old step tokens and conflicting starts return 409. Invalid input returns 400;
+an unavailable generator returns 503. Retries retain the candidate range but
+change the step token and restart the settling interval.
+
+Each phase continuously sends function-group-one packets to **the entire original
+range**, setting excluded addresses OFF. After ON/OFF preflight, ON selects the
+lower half and OFF the upper half. A singleton skips splitting but still needs
+ON/OFF confirmation. A failed preflight or confirmation yields no result. F1-F4
+are off; no speed, broadcast, long-address or programming packets are generated.
+This requires F0 lighting compatible with function-group-one (not 14-step FL).
+
+Completion, cancellation or 180000 ms since the last accepted start/answer/retry
+enters `cleanup`: send all original addresses OFF for 4000 ms, then resume the
+unchanged roster and its requested F0 states. Unlisted locos remain OFF; functions
+other than roster F0 are not restored. HTTP polling does not extend the timeout.
+During an active search, including cleanup, `/dcc/f0`, `/locos/save`,
+`/locos/remove`, POST `/update`, `/wifi/save` and `/wifi/forget` return 409.
+The existing hardware limitations remain: **GP2 logic only; track power disabled**.

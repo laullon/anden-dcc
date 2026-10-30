@@ -19,8 +19,8 @@ some light, sound and, eventually, a little movement—without a full-size comma
 station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
 hardware, independent of browser and Wi-Fi activity.
 
-**Current release: 0.5.3.** A shared locomotive roster, independent F0/headlights
-and short addresses are implemented. This is a **logic-output prototype**. Track
+**Current release: 0.6.0.** A shared locomotive roster, independent F0/headlights
+and a guided F0 address finder are implemented. This is a **logic-output prototype**. Track
 power, motor control and current protection are not enabled in firmware. The
 Deek-Robot power assembly is a documented proposal for the next stage.
 
@@ -34,6 +34,9 @@ Deek-Robot power assembly is a documented proposal for the next stage.
 
 - **A shared locomotive roster**: two cards to start, room for up to **eight**.
 - Name each train; edit its address and control **F0/headlights independently**.
+- **Find an address**: choose a range, answer the headlights questions, confirm
+  the result and add it to the roster. Short addresses 1-127; no CV programming.
+  The finder produces logic now; headlight testing needs the future power stage.
 - Names and short addresses **1–127** are saved on the Pico, shared by browsers.
 - Every roster address keeps receiving its own F0 packet with the page closed.
 - **English by default**; an EN/ES switch is remembered by your browser.
@@ -67,6 +70,22 @@ sets F1–F4 off. An empty roster sends DCC idle packets.
 
 The network and updater are intentionally open for this local prototype. Your
 router password is entered in Setup and stored on the Pico, not in source.
+
+### Find a forgotten address
+
+Open **Find an address** and enter a possible range (default 1-100). Watch the
+same locomotive throughout. First confirm lights ON and OFF across the whole
+range, then answer the split tests. Each pattern repeats for four seconds before
+answers are accepted. A 100-address range takes at most seven split questions,
+plus the initial and final checks. **Not sure / Retry** repeats the current test.
+
+The result must turn the lights ON and OFF before **Add this loco** becomes
+available; an address already in the roster opens its existing editor instead.
+Normal roster controls pause during the search. Cancel or three minutes without
+an answer sends lights OFF across the original range, then restores the roster's
+requested F0 states. Refreshing or opening another tab resumes the shared search.
+F1-F4 are off in these packets. No long addresses, address 0, 14-step lighting or
+CV reads/writes. **Track power is still not enabled by the firmware.**
 
 ### Logic analyzer hookup
 

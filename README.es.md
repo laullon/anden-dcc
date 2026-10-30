@@ -31,6 +31,14 @@ pruebas y firmware de protección.
 5. **Añadir locomotora** amplía la lista hasta ocho tarjetas.
 6. Los archivos `.bin` se instalan en **Configuración → Actualizar firmware**.
 
+**Buscar una dirección:** elige un rango de 1 a 127 (por defecto 1-100) y
+responde observando las luces de la misma locomotora. La central verifica primero
+el rango, lo divide y confirma el resultado antes de añadirlo a las tarjetas.
+Cada prueba espera cuatro segundos; puedes repetir o cancelar. Tras tres minutos
+sin respuesta se apaga el rango y se restauran las luces solicitadas en las tarjetas.
+No programa CV ni admite direcciones largas o luces en modo de 14 pasos.
+La búsqueda ya produce señal lógica; la prueba con luces espera la etapa de potencia.
+
 **Montaje simplificado:** una salida del L298P alimenta ambas vías en paralelo;
 cada locomotora mantiene sus controles independientes por dirección. Conservamos
 dos opciones: **A**, shield sin modificar con adaptador 74AHCT125; y **B**,

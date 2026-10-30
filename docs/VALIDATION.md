@@ -1,4 +1,29 @@
-# Release 0.5.3 · favicon validation
+# Release 0.6.0 · guided address finder
+
+- Host checks exercise every short-address range (endpoints/midpoints), every
+  target in 1-100 and 1-127, singleton/uneven ranges, complete transmit coverage,
+  excluded-address OFF, XOR bytes, retries, stale tokens, four-second settling,
+  initial/final failures, cancellation, inactivity timeout and timer wrap.
+- Existing PIO opcode-model checks still pass for all 254 address/F0 combinations.
+- Browser checks cover the entire search-to-roster flow, shared session across
+  tabs, locks, request failure recovery, offline/cancel, drafts, existing-address
+  handoff, English/Spanish and 320px layout; normal roster regressions pass.
+- The DMA ring is now 128 words / 512 bytes, aligned and wrapped accordingly.
+  Normal mode repeats the existing eight-word roster schedule; search mode
+  refreshes the entire original address range without CPU refill callbacks.
+- Pico W compilation: 491076 bytes program (47%), 74704 bytes globals (28%).
+- Physical waveform validation of the new 128-word DMA schedule and decoder
+  headlight behavior remain pending. No track-enable, current cutoff or powered
+  locomotive test is claimed.
+- OTA 0.6.0 verified on the Pico. Live HTTP checks passed for range/answer
+  validation, settling, stale tokens, roster/update/Wi-Fi conflicts (including
+  query URLs), a simulated search to address 37, cancellation and result dismissal.
+  Saved loco configuration and prior requested F0 states were restored. No
+  decoder response was measured; the answers in that check were simulated.
+
+## Previous release evidence
+
+## Release 0.5.3 · favicon validation
 
 30 October 2026. SVG train favicon plus a classic 16/32px ICO fallback.
 
