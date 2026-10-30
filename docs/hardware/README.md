@@ -2,8 +2,10 @@
 
 **Revision C — simple design proposal.** This assembly is not built or
 electrically validated.
-Firmware **0.5.2 still produces logic on GP2 only**; track enable and current
+Firmware **0.5.3 still produces logic on GP2 only**; track enable and current
 cutoff must be implemented and tested before powering a train.
+
+**30 October: modified-shield alternative.** The new [CD4077 removal guide](shield-modification.md) ([printable PDF](shield-modification.pdf)) describes direct Pico control without the AHCT buffer. The Revision C schematic and BOM below still describe the buffered assembly. These are alternative interfaces; do not combine their signal wiring. Both need the power-stage firmware and bench validation.
 
 - [Single-sheet electrical schematic (PDF)](schematic.pdf)
 - [Zoomable schematic (SVG)](schematic.svg) / [print page](print.html)
