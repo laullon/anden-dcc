@@ -19,7 +19,7 @@ some light, sound and, eventually, a little movement—without a full-size comma
 station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
 hardware, independent of browser and Wi-Fi activity.
 
-**Current release: 0.6.0.** A shared locomotive roster, independent F0/headlights
+**Current release: 0.6.1.** A shared locomotive roster, independent F0/headlights
 and a guided F0 address finder are implemented. This is a **logic-output prototype**. Track
 power, motor control and current protection are not enabled in firmware. The
 Deek-Robot power assembly is a documented proposal for the next stage.
@@ -34,6 +34,9 @@ Deek-Robot power assembly is a documented proposal for the next stage.
 
 - **A shared locomotive roster**: two cards to start, room for up to **eight**.
 - Name each train; edit its address and control **F0/headlights independently**.
+- Choose **Electric, Diesel or Steam** with a live preview. Original SVG drawings
+  take their cues from the **RENFE 269, 333 and Santa Fe 151**; the type is saved
+  on the controller and changes appearance only.
 - **Find an address**: choose a range, answer the headlights questions, confirm
   the result and add it to the roster. Short addresses 1-127; no CV programming.
   The finder produces logic now; headlight testing needs the future power stage.
@@ -50,6 +53,8 @@ Deek-Robot power assembly is a documented proposal for the next stage.
 
 The waveform illustration is not a live oscilloscope. Diagnostics show each
 locomotive's requested packet and nominal timings. Measurements come from an external analyzer.
+
+![RENFE-inspired locomotive illustrations](assets/loco-types.png)
 
 ## Quick start
 

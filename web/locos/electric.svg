@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" data-model="269">
+<ellipse cx="191" cy="130" rx="153" ry="5" fill="#091f24" opacity=".45"/>
+<path d="M38 108h306v9H38zM26 107h15v6H26m317-6h12v6h-12" fill="#0b2227"/>
+<path d="M47 99V56l9-13h269l10 13v43z" fill="#a3beaa"/>
+<path d="M57 38h267l7 9H50z" fill="#d9dfca"/>
+<path d="M47 78h288v5H47z" fill="#eeb35d"/>
+<path d="M47 84h288v16H47z" fill="#769782"/>
+<path d="M48 99h287v9H48z" fill="#243b3c"/>
+<g fill="#1b373d" stroke="#c4d3be" stroke-width="1.4"><path d="M54 53h17v18H49v-9z"/><rect x="76" y="51" width="13" height="22" rx="2"/><rect x="293" y="51" width="13" height="22" rx="2"/><path d="M311 53h16l7 11v7h-23z"/></g>
+<g fill="#d2dac7"><rect x="106" y="53" width="36" height="19" rx="2"/><rect x="153" y="53" width="36" height="19" rx="2"/><rect x="208" y="53" width="36" height="19" rx="2"/><rect x="252" y="53" width="27" height="19" rx="2"/></g>
+<path d="M111 57h26m-26 4h26m-26 4h26m-26 4h26m21-12h26m-26 4h26m-26 4h26m-26 4h26m29-12h26m-26 4h26m-26 4h26m-26 4h26m18-12h17m-17 4h17m-17 4h17m-17 4h17" fill="none" stroke="#8b9f92" stroke-width="1.3"/>
+<path d="M96 49v47m190-47v47M52 95h17m245 0h17" stroke="#668776" stroke-width="1.2"/>
+<g fill="#18343b"><rect x="194" y="53" width="8" height="18" rx="2"/><rect x="146" y="54" width="4" height="15" rx="1"/></g>
+<path d="M148 109h77v10h-77z" fill="#354b49"/>
+<g fill="#10292e" stroke="#809b8c" stroke-width="3"><circle cx="83" cy="116" r="13"/><circle cx="119" cy="116" r="13"/><circle cx="264" cy="116" r="13"/><circle cx="300" cy="116" r="13"/></g>
+<path d="M69 109h64v8H69zm181 0h64v8h-64z" fill="#435c53"/>
+<path d="M77 109h13m23 0h13m132 0h13m23 0h13" stroke="#b2c4ac" stroke-width="2"/>
+<g fill="#b3bea8"><rect x="165" y="29" width="35" height="9" rx="2"/><rect x="215" y="34" width="12" height="4"/></g>
+<g fill="none" stroke="#bd876b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M74 37h59M80 33l41-9 10 7-45 3 35-10m-32-3h35M252 37h55m-46-4 28-14-23-12m0 0h-17m17 0 28 12-28 14"/></g>
+<path d="M78 36v-3m45 3v-3m139 3v-3m34 3v-3" stroke="#e5d3aa" stroke-width="3"/>
+<text x="192" y="94" text-anchor="middle" fill="#efd59b" font-family="sans-serif" font-size="8" letter-spacing="1.5">269</text>
+<circle class="lamp" cx="51" cy="91" r="3.5"/><circle class="lamp" cx="331" cy="91" r="3.5"/>
+</svg>

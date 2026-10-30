@@ -11,7 +11,7 @@ the assigned IP also works. There is no cloud service.
 | GET | `/favicon.ico` | Binary ICO fallback, 16/32px |
 | GET | `/api/status` | Version, network and DCC state; no LED pulse |
 | POST | `/dcc/f0` | Form: existing roster `address=1..127`, `on=0|1` |
-| POST | `/locos/save` | Form: optional `id`, `address=1..127`, optional `name` |
+| POST | `/locos/save` | Form: optional `id`, `address=1..127`, optional `name`, optional `type` (electric, diesel, steam) |
 | POST | `/locos/remove` | Form: existing `id=1..8` |
 | POST | `/wifi/save` | Form: `ssid`, `password`; stored on Pico |
 | POST | `/wifi/forget` | Erase network and restore setup AP |
@@ -28,7 +28,7 @@ this object under `dcc` (schema changed in 0.5.0):
   "pin": 2,
   "maxLocos": 8,
   "locos": [
-    {"id": 1, "name": "Evening express", "address": 3, "f0": true, "bytes": "03 90 93"},
+    {"id": 1, "name": "Evening express", "type": "electric", "address": 3, "f0": true, "bytes": "03 90 93"},
     {"id": 2, "name": "Shunter", "address": 4, "f0": false, "bytes": "04 80 84"}
   ]
 }
@@ -49,7 +49,7 @@ Addresses must be unique. Names are optional, at most 48 UTF-8 bytes, with no
 ASCII control characters. An empty name gets a translated fallback in the UI.
 Names are escaped in JSON and displayed as text, never HTML.
 
-Names and addresses persist in `/locos.cfg` on Pico LittleFS. Writes use a
+Names, addresses and illustration types persist in `/locos.cfg` on Pico LittleFS. Writes use a
 temporary file followed by rename; failed saves do not change the RAM roster.
 The valid empty roster persists and generates idle packets (`FF 00 FF`).
 F0 lives in RAM and always starts off after reboot. Changing a loco's address
@@ -128,3 +128,24 @@ other than roster F0 are not restored. HTTP polling does not extend the timeout.
 During an active search, including cleanup, `/dcc/f0`, `/locos/save`,
 `/locos/remove`, POST `/update`, `/wifi/save` and `/wifi/forget` return 409.
 The existing hardware limitations remain: **GP2 logic only; track power disabled**.
+
+
+## Locomotive illustration type (0.6.1)
+
+Each loco in `dcc.locos` includes `type`: `electric`, `diesel` or `steam`.
+POST `/locos/save` accepts this optional field. Omitting it preserves the type
+of an existing loco; new locos default to `electric`. An unsupported or empty
+explicit type returns 400 without changing configuration. Type-only edits keep
+F0 and address unchanged and do not alter the DCC packet contents.
+
+The type is shared by browsers and stored with the roster in LittleFS.
+`anden-roster-1` files still load, defaulting every type to electric. The next
+successful roster save writes `anden-roster-2`, whose lines are
+`id\taddress\ttype\tname`. F0 remains RAM-only and starts off after reboot.
+Firmware older than 0.6.1 does not understand the v2 file: downgrade only with a
+separate copy of the roster settings. Older API clients can still omit `type`.
+
+Artwork sources and maintenance: [locomotive artwork](LOCO-ART.md).
+
+OTA staging files are reclaimed after boot and before a new upload (0.6.1).
+This preserves the same memory layout and all saved Wi-Fi/roster configuration.

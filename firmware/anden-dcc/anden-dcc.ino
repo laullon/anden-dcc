@@ -11,7 +11,7 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Logic-analyzer prototype: GP2 carries DCC; no power-stage pins are assigned.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.6.0";
+const char* VERSION = "0.6.1";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;
@@ -115,17 +115,14 @@ void loadRoster() {
   roster.save(0, 4, "");
   if (!storageReady || !LittleFS.exists("/locos.cfg")) return;
   File file = LittleFS.open("/locos.cfg", "r");
-  if (!file || file.size() > 1024 || file.readStringUntil('\n') != "anden-roster-1") return;
+  if (!file || file.size() > 1024) return;
+  String header=file.readStringUntil('\n');
+  bool legacy=header=="anden-roster-1";
+  if(!legacy && header!="anden-roster-2") return;
   LocoRoster loaded;
   while (file.available()) {
-    String line = file.readStringUntil('\n');
-    int first = line.indexOf('\t'), second = line.indexOf('\t', first + 1);
-    if (first < 0 || second < 0) return;
-    int id = number(line.substring(0, first), LocoRoster::CAPACITY);
-    int address = number(line.substring(first + 1, second), 127);
-    if (id < 0 || address < 0 || loaded.findId(id) >= 0) return;
-    if (loaded.save(0, address, line.substring(second + 1).c_str()) != LocoRoster::Result::Ok) return;
-    loaded.entries[loaded.count - 1].id = id;
+    String line=file.readStringUntil('\n');
+    if(!loaded.loadRecord(line.c_str(),legacy))return;
   }
   roster = loaded; // A valid empty roster is intentional.
 }
@@ -134,10 +131,10 @@ bool saveRoster(const LocoRoster& value) {
   if (!storageReady) return false;
   File file = LittleFS.open("/locos.tmp", "w");
   if (!file) return false;
-  String data = "anden-roster-1\n";
+  String data = "anden-roster-2\n";
   for (uint8_t i = 0; i < value.count; ++i) {
     const auto& loco = value.entries[i];
-    data += String(loco.id) + "\t" + String(loco.address) + "\t" + loco.name + "\n";
+    data += String(loco.id) + "\t" + String(loco.address) + "\t" + LocoRoster::typeName(loco.type) + "\t" + loco.name + "\n";
   }
   bool ok = file.print(data) == data.length();
   file.close();
@@ -180,6 +177,7 @@ String dccStatus() {
         DccPacket::instruction(loco.f0), DccPacket::checksum(loco.address, loco.f0));
     if (i) body += ',';
     body += "{\"id\":" + String(loco.id) + ",\"name\":" + jsonString(loco.name);
+    body += ",\"type\":" + jsonString(LocoRoster::typeName(loco.type));
     body += ",\"address\":" + String(loco.address) + ",\"f0\":";
     body += loco.f0 ? "true" : "false";
     body += ",\"bytes\":" + jsonString(bytes) + "}";
@@ -204,6 +202,9 @@ void setup() {
     for (size_t i = 0; i < 4096; ++i) if (flash[i] != 0xff) { erased = false; break; }
     if (erased && LittleFS.format()) storageReady = LittleFS.begin();
   }
+  // The core leaves the applied OTA image in LittleFS. Reclaim it after boot
+  // so the next upload measures free space without counting the old image.
+  if(storageReady) LittleFS.remove("/firmware.bin");
   loadNetwork();
   loadRoster();
   WiFi.mode(WIFI_AP_STA);
@@ -218,7 +219,14 @@ void setup() {
     if (!statusPoll) signalWebActivity();
     if (method == "POST" && (path == "/update" || path == "/wifi/save" || path == "/wifi/forget") && finderLocked())
       return HTTPServer::CLIENT_REQUEST_IS_HANDLED;
-    if (method == "POST" && path == "/update") DccSignal::stop();
+    if (method == "POST" && path == "/update") {
+      DccSignal::stop();
+      // Also reclaim partial files left by a failed upload in this boot.
+      if(storageReady && LittleFS.exists("/firmware.bin") && !LittleFS.remove("/firmware.bin")) {
+        server.send(500,"text/plain","Could not reclaim OTA staging space.");
+        return HTTPServer::CLIENT_REQUEST_IS_HANDLED;
+      }
+    }
     return HTTPServer::CLIENT_REQUEST_CAN_CONTINUE;
   });
   server.on("/", HTTP_GET, []() { server.send(200, "text/html; charset=utf-8", PAGE); });
@@ -305,11 +313,12 @@ void setup() {
     String name = server.arg("name"); name.trim();
     if (id < 0 || address < 0) { server.send(400, "text/plain", "Invalid locomotive ID or address."); return; }
     LocoRoster changed = roster;
-    auto result = changed.save(id, address, name.c_str());
+    String type=server.arg("type");
+    auto result = changed.save(id, address, name.c_str(),server.hasArg("type")?type.c_str():nullptr);
     if (result != LocoRoster::Result::Ok) {
       int code = result == LocoRoster::Result::Missing ? 404 :
           result == LocoRoster::Result::Invalid ? 400 : 409;
-      server.send(code, "text/plain", "Invalid name, duplicate address, missing locomotive or full roster."); return;
+      server.send(code, "text/plain", "Invalid name/type, duplicate address, missing locomotive or full roster."); return;
     }
     if (!saveRoster(changed)) { server.send(500, "text/plain", "Could not save locomotive settings."); return; }
     roster = changed;

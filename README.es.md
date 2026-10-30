@@ -31,6 +31,10 @@ pruebas y firmware de protección.
 5. **Añadir locomotora** amplía la lista hasta ocho tarjetas.
 6. Los archivos `.bin` se instalan en **Configuración → Actualizar firmware**.
 
+**Ilustraciones de locomotoras:** en **Editar**, elige Eléctrica, Diésel o Vapor
+con vista previa. Los dibujos SVG se inspiran en RENFE 269, 333 y Santa Fe 151.
+El tipo se guarda en la central; cambiarlo no altera la dirección ni las luces.
+
 **Buscar una dirección:** elige un rango de 1 a 127 (por defecto 1-100) y
 responde observando las luces de la misma locomotora. La central verifica primero
 el rango, lo divide y confirma el resultado antes de añadirlo a las tarjetas.

@@ -123,6 +123,31 @@ void output(const LocoRoster& roster) {
   std::puts("");
 }
 int main() {
+  // Visual type is metadata: preserve F0/address, validate and load old/new records.
+  LocoRoster typed;
+  assert(typed.loadRecord("5\t37\tOld electric",true));
+  assert(typed.entries[0].type==LocoRoster::Type::Electric && typed.entries[0].id==5);
+  assert(typed.loadRecord("2\t9\tsteam\tSanta Fe",false));
+  assert(typed.entries[1].type==LocoRoster::Type::Steam);
+  typed.entries[1].f0=true;
+  uint32_t oldWords[8];typed.schedule(oldWords);
+  assert(typed.save(2,9,"Renamed","diesel")==Result::Ok && typed.entries[1].f0);
+  uint32_t newWords[8];typed.schedule(newWords);
+  for(int i=0;i<8;++i)assert(oldWords[i]==newWords[i]); // Appearance sends no DCC change.
+  assert(typed.save(2,9,"Legacy client")==Result::Ok && typed.entries[1].type==LocoRoster::Type::Diesel);
+  assert(typed.save(2,9,"Invalid","maglev")==Result::Invalid && typed.entries[1].type==LocoRoster::Type::Diesel);
+  assert(typed.save(0,10,"Invalid","")==Result::Invalid && typed.count==2);
+  assert(!typed.loadRecord("3\t8\tmaglev\tBad",false));
+  assert(!typed.loadRecord("2\t8\telectric\tDuplicate ID",false));
+  assert(!typed.loadRecord("1\t9\telectric\tDuplicate address",false));
+  assert(!typed.loadRecord("1\t0\telectric\tInvalid",false));
+  assert(!typed.loadRecord("1\t8\tMissing type separator",false));
+  assert(!typed.loadRecord("1\t8\tsteam\tBad\tName",false));
+  for(const char* type:{"electric","diesel","steam"}) {
+    LocoRoster saved,loaded;assert(saved.save(0,127,"",type)==Result::Ok);
+    char record[81];std::snprintf(record,sizeof(record),"%d\t%d\t%s\t%s",saved.entries[0].id,saved.entries[0].address,LocoRoster::typeName(saved.entries[0].type),saved.entries[0].name);
+    assert(loaded.loadRecord(record,false));assert(loaded.entries[0].type==saved.entries[0].type && !loaded.entries[0].f0);
+  }
   LocoRoster r;
   output(r); // Empty roster generates idle packets, never stale loco state.
   assert(r.save(0, 3, "Evening express") == Result::Ok);
@@ -169,4 +194,4 @@ for schedule in schedules:
             frame += [0] + [(byte >> shift) & 1 for shift in range(7, -1, -1)]
         wanted.append(frame + [1])
     assert simulate(ring * 2, frames=16) == wanted * 2
-print('PASS: roster independence, rename/address reset, duplicates, limits, removal/ID reuse, empty idle and 2/3/8-loco PIO schedules.')
+print('PASS: visual types, legacy/v2 record loading, validation and F0 preservation; roster independence, rename/address reset, duplicates, limits, removal/ID reuse, empty idle and 2/3/8-loco PIO schedules.')

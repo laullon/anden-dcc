@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" data-model="333">
+<ellipse cx="191" cy="130" rx="160" ry="5" fill="#091f24" opacity=".45"/>
+<path d="M37 101V65q3-23 31-25h245q23 3 28 26v35z" fill="#8eaf98"/>
+<path d="M53 48q7-10 20-11h237q17 1 24 13l-23-6H73z" fill="#c1ceba"/>
+<path d="M38 76h303v7H38zm0 20h303v3H38z" fill="#efb95e"/>
+<path d="m38 76 15 8 17-8m239 0 18 8 14-8" fill="none" stroke="#efb95e" stroke-width="5"/>
+<g fill="#19363c" stroke="#b9ccb8" stroke-width="1.4"><path d="M43 60q3-9 12-11h16v20H39z"/><path d="M76 49h15v21H76z"/><path d="M289 49h16v21h-16z"/><path d="M311 49h12q11 2 14 14l2 6h-28z"/></g>
+<g fill="#527a65"><rect x="109" y="51" width="58" height="20" rx="2"/><rect x="178" y="51" width="44" height="20" rx="2"/><rect x="233" y="51" width="40" height="20" rx="2"/></g>
+<path d="M114 55h48m-48 4h48m-48 4h48m-48 4h48m21-12h34m-34 4h34m-34 4h34m-34 4h34m21-12h30m-30 4h30m-30 4h30m-30 4h30" fill="none" stroke="#2f5548" stroke-width="1.6"/>
+<g fill="#1b383d" stroke="#b6c5ae" stroke-width="1"><rect x="97" y="52" width="7" height="18" rx="3"/><rect x="169" y="52" width="7" height="18" rx="3"/><rect x="224" y="52" width="7" height="18" rx="3"/><rect x="276" y="52" width="7" height="18" rx="3"/></g>
+<path d="M96 49v48m190-48v48M51 87v10m277-10v10" stroke="#567d68" stroke-width="1.3"/>
+<path d="M39 100h301v10H39zM29 103h12v7H29m310-7h12v7h-12" fill="#b07158"/>
+<path d="M49 108h281v6H49z" fill="#182f33"/>
+<rect x="153" y="110" width="75" height="13" rx="3" fill="#374b48"/>
+<g fill="#10292e" stroke="#809b8c" stroke-width="2.5"><circle cx="69" cy="117" r="11"/><circle cx="99" cy="117" r="11"/><circle cx="129" cy="117" r="11"/><circle cx="250" cy="117" r="11"/><circle cx="280" cy="117" r="11"/><circle cx="310" cy="117" r="11"/></g>
+<path d="M54 109h91v8H54zm182 0h88v8h-88z" fill="#496052"/>
+<path d="M62 110h13m17 0h13m17 0h13m108 0h13m17 0h13m17 0h13" stroke="#abbda5" stroke-width="2"/>
+<path d="M123 37v-4h18v4m55 0v-3h20v3m40 0v-4h25v4" fill="#6c8877"/>
+<path d="M42 96v-11m296 11V85" stroke="#e0c68d" stroke-width="1.5"/>
+<text x="191" y="94" text-anchor="middle" fill="#efdcaa" font-family="sans-serif" font-size="8" letter-spacing="1.5">333</text>
+<circle class="lamp" cx="42" cy="88" r="3.5"/><circle class="lamp" cx="337" cy="88" r="3.5"/>
+</svg>

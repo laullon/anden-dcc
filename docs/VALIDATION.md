@@ -1,4 +1,32 @@
-# Release 0.6.0 · guided address finder
+# Release 0.6.1 · RENFE-inspired locomotive artwork
+
+- Three original inline SVG illustrations: electric based on RENFE 269, diesel
+  on the original RENFE 333, steam on Santa Fe 151/5001. Live editor preview,
+  English/Spanish labels, responsive radio selector and per-card F0 lamps.
+- Host checks cover all types, omitted/invalid type handling, legacy and v2
+  records, duplicate/invalid records, empty names and unchanged DCC/F0 on type-only
+  edits. Existing packet timing, roster and exhaustive address-search checks pass.
+- Browser checks cover type preview/save/reload, draft preservation across polls,
+  F0 retention, localized labels, 320px editor layout and normal roster/finder
+  regressions. Reference photos are not bundled; SVGs are embedded once each.
+- Pico W build: 501148 program bytes, 74712 global RAM bytes. Artwork and its
+  selector/storage changes add 10072 program bytes and 8 RAM bytes over 0.6.0.
+- The core leaves `firmware.bin` in LittleFS after OTA. Its HTTP updater measures
+  free space before truncating that file, so repeated images around 519 kB could
+  hit a false staging-space ceiling. The sketch now removes only that reserved
+  file after boot and before a new upload, including failed-upload retries.
+- Live OTA 0.6.0 -> 0.6.1 kept the legacy roster. On-device checks passed for all
+  types, invalid/empty type rejection, omitted-type compatibility and unchanged
+  F0 on appearance-only saves. Nondefault types survived restarts in the v2 file.
+- After recovering the older updater with the core's supported gzip format,
+  two consecutive normal raw-binary OTA uploads passed with staging cleanup.
+  Original card settings and requested F0 states were restored after testing.
+- Physical DCC and decoder validation remains pending; this release adds no
+  power-stage control.
+
+## Previous release evidence
+
+## Release 0.6.0 · guided address finder
 
 - Host checks exercise every short-address range (endpoints/midpoints), every
   target in 1-100 and 1-127, singleton/uneven ranges, complete transmit coverage,

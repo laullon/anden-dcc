@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('fs'),path=require('path');
 const root=path.resolve(__dirname,'../..');
 const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,{recursive:true});
-const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[address,f0?0x90:0x80,address^(f0?0x90:0x80)].map(n=>n.toString(16).toUpperCase().padStart(2,'0')).join(' ')});
+const makeLoco=(id,address,name='',f0=false,type='electric')=>({id,address,name,f0,type,bytes:[address,f0?0x90:0x80,address^(f0?0x90:0x80)].map(n=>n.toString(16).toUpperCase().padStart(2,'0')).join(' ')});
 (async()=>{
  const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),headless:true});
  try {
@@ -19,15 +19,15 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
   if(u.pathname==='/dcc/f0') {
    const index=state.dcc.locos.findIndex(l=>l.address===Number(data.get('address')));
    if(index<0)return route.fulfill({status:404});
-   const l=state.dcc.locos[index];state.dcc.locos[index]=makeLoco(l.id,l.address,l.name,data.get('on')==='1');
+   const l=state.dcc.locos[index];state.dcc.locos[index]=makeLoco(l.id,l.address,l.name,data.get('on')==='1',l.type);
    state.dcc.running=true;return route.fulfill({json:state.dcc});
   }
   if(u.pathname==='/locos/save') {
    saveCount++;if(rejectSave)return route.fulfill({status:500});
    let id=Number(data.get('id')),address=Number(data.get('address')),name=data.get('name');
    if(state.dcc.locos.some(l=>l.address===address&&l.id!==id)||(!id&&state.dcc.locos.length===8))return route.fulfill({status:409});
-   if(id){const i=state.dcc.locos.findIndex(l=>l.id===id);if(i<0)return route.fulfill({status:404});const old=state.dcc.locos[i];state.dcc.locos[i]=makeLoco(id,address,name,old.address===address&&old.f0);}
-   else {id=1;while(state.dcc.locos.some(l=>l.id===id))id++;state.dcc.locos.push(makeLoco(id,address,name));}
+   if(id){const i=state.dcc.locos.findIndex(l=>l.id===id);if(i<0)return route.fulfill({status:404});const old=state.dcc.locos[i];state.dcc.locos[i]=makeLoco(id,address,name,old.address===address&&old.f0,data.get('type')||old.type);}
+   else {id=1;while(state.dcc.locos.some(l=>l.id===id))id++;state.dcc.locos.push(makeLoco(id,address,name,false,data.get('type')||'electric'));}
    return route.fulfill({json:state.dcc});
   }
   if(u.pathname==='/locos/remove'){state.dcc.locos=state.dcc.locos.filter(l=>l.id!==Number(data.get('id')));return route.fulfill({json:state.dcc});}
@@ -51,7 +51,15 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
  const first=await card(1).boundingBox(),second=await card(2).boundingBox();assert.equal(first.y,second.y);assert(second.x>first.x);
  await press(1,true);assert.equal(await light(2,false).getAttribute('aria-pressed'),'true');
  await press(2,true);await press(1,false);assert.equal(await light(2,true).getAttribute('aria-pressed'),'true');
+ await card(1).locator('.edit-loco').click();
+ await page.locator('[name="loco-type"][value="steam"]').check();
+ assert.equal(await page.locator('#loco-preview svg').getAttribute('data-model'),'santa-fe');
+ await page.evaluate(()=>refresh());assert(await page.locator('[name="loco-type"][value="steam"]').isChecked());
+ await save();assert.equal(state.dcc.locos[0].type,'steam');assert.equal(state.dcc.locos[0].f0,false);
+ await card(2).locator('.edit-loco').click();await page.locator('[name="loco-type"][value="diesel"]').check();await save();
+ assert.equal(await card(2).locator('.train-art svg').getAttribute('data-model'),'333');assert.equal(state.dcc.locos[1].f0,true);
  await edit(1,'Evening express',null);await edit(2,'The little shunter',37);
+ assert.equal(state.dcc.locos[0].type,'steam');assert.equal(state.dcc.locos[1].type,'diesel');
  assert.equal(await light(2,false).getAttribute('aria-pressed'),'true');
  await press(1,true);await press(2,true);
  await page.waitForTimeout(300);await page.screenshot({path:path.join(out,'ui-desktop.png'),fullPage:true});
@@ -62,6 +70,7 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
  await page.locator('#loco-address').fill('3');rejectSave=true;await page.locator('#save-loco').click();await page.waitForFunction(()=>document.getElementById('editor-message').classList.contains('error'));assert.equal(await card(1).locator('.loco-name').textContent(),'Evening express');rejectSave=false;
  await page.locator('#cancel-editor').click();
  await page.reload();await waitReady();assert.equal(await card(1).locator('.loco-name').textContent(),'Evening express');
+ assert.equal(await card(1).locator('.train-art svg').getAttribute('data-model'),'santa-fe');
  // A slow poll captured before a command cannot roll the UI back afterwards.
  let release;delayStatus=new Promise(resolve=>release=resolve);await page.evaluate(()=>{window.slowPoll=refresh();});await page.waitForTimeout(50);
  await press(1,false);release();delayStatus=null;await page.evaluate(()=>window.slowPoll);assert.equal(await light(1,false).getAttribute('aria-pressed'),'true');
@@ -73,7 +82,7 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
  for(let n=3;n<=8;n++){await page.locator('#add-loco').click();await page.locator('#loco-name').fill('Display train '+n);await save();}
  assert.equal(await page.locator('.train-card').count(),8);assert.equal(await page.locator('#add-loco').isDisabled(),true);
  for(const loco of [...state.dcc.locos].slice(2)){await card(loco.id).locator('.edit-loco').click();await page.locator('#remove-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);}
- await page.locator('[data-lang="es"]').click();assert.equal(await page.locator('h1').textContent(),'Dale vida a tu escena.');assert.equal(await card(1).locator('.edit-loco').textContent(),'Editar');
+ await page.locator('[data-lang="es"]').click();assert.equal(await page.locator('h1').textContent(),'Dale vida a tu escena.');assert.equal(await card(1).locator('.edit-loco').textContent(),'Editar');assert.equal(await card(1).locator('.loco-kind').textContent(),'Vapor · Santa Fe');
  await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='es');assert.equal(await page.locator('#setup').getAttribute('open'),null);
  await page.locator('[data-lang="en"]').click();
  await page.locator('#setup>summary').click();await page.screenshot({path:path.join(out,'ui-setup.png'),fullPage:true});
@@ -84,11 +93,11 @@ const makeLoco=(id,address,name='',f0=false)=>({id,address,name,f0,bytes:[addres
  const m1=await card(1).boundingBox(),m2=await card(2).boundingBox();assert(m2.y>m1.y);assert.equal(m1.x,m2.x);
  await page.screenshot({path:path.join(out,'ui-mobile.png')});await page.locator('[data-lang="es"]').click();await page.screenshot({path:path.join(out,'ui-mobile-es.png')});
  await page.setViewportSize({width:320,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
- await card(1).locator('.edit-loco').click();assert.equal(await page.evaluate(()=>document.getElementById('loco-dialog').scrollWidth>document.getElementById('loco-dialog').clientWidth),false);await page.locator('#cancel-editor').click();
+ await card(1).locator('.edit-loco').click();assert.equal(await page.evaluate(()=>document.getElementById('loco-dialog').scrollWidth>document.getElementById('loco-dialog').clientWidth),false);await page.screenshot({path:path.join(out,'loco-editor-mobile.png')});await page.locator('[name="loco-type"][value="electric"]').check();assert.equal(await page.locator('#loco-preview svg').getAttribute('data-model'),'269');await page.locator('#cancel-editor').click();
  for(const loco of [...state.dcc.locos]){await card(loco.id).locator('.edit-loco').click();await page.locator('#remove-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);}
  assert.equal(await page.locator('#empty-roster').isVisible(),true);assert.equal(await page.locator('#add-loco').isDisabled(),false);
  await page.locator('#add-loco').click();await page.locator('#loco-name').fill('A new beginning');await save();assert.equal(await page.locator('.train-card').count(),1);
  assert.deepEqual(errors,[]);
- console.log('PASS: independent loco F0, shared roster, rename/address edits, duplicate prevention, failed save, draft preservation, stale-poll protection, add/remove/empty/max-8, safe names, EN/ES, setup/OTA/offline, desktop/mobile; no JS errors.');
+ console.log('PASS: three loco illustrations, type preview/save/reload/drafts/EN-ES/mobile, independent loco F0, shared roster, rename/address edits, duplicate prevention, failed save, draft preservation, stale-poll protection, add/remove/empty/max-8, safe names, EN/ES, setup/OTA/offline, desktop/mobile; no JS errors.');
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
