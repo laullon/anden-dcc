@@ -1,4 +1,8 @@
-# Simple electrical schematic · Rev C
+# Option A electrical schematic · Rev C
+
+This KiCad project covers the **unmodified shield + AHCT buffer** option.
+The [hardware comparison](../../docs/hardware/README.md) also preserves the
+[modified-shield guide](../../docs/hardware/shield-modification.md) as Option B.
 
 Open **anden-dcc.kicad_pro**, then the schematic, in KiCad 8 or later.
 It is **one A3 sheet**, with the four modules, one complete 14-pin level shifter

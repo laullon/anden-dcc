@@ -1,4 +1,7 @@
-# Simple bill of materials
+# Option A bill of materials: unmodified shield + buffer
+
+[Compare hardware options](README.md). This BOM matches **Option A only**;
+for the buffer-free assembly, use the [Option B modification guide](shield-modification.md).
 
 **Rev C proposal.** The four modules stay as chosen. The added logic is one
 SN74AHCT125N, five resistors and six capacitors; no programming, latch or comparator

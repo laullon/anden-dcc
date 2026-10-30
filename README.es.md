@@ -32,9 +32,10 @@ pruebas y firmware de protección.
 6. Los archivos `.bin` se instalan en **Configuración → Actualizar firmware**.
 
 **Montaje simplificado:** una salida del L298P alimenta ambas vías en paralelo;
-cada locomotora mantiene sus controles independientes por dirección. Solo se
-añade un 74AHCT125 de adaptación de nivel. La programación de decóderes se ha
-retirado: las direcciones se obtendrán por otro método.
+cada locomotora mantiene sus controles independientes por dirección. Conservamos
+dos opciones: **A**, shield sin modificar con adaptador 74AHCT125; y **B**,
+retirar el CD4077 y usar dos señales complementarias de la Pico directamente.
+La programación de decóderes se ha retirado: las direcciones se obtendrán por otro método.
 [Esquema de una hoja](docs/hardware/schematic.pdf) · [Materiales](docs/hardware/BOM.md).
 La habilitación de potencia y el corte por corriente en firmware aún están
 pendientes de implementación y pruebas.
@@ -55,7 +56,9 @@ analizador directamente a una vía alimentada. Dirección 3: F0 apagado `03 80 8
 encendido `03 90 93`.
 
 - [README y compilación](README.md)
-- [Cableado y comprobaciones](docs/hardware/README.md)
+- [Elegir entre las dos versiones de hardware](docs/hardware/README.md)
+- [Opción A: shield sin modificar y adaptador de nivel](docs/hardware/buffered-shield.md)
+- [Opción B: retirar CD4077 y conectar la Pico directamente](docs/hardware/shield-modification.md) · [Guía PDF](docs/hardware/shield-modification.pdf)
 - [Materiales](docs/hardware/BOM.md)
 - [Analizador](DCC-ANALYZER.md)
 - [API](docs/API.md)

@@ -93,18 +93,22 @@ Half-bits measured 58.000–58.125 µs and 100.000–100.125 µs at 8 MS/s.
 **One DCC output feeds both tracks in parallel.** Each loco is still controlled
 independently by its address. The simple design keeps the **Pico W**, selected
 **Deek-Robot L298P**, **15 V USB-C PD trigger**, and **MP1584 set to 5.00 V**.
-Only one SN74AHCT125N level-shifter IC is added, plus five resistors, six
-capacitors, the VSYS diode, fuse and track-power switch. Bridge B is unused.
+There are two documented interfaces: **Option A** keeps the shield intact and
+adds an SN74AHCT125N buffer; **Option B** removes the shield's CD4077 and uses
+complementary Pico outputs directly. Power, sensing and default-off enable
+components are still required. Bridge B is unused.
 
 Decoder addresses are identified/set by another method.
 
 | Document | Contents |
 | --- | --- |
-| [Hardware guide](docs/hardware/README.md) | Simple wiring, pin mapping and current-cutoff plan |
-| [Schematic PDF](docs/hardware/schematic.pdf) / [SVG](docs/hardware/schematic.svg) | One electrical sheet, Rev C proposal |
+| [Choose a hardware version](docs/hardware/README.md) | Both build options and firmware status |
+| [Option A: unmodified shield](docs/hardware/buffered-shield.md) | External AHCT buffer; no shield rework |
+| [Option B: modified shield](docs/hardware/shield-modification.md) / [PDF guide](docs/hardware/shield-modification.pdf) | Remove CD4077; direct complementary Pico signals |
+| [Schematic PDF](docs/hardware/schematic.pdf) / [SVG](docs/hardware/schematic.svg) | Option A: one electrical sheet, Rev C proposal |
 | [Editable KiCad project](hardware/kicad/README.md) | Native schematic, ERC report and exported netlist |
-| [BOM](docs/hardware/BOM.md) / [CSV](docs/hardware/bom.csv) | Modules and the small set of additional parts |
-| [Connections](docs/hardware/connections.csv) | Exact circuit nets and pins |
+| [BOM](docs/hardware/BOM.md) / [CSV](docs/hardware/bom.csv) | Option A: modules and additional parts |
+| [Connections](docs/hardware/connections.csv) | Option A: exact circuit nets and pins |
 | [Sources](docs/hardware/sources.md) | Manufacturer references |
 
 **The power assembly is not built or electrically validated.** Track enable,

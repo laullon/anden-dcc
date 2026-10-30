@@ -1,84 +1,48 @@
-# Simple hardware · one output, two tracks
+# Hardware: choose your build
 
-**Revision C — simple design proposal.** This assembly is not built or
-electrically validated.
-Firmware **0.5.3 still produces logic on GP2 only**; track enable and current
-cutoff must be implemented and tested before powering a train.
+Both versions stay in this repository. Choose one interface; they share the
+Pico W, Deek-Robot L298P shield, USB-C PD supply, MP1584 buck and two-track layout.
 
-**30 October: modified-shield alternative.** The new [CD4077 removal guide](shield-modification.md) ([printable PDF](shield-modification.pdf)) describes direct Pico control without the AHCT buffer. The Revision C schematic and BOM below still describe the buffered assembly. These are alternative interfaces; do not combine their signal wiring. Both need the power-stage firmware and bench validation.
+| | Option A: keep the shield intact | Option B: modify the shield |
+| --- | --- | --- |
+| CD4077 on the shield | Leave installed | Remove |
+| External logic | SN74AHCT125N level shifter | None |
+| DCC signals from the Pico | GP2; shield creates the inverse | GP2 + GP3, complementary outputs |
+| Track enable | GP6 through the buffer | GP6 directly to D3 / ENA |
+| Board rework | None | Remove CD4077; wire GP3 to its former PCB pad 3 |
+| Build guide | [Buffered shield guide](buffered-shield.md) | [Modification guide](shield-modification.md) |
+| Printable document | [Rev C schematic](schematic.pdf) | [Illustrated modification guide](shield-modification.pdf) |
+| Detailed design files | [KiCad](../../hardware/kicad/anden-dcc.kicad_pro), [BOM](BOM.md), [CSV](bom.csv), [connections](connections.csv) | Wiring and changes to the buffered assembly are described in the modification guide; no separate KiCad schematic or BOM yet |
 
-- [Single-sheet electrical schematic (PDF)](schematic.pdf)
-- [Zoomable schematic (SVG)](schematic.svg) / [print page](print.html)
-- [Editable KiCad project](../../hardware/kicad/anden-dcc.kicad_pro)
-- [BOM](BOM.md) / [CSV](bom.csv)
-- [Pin-by-pin wiring](connections.csv) / [primary sources](sources.md)
+**Option A** suits builders who prefer to leave the shield untouched.
+**Option B** avoids the added buffer for builders comfortable with SMD rework.
+Both keep the shield's logic supply at **5 V**. Neither runs the entire shield
+from 3.3 V.
 
-## What we are building
+## Shared layout
 
-Use **bridge A** of the Deek-Robot L298P to feed **both tracks in parallel**.
-Each locomotive keeps its own DCC address and independent controls. Two locos
-do not require two power outputs. Bridge B is disabled and its rail terminals
-are left unconnected. Decoder programming is out of scope.
+Use bridge A to feed **both tracks in parallel**. Locomotives have independent
+DCC addresses; two locos do not require two bridge outputs. Bridge B stays
+disabled, with B+ and B- unconnected. Decoder programming is out of scope.
 
-```text
-USB-C PD, 15 V ── fuse ──┬── track-power switch ── shield VIN
-                       └── MP1584, 5.00 V ── logic + diode ── Pico VSYS
+The supply plan is USB-C PD at 15 V for the motor stage, with the MP1584 set to
+5.00 V for logic and the protected Pico VSYS feed. Current sensing uses A0 through
+the existing divider/filter to GP26. Follow the chosen guide for the actual
+connections; neither rail is logic ground.
 
-Pico GP2 ── 74AHCT125 ── shield D12 / direction A
-Pico GP6 ── 74AHCT125 ── shield D3 / enable A
-Shield A0 / sense ── 10k + 10k divider ── Pico GP26
+## Firmware and validation status
 
-Shield A+ ── one rail of each track
-Shield A− ── the other rail of each track
-```
+These are **two documented hardware options, not two released firmware variants**.
+Firmware **0.5.3 is still a GP2-only logic-output prototype**. Option B needs the
+complementary GP3 output. Both need default-off track enable, calibrated current
+cutoff and startup speed-zero handling before powering a train. The assemblies
+are not built or electrically validated, and there is no hardware-option setting
+in the current firmware.
 
-The **only extra logic IC** is an SN74AHCT125N level shifter. It lets the Pico's
-3.3 V outputs drive the shield's 5 V logic. Use AHCT, not HC. The shield's CD4077
-direction logic is why we are keeping it.
+The existing **Revision C schematic, BOM, connections CSV and KiCad exports cover
+Option A only**. Do not combine its buffer wiring with Option B's direct wiring.
+Both guides remain available on the main branch so builders can choose without
+switching branches.
 
-## Power connections
-
-1. Set the USB-C trigger to **15 V**, using its actual printed DIP table. The
-   charger must offer 15 V at 3 A; the trigger does not boost a 5 V supply.
-2. After the 3 A fuse, split the supply. S1 switches motor VIN; the other branch
-   feeds the MP1584. The logic can stay on while track power is switched off.
-3. Adjust the MP1584 to **5.00 V** before connection. Its output feeds the shield
-   `5V` header and U1 pin 14. D1's anode goes to that 5 V rail; its band/cathode
-   goes to Pico **VSYS, physical pin 39**.
-4. Join PD−, buck IN−/OUT−, shield GND, Pico GND and U1 pin 7. Keep heavy motor
-   returns away from the ADC return. Neither track rail goes to logic GND.
-
-Leave the shield VIN header unconnected to the Pico. Do not connect external
-5 V to Pico VBUS or 3V3_OUT. The Pico's USB connection remains usable for recovery.
-
-## Signal wiring
-
-| Function | Pico | U1 SN74AHCT125N | Shield |
-| --- | --- | --- | --- |
-| DCC waveform | GP2 / physical 4 | input 2 → output 3 | D12 / DIRA |
-| Track enable, future firmware | GP6 / physical 9 | input 5 → output 6 | D3 / PWMA |
-| Current measurement, future firmware | GP26 / physical 31 | 10k/10k divider and 1 nF; no buffer | A0 / SNSA |
-
-U1 pins **1, 4, 7, 9 and 12 → GND**; pins **10, 13 and 14 → +5V**.
-Outputs **8 and 11 remain unconnected**. These ties disable the unused gates.
-R1/R2 hold the Pico-side control inputs low during reset; R3 holds shield ENA low.
-Tie shield **D9, D8, D11 and D13 to GND**, disabling braking and unused bridge B.
-Shield A1 and B+/B− remain unconnected.
-
-## Basic current cutoff
-
-Current protection is planned **in firmware**, using GP26 to switch GP6 off and
-latch the output off until manually reset. The removed comparator/latch chips
-are not part of this design. This is not an independent hardware overcurrent trip.
-
-The shield's nominal 1.65 V/A sense gain becomes **0.825 V/A** after the divider.
-An initial bench target of 0.8 A would correspond to 0.66 V, approximately 819
-ideal 12-bit counts at 3.3 V. These are calculations, not calibration of the clone
-or an implemented setting. The limit applies to both locos and all stock combined.
-The fuse protects supply wiring; it is not the decoder-current cutoff.
-
-Before enabling rails, the firmware needs a measured/calibrated cutoff that keeps
-working during HTTP activity, default-off enable, startup speed-zero packets,
-and disarm on OTA or faults. Verify those using a current-limited source and a
-dummy load first. The L298P's thermal/current capability still needs measurement
-and appropriate cooling; a product's “2 A” title is not a continuous guarantee.
+[Manufacturer references](sources.md) · [Schematic SVG, Option A](schematic.svg) ·
+[Offline print page, Option A](print.html)
