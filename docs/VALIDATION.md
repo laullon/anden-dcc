@@ -1,4 +1,14 @@
-# Release 0.6.1 · RENFE-inspired locomotive artwork
+# Release 0.6.2 · generic locomotive illustrations
+
+Removed painted model numbers and prototype-specific labels from the live UI.
+Electric / Diesel / Steam and their Spanish translations identify the types;
+DCC addresses, user-entered names, silhouettes and saved type values are kept.
+Build, browser and DCC checks pass; no power-stage changes.
+Pico W build: 500676 program bytes (47%), 74712 global RAM bytes (28%).
+
+## Previous release evidence
+
+## Release 0.6.1 · RENFE-inspired locomotive artwork
 
 - Three original inline SVG illustrations: electric based on RENFE 269, diesel
   on the original RENFE 333, steam on Santa Fe 151/5001. Live editor preview,

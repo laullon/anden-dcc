@@ -1,6 +1,8 @@
 # Locomotive artwork
 
 Three original, stylized SVG illustrations extend the existing flat palette.
+The UI uses generic Electric / Diesel / Steam labels and no painted model
+numbers (0.6.2). Prototype references below describe the inspiration only.
 They are visual bases for electric, diesel and steam cards, not scale drawings
 or claims that the decoder identifies a particular model.
 
@@ -29,7 +31,7 @@ embedded `WebAssets.h`. CI checks both for freshness. Each SVG is embedded once
 and cloned in the browser; it is not duplicated in firmware for every loco.
 No image downloads, external fonts or raster assets are needed at runtime.
 
-The three SVG source files total 7114 bytes. The complete 0.6.1 firmware uses
+The initial 0.6.1 SVG source files totaled 7114 bytes. The complete 0.6.1 firmware uses
 501148 program bytes versus 491076 in 0.6.0: **10072 extra bytes**, including the
 selector, metadata storage, API changes and OTA staging cleanup. It remains below half the 1044480-byte
 application partition; global RAM increases by 8 bytes to 74712. The PNG preview

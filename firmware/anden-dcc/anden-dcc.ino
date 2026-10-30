@@ -11,7 +11,7 @@
 // Arduino-Pico 6.3.1, Pico W, flash: 1 MB application + 1 MB LittleFS.
 // Logic-analyzer prototype: GP2 carries DCC; no power-stage pins are assigned.
 const char* AP_NAME = "anden-dcc";
-const char* VERSION = "0.6.1";
+const char* VERSION = "0.6.2";
 WebServer server(80);
 HTTPUpdateServer updater;
 String networkName, networkPassword;

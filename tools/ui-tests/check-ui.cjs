@@ -82,7 +82,7 @@ const makeLoco=(id,address,name='',f0=false,type='electric')=>({id,address,name,
  for(let n=3;n<=8;n++){await page.locator('#add-loco').click();await page.locator('#loco-name').fill('Display train '+n);await save();}
  assert.equal(await page.locator('.train-card').count(),8);assert.equal(await page.locator('#add-loco').isDisabled(),true);
  for(const loco of [...state.dcc.locos].slice(2)){await card(loco.id).locator('.edit-loco').click();await page.locator('#remove-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);}
- await page.locator('[data-lang="es"]').click();assert.equal(await page.locator('h1').textContent(),'Dale vida a tu escena.');assert.equal(await card(1).locator('.edit-loco').textContent(),'Editar');assert.equal(await card(1).locator('.loco-kind').textContent(),'Vapor · Santa Fe');
+ await page.locator('[data-lang="es"]').click();assert.equal(await page.locator('h1').textContent(),'Dale vida a tu escena.');assert.equal(await card(1).locator('.edit-loco').textContent(),'Editar');assert.equal(await card(1).locator('.loco-kind').textContent(),'Vapor');
  await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='es');assert.equal(await page.locator('#setup').getAttribute('open'),null);
  await page.locator('[data-lang="en"]').click();
  await page.locator('#setup>summary').click();await page.screenshot({path:path.join(out,'ui-setup.png'),fullPage:true});

@@ -18,6 +18,5 @@
 <g fill="#b3bea8"><rect x="165" y="29" width="35" height="9" rx="2"/><rect x="215" y="34" width="12" height="4"/></g>
 <g fill="none" stroke="#bd876b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M74 37h59M80 33l41-9 10 7-45 3 35-10m-32-3h35M252 37h55m-46-4 28-14-23-12m0 0h-17m17 0 28 12-28 14"/></g>
 <path d="M78 36v-3m45 3v-3m139 3v-3m34 3v-3" stroke="#e5d3aa" stroke-width="3"/>
-<text x="192" y="94" text-anchor="middle" fill="#efd59b" font-family="sans-serif" font-size="8" letter-spacing="1.5">269</text>
 <circle class="lamp" cx="51" cy="91" r="3.5"/><circle class="lamp" cx="331" cy="91" r="3.5"/>
 </svg>

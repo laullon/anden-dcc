@@ -19,7 +19,7 @@ some light, sound and, eventually, a little movement—without a full-size comma
 station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
 hardware, independent of browser and Wi-Fi activity.
 
-**Current release: 0.6.1.** A shared locomotive roster, independent F0/headlights
+**Current release: 0.6.2.** A shared locomotive roster, independent F0/headlights
 and a guided F0 address finder are implemented. This is a **logic-output prototype**. Track
 power, motor control and current protection are not enabled in firmware. The
 Deek-Robot power assembly is a documented proposal for the next stage.
