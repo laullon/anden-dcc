@@ -30,7 +30,7 @@ try:
   while b'\n' in pending:
    line,pending=pending.split(b'\n',1)
    # Only our structured diagnostic is printed; save raw data privately.
-   for marker in [b'ANDEN_UNO_',b'PROBE_BEGIN',b'PROBE_RESULT',b'PROBE_DONE',b'BOOT_MONITOR_READY',b'BOOT_CAPTURE']:
+   for marker in [b'ANDEN_UNO_',b'PROBE_BEGIN',b'PROBE_RESULT',b'PROBE_DONE',b'BOOT_MONITOR_READY',b'BOOT_CAPTURE',b'ROM_SYNC']:
     if marker in line:
      print(line[line.index(marker):].decode('ascii','replace').strip(),flush=True)
   if not args.monitor and b'PROBE_DONE' in raw:break

@@ -42,6 +42,18 @@ Each window reports a byte count and the first 64 bytes in hex at 115200 baud.
 The shared UART is not used as a continuous echo bridge, which could feed ESP
 responses back into its command input.
 
+Version 3 also sends one ESP ROM `SYNC` packet at 115200 baud after each listen
+window. To test this independently of the installed firmware, hold the ESP13
+**KEY** button, press and release its **RST**, wait one second, then release KEY.
+A startup message with first boot-mode value `1` confirms UART bootloader mode.
+`ROM_SYNC status=OK` requires a correctly framed, successful SYNC response;
+ordinary boot text, packet echoes, and error replies do not count.
+
+This experiment sends no erase, flash/RAM download, or register-write commands.
+The packet follows [Espressif’s serial protocol](https://docs.espressif.com/projects/esptool/en/latest/esp8266/advanced-topics/serial-protocol.html).
+After testing, press ESP13 RST with KEY released to return to its installed
+firmware.
+
 The host prints only structured diagnostic lines. Its raw log stays locally in
 `/tmp/anden-uno-esp13-probe.log` (override with `--log`); review it before sharing
 because arbitrary pre-existing ESP firmware may emit private data. Without
@@ -53,5 +65,19 @@ On 2026-11-02 the Uno bootloader identified an ATmega328P and the diagnostic was
 uploaded successfully with both switches OFF. With both switches ON, all six
 AT probes received zero bytes. The ESP13 power LED is lit and the user confirmed
 soldered, stacked headers. This does **not** establish whether the ESP has AT
-firmware or whether its UART routing/level conversion is working; startup-log
-testing is the next check.
+firmware or whether both UART directions work.
+
+The startup-log test subsequently captured 630 bytes after each of two ESP13
+resets. The decoded prefix was:
+
+```text
+ets Jan  8 2013,rst cause:2, boot mode:(3,6)
+load 0x401000
+```
+
+This confirms the ESP ROM is running and the ESP-to-Uno receive path works. It
+does not verify the Uno-to-ESP transmit path or identify the installed firmware.
+The first boot-mode value of 3 denotes booting from flash; see the
+[Espressif SDK API guide](https://www.espressif.com/sites/default/files/2c-esp8266_non_os_sdk_api_guide_en_v1.5.4.pdf).
+
+Repeating the six AT probes after those resets still received zero bytes.

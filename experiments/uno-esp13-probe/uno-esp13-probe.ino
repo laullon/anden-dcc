@@ -45,6 +45,48 @@ bool probe(unsigned long baud) {
   return ack;
 }
 
+bool hasSyncReply(unsigned received) {
+  uint8_t frame[32];
+  unsigned length=0;
+  bool escaped=false,overflow=false,inFrame=false;
+  for(unsigned i=0;i<received;++i) {
+    uint8_t b=uint8_t(reply[i]);
+    if(b==0xC0) {
+      if(inFrame && !overflow && !escaped && length>=10) {
+        unsigned size=unsigned(frame[2]) | (unsigned(frame[3])<<8);
+        if(frame[0]==1 && frame[1]==8 && size>=2 &&
+           length==8+size && frame[length-2]==0 && frame[length-1]==0)
+          return true;
+      }
+      length=0;escaped=false;overflow=false;inFrame=true;
+      continue;
+    }
+    if(!inFrame || overflow)continue;
+    if(escaped) {
+      if(b==0xDC)b=0xC0;
+      else if(b==0xDD)b=0xDB;
+      else {overflow=true;continue;}
+      escaped=false;
+    } else if(b==0xDB) {escaped=true;continue;}
+    if(length<sizeof(frame))frame[length++]=b;
+    else overflow=true;
+  }
+  return false;
+}
+
+void pingRom() {
+  // Espressif ROM SYNC only: no erase, flash/RAM write, or register commands.
+  const uint8_t header[]={0xC0,0,8,36,0,0,0,0,0,7,7,0x12,0x20};
+  discardFor(50);
+  Serial.write(header,sizeof(header));
+  for(uint8_t i=0;i<32;++i)Serial.write(uint8_t(0x55));
+  Serial.write(uint8_t(0xC0));Serial.flush();
+  unsigned received=capture(400);
+  bool ok=hasSyncReply(received);
+  Serial.print(F("ROM_SYNC status="));Serial.print(ok?F("OK"):F("NO_REPLY"));
+  Serial.print(F(" received="));Serial.println(received);Serial.flush();
+}
+
 void setup() {
   // Standard unmodified L298P shield: both enables LOW throughout this test.
   digitalWrite(3,LOW);pinMode(3,OUTPUT);
@@ -52,7 +94,7 @@ void setup() {
   const uint8_t controls[]={8,9,12,13};
   for(uint8_t pin:controls) {digitalWrite(pin,LOW);pinMode(pin,OUTPUT);}
   Serial.begin(115200);delay(1500);
-  Serial.println(F("ANDEN_UNO_ESP13_PROBE v2; MOTOR_OUTPUTS_DISABLED"));Serial.flush();
+  Serial.println(F("ANDEN_UNO_ESP13_PROBE v3; MOTOR_OUTPUTS_DISABLED"));Serial.flush();
   discardFor(300);
   const unsigned long rates[]={115200,9600,57600,38400,19200,74880};
   bool found=false;
@@ -85,6 +127,8 @@ void loop() {
     Serial.print(b,HEX);
   }
   Serial.println();Serial.flush();
+  discardFor(100);
+  pingRom();
   discardFor(100);
   Serial.begin(74880);
 }
