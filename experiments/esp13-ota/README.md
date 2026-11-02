@@ -61,6 +61,9 @@ SYNC diagnostic worked because the Uno sketch generated the ESP commands and
 reported their results to the Mac.
 
 This wiring is prepared for physical testing, not yet recorded as successful.
+A [software relay with the shield left stacked](../uno-esp13-proxy/README.md) was
+also tested: USB packets passed with the switches OFF but failed with them ON,
+while the Uno still reported its startup. No ESP flash was written.
 After flashing and validating ESP OTA, unplug USB, remove all five jumpers, and
 restack the shield. The Uno's diagnostic sketch remains installed until it is
 explicitly replaced.
