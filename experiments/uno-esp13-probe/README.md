@@ -81,3 +81,15 @@ The first boot-mode value of 3 denotes booting from flash; see the
 [Espressif SDK API guide](https://www.espressif.com/sites/default/files/2c-esp8266_non_os_sdk_api_guide_en_v1.5.4.pdf).
 
 Repeating the six AT probes after those resets still received zero bytes.
+
+The subsequent KEY/RST test produced `boot mode:(1,6)` and repeated
+`ROM_SYNC status=OK received=96` at 115200 baud. This confirms successful,
+validated command/response communication in both directions through the stacked
+shield. No ESP flash or RAM download was performed. The AT-command failure now
+needs investigation of the installed firmware and its command UART mapping,
+rather than assuming the shield is unpowered or the serial link is broken.
+
+Some ESP-AT firmware configurations use GPIO15/GPIO13 for commands instead of
+the GPIO1/GPIO3 ROM UART; see
+[Espressif's AT port configuration documentation](https://espressif-docs.readthedocs-hosted.com/projects/esp-at/en/release-v2.1.0.0_esp8266/Compile_and_Develop/How_to_set_AT_port_pin.html).
+That is a possible explanation, not an identification of this board's firmware.
