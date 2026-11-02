@@ -82,9 +82,12 @@ proyecto para este prototipo local.
 ## Experimento ESP13 / Uno
 
 Hay un [firmware independiente para el ESP13](experiments/esp13-ota/README.md)
-con configuración Wi-Fi y actualizaciones OTA. Necesita una primera instalación
-por cable; la instalación física y las pruebas OTA están pendientes. La versión
-actual no controla trenes ni sustituye el firmware de la Pico.
+con configuración Wi-Fi y actualizaciones OTA. La instalación inicial, Wi-Fi,
+mDNS y las actualizaciones OTA consecutivas ya están verificadas. La
+[prueba de las tres placas por USB](experiments/uno-stack-test/README.md) permite
+comprobar la comunicación con el Uno, hacer parpadear su LED L y consultar pines
+y lecturas ADC. Los puentes alimentados y el control DCC desde el Uno siguen
+pendientes; esta versión no sustituye el firmware de la Pico.
 
 ## Licencia
 

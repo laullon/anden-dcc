@@ -9,6 +9,7 @@ static const char SETUP_PAGE[] PROGMEM = R"ESP13(<!doctype html>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111b25'/%3E%3Cpath d='M19 48V19q0-7 13-7t13 7v29M20 34h24M25 48l-4 7m18-7 4 7' fill='none' stroke='%23efb663' stroke-width='5'/%3E%3Cpath d='M25 21h14v8H25z' fill='%23efb663'/%3E%3Ccircle cx='25' cy='41' r='3' fill='%23efb663'/%3E%3Ccircle cx='39' cy='41' r='3' fill='%23efb663'/%3E%3C/svg%3E">
 <style>
 :root{font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e9eef2;background:#0b121a;--line:#2c3b48;--muted:#a8b8c5;--amber:#efb663;--green:#8cd6b3}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top right,#23313b66,transparent 65%)}main{max-width:840px;margin:auto;padding:48px 24px 64px}header{display:flex;align-items:center;gap:16px;margin-bottom:40px}.mark{display:grid;place-items:center;width:56px;height:56px;border:1px solid #8b673c;border-radius:17px;color:var(--amber);font-size:30px;background:#241f1a}.brand{font-size:24px;letter-spacing:-1px;font-weight:750}.eyebrow{color:var(--amber);font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase}.version{margin-left:auto;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12px}h1{font-size:clamp(29px,6vw,43px);line-height:1.15;letter-spacing:-1.4px;margin:12px 0}p{margin:12px 0}.intro{color:var(--muted);max-width:540px;margin-bottom:30px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card,details{background:#111c27;border:1px solid var(--line);border-radius:20px;padding:24px}.card h2{font-size:12px;font-weight:650;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin:0 0 15px}.status{font-size:22px;font-weight:650;display:flex;align-items:center;gap:10px}.dot{width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0}.dot.connected{background:var(--green);box-shadow:0 0 14px #8cd6b344}.muted{color:var(--muted);font-size:14px}.detail{overflow-wrap:anywhere;min-height:22px}a{color:var(--amber);text-underline-offset:4px}.note{border-left:2px solid #627b8c;padding-left:14px;margin:24px 0 30px;font-size:14px;color:var(--muted)}details{padding:0;overflow:hidden}summary{cursor:pointer;padding:22px 24px;font-weight:650}summary::marker{color:var(--amber)}.setup{border-top:1px solid var(--line);padding:0 24px 24px}.section{padding-top:24px}.section+.section{margin-top:24px;border-top:1px solid var(--line)}h3{margin:0 0 6px;font-size:18px}label{display:block;font-size:13px;margin:16px 0 6px;color:#cbd5de}input{display:block;background:#0b141e;border:1px solid #415362;color:#e9eef2;border-radius:10px;padding:12px;width:100%;font:inherit;min-width:0}input:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--amber);outline-offset:3px}button{cursor:pointer;border:1px solid var(--amber);background:var(--amber);color:#21190f;font:inherit;font-size:14px;line-height:1.4;font-weight:650;border-radius:10px;padding:12px 18px;min-height:44px}button.secondary{border-color:#415362;background:transparent;color:#d3dce3}button:disabled{opacity:.5;cursor:wait}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.message{font-size:14px;margin-top:14px;color:var(--green);overflow-wrap:anywhere}.message.error{color:#ffb9a5}.message:empty{display:none}progress{width:100%;height:10px;accent-color:var(--amber);margin-top:18px}progress[hidden]{display:none}.footer{margin-top:26px;color:#8fa3b3;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}@media(max-width:560px){main{padding:28px 18px 40px}header{margin-bottom:30px;gap:12px}.mark{height:48px;width:48px}.brand{font-size:22px}.version{padding:4px 8px}.grid,.form-row{grid-template-columns:1fr}.card{padding:21px}.setup{padding:0 20px 20px}summary{padding:20px}.actions button{flex:1}}
+.stack-card{grid-column:1/-1}.stack-readouts{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px}.stack-readouts span{color:var(--muted)}
 </style>
 </head>
 <body><main>
@@ -19,8 +20,9 @@ static const char SETUP_PAGE[] PROGMEM = R"ESP13(<!doctype html>
 <div class="grid">
  <section class="card" aria-labelledby="network-title"><h2 id="network-title">Your Wi-Fi</h2><div class="status"><span class="dot" id="network-dot"></span><span id="network-state">Checking…</span></div><p class="muted detail" id="ssid">Waiting for the board</p><a class="mono" id="lan-link" hidden></a><p class="muted" id="network-hint">Network status refreshes automatically.</p></section>
  <section class="card" aria-labelledby="recovery-title"><h2 id="recovery-title">Always a way back</h2><div class="status">Setup network</div><p class="muted detail" id="ap-name">anden-esp13 · open Wi-Fi</p><a class="mono" id="ap-link" href="http://192.168.13.1/">192.168.13.1</a><p class="muted">Available even when your router is out of reach.</p></section>
+ <section class="card stack-card" aria-labelledby="uno-title"><h2 id="uno-title">Uno + motor shield</h2><div class="status"><span class="dot" id="uno-dot"></span><span id="uno-state">Checking Uno…</span></div><p class="muted detail" id="uno-detail">Waiting for a checked serial reply</p><div class="stack-readouts mono"><span id="uno-outputs">Enable pins: unknown</span><span id="uno-adc">A0 / A1: —</span></div><div class="actions"><button class="secondary stack-action" id="ping-uno" type="button" disabled>Ping Uno</button><button class="stack-action" id="blink-uno" type="button" disabled>Blink Uno L LED</button></div><p class="message" id="uno-message" role="status" aria-live="polite"></p><p class="muted">The L LED also shares the shield’s direction B pin. Both bridge enables stay LOW during this test.</p></section>
 </div>
-<p class="note">This experimental build handles Wi-Fi and updates. Train control and communication with the Uno come next.</p>
+<p class="note">Logic bench test: Wi-Fi, OTA and the Uno serial link. DCC and the motor power stage are not tested by this build.</p>
 <details id="setup"><summary>Setup <span class="muted">· Wi-Fi &amp; firmware</span></summary><div class="setup">
 <section class="section"><h3>Join your network</h3><p class="muted">Use a 2.4 GHz Wi-Fi network. Its details stay on this ESP13 and survive firmware updates made with the same flash layout.</p>
 <form id="wifi-form" action="/setup/wifi" method="post"><div class="form-row"><div><label for="ssid-input">Network name</label><input id="ssid-input" name="ssid" required autocomplete="off" placeholder="Your Wi-Fi name"></div><div><label for="password">Wi-Fi password</label><input id="password" name="password" type="password" maxlength="64" autocomplete="new-password" placeholder="Blank for an open network"></div></div><div class="actions"><button id="save-wifi" type="submit">Save &amp; connect</button><button class="secondary" id="forget-wifi" type="button">Forget saved Wi-Fi</button></div></form><p class="message" id="wifi-message" role="status" aria-live="polite"></p></section>
@@ -33,10 +35,32 @@ static const char SETUP_PAGE[] PROGMEM = R"ESP13(<!doctype html>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-let state=null, uploading=false, editing=false, changingWifi=false;
+let state=null, uploading=false, editing=false, changingWifi=false, stackBusy=false;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error)}
-function lock(value){for(const control of document.querySelectorAll('form input,form button'))control.disabled=value;$('upload-button').disabled=value||!state}
+function lock(value){for(const control of document.querySelectorAll('form input,form button'))control.disabled=value;$('upload-button').disabled=value||!state;renderUno()}
+function renderUno(){
+ const u=state&&state.uno,online=!!(u&&u.online),disabled=online&&u.enableA===false&&u.enableB===false;
+ $('uno-state').textContent=online?'Connected':'Not detected';$('uno-dot').classList.toggle('connected',online);
+ $('uno-detail').textContent=online?'v'+u.version+' · '+u.roundTripMs+' ms round trip · '+u.rxFrames+' checked replies':'Check the Uno test sketch and both ESP13 switches. No motor commands are sent.';
+ $('uno-outputs').textContent=online?(disabled?'D3 LOW · D11 LOW':'Enable input HIGH — LED test blocked'):'Enable pins: unknown';
+ $('uno-adc').textContent=online?'A0 / A1: '+u.adcA+' / '+u.adcB+' raw ADC':'A0 / A1: —';
+ $('ping-uno').disabled=!state||uploading||changingWifi||stackBusy;
+ $('blink-uno').disabled=!disabled||uploading||changingWifi||stackBusy;
+}
+async function stackAction(action){
+ if(uploading||changingWifi||stackBusy||!state)return;
+ stackBusy=true;lock(true);message('uno-message','Waiting for the Uno…');
+ try{
+  const response=await fetch('/api/uno/'+action,{method:'POST'}),result=await response.json();
+  if(result.online!==undefined)state.uno=result;
+  if(!response.ok)throw Error(result.error||'The Uno did not return a checked reply. Check the sketch and switches.');
+  message('uno-message',action==='led'?'Blink acknowledged — watch the Uno L LED. Both bridge enables remain LOW.':'Uno replied. Serial link is working.');
+ }catch(error){message('uno-message',error.message,true)}
+ finally{stackBusy=false;lock(false);await refreshStatus()}
+}
+$('ping-uno').addEventListener('click',()=>stackAction('ping'));
+$('blink-uno').addEventListener('click',()=>stackAction('led'));
 async function readStatus(){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
  try{const response=await fetch('/api/status',{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('Board did not return status');return await response.json()}finally{clearTimeout(timer)}
@@ -53,12 +77,12 @@ async function refreshStatus(){
   $('ota-space').textContent='Maximum image: '+Math.floor(state.otaMaxBytes/1024)+' KiB';
   $('board-health').textContent='ESP8266 · '+Math.round(state.freeHeap/1024)+' KiB free RAM';
   if(!editing)$('ssid-input').value=state.ssid||'';
-  if(!changingWifi)$('upload-button').disabled=false;
- }catch(error){$('version').textContent='Offline';$('network-state').textContent='Board unreachable';$('network-dot').classList.remove('connected');$('network-hint').textContent='Check your connection, or join anden-esp13 and open 192.168.13.1.';state=null;$('upload-button').disabled=true}
+  if(!changingWifi&&!stackBusy)$('upload-button').disabled=false;renderUno();
+ }catch(error){$('version').textContent='Offline';$('network-state').textContent='Board unreachable';$('network-dot').classList.remove('connected');$('network-hint').textContent='Check your connection, or join anden-esp13 and open 192.168.13.1.';state=null;$('upload-button').disabled=true;renderUno()}
 }
 $('ssid-input').addEventListener('input',()=>editing=true);
 async function wifiRequest(path,body){
- if(uploading||changingWifi)return;
+ if(uploading||changingWifi||stackBusy)return;
  changingWifi=true;lock(true);message('wifi-message','Sending settings…');
  try{const response=await fetch(path,{method:'POST',body});const result=await response.json();if(!response.ok)throw Error(result.error||'Could not save Wi-Fi');message('wifi-message',result.message);$('password').value='';editing=false}
  catch(error){message('wifi-message',error.message,true)}finally{changingWifi=false;lock(false);await refreshStatus()}
@@ -82,7 +106,7 @@ async function waitForRestart(oldBoot){
  throw Error('Upload accepted, but restart was not confirmed. Reconnect to anden-esp13 or check the board IP.');
 }
 $('update-form').addEventListener('submit',async event=>{
- event.preventDefault();if(uploading||changingWifi)return;
+ event.preventDefault();if(uploading||changingWifi||stackBusy)return;
  const file=$('firmware').files[0];if(!file)return;uploading=true;lock(true);
  try{
   if(!state)throw Error('Wait for the board to return its status.');

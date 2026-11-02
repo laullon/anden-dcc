@@ -1,5 +1,15 @@
 # Changelog
 
+## ESP13 / Uno bench experiment · 2026-11-02
+
+- ESP13 v0.1.1 adds checked UART communication with Uno stack-test v0.1.0.
+- Add web ping/L LED controls, enable-pin readback and uncalibrated ADC readings.
+- Hold both L298P enables LOW; there are no bridge-enable or train commands.
+- Validate a full original ESP backup, serial installation, Wi-Fi/mDNS, repeated
+  OTA, and live web → ESP → Uno communication with the three boards stacked.
+- Add shared framing/CRC corruption tests, Uno compilation and browser checks.
+- Powered bridges, DCC output and current/overload calibration remain untested.
+
 ## 0.5.3
 
 - Add a small train favicon, with SVG and 16/32px ICO formats.

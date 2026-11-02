@@ -226,9 +226,11 @@ tools/               web embedding, OTA, capture decoding and UI checks
 ## ESP13 / Uno experiment
 
 A separate [ESP13 web + OTA firmware](experiments/esp13-ota/README.md) provides
-Wi-Fi setup and future wireless updates for the Uno shield experiment. It needs
-one initial serial installation; physical deployment and OTA validation are
-pending. It does not replace the Pico controller or provide Uno train control yet.
+Wi-Fi setup and wireless updates for the Uno shield experiment. Initial serial
+installation, Wi-Fi/mDNS, repeated OTA, and the [USB-only three-board bench test](experiments/uno-stack-test/README.md)
+have been checked on hardware. The page can ping the Uno, blink its L LED and
+show the motor-shield enable pins and raw ADC counts. Powered bridges and Uno DCC
+control remain future work; this does not replace the Pico controller.
 The [Uno UART diagnostic](experiments/uno-esp13-probe/README.md) records the
 verified ESP13 bootloader communication.
 

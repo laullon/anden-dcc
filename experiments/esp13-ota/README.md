@@ -2,7 +2,9 @@
 
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
 Wi-Fi setup and browser-based firmware updates. It is **not AT modem firmware**,
-and does not yet provide a train-control protocol, DCC generation, or Uno updates.
+and does not provide a train-control protocol, DCC generation, or Uno updates.
+Version 0.1.1 adds [Uno stack bench tests](../uno-stack-test/README.md): checked
+serial ping/status, enable-pin readback, raw ADC values and a guarded L LED test.
 The existing Pico W controller stays separate.
 
 ## What it does
@@ -13,11 +15,13 @@ The existing Pico W controller stays separate.
 - Advertises **anden-esp13.local**, with direct IP access as a fallback.
 - Saves explicit Wi-Fi changes in the ESP8266 SDK settings, outside the sketch.
 - Accepts firmware updates from the collapsed **Setup → firmware** panel.
-- Provides `/api/status` with board identity, version, IPs, update space and boot ID.
+- Provides `/api/status` with board identity, version, IPs, update space, boot ID
+  and the Uno bench-test state.
+- Adds web buttons for Uno ping and its L LED; both bridge enables stay LOW.
 - Uses no application login or access-point password, as requested.
 
-The app does not print to the shared Uno UART or drive its pins. The ESP ROM still
-sends its usual boot message. Leave the track/motor supply disconnected during
+The app sends only checked protocol frames on the Uno UART, with no debug
+logging. The ESP ROM still sends its usual boot message, which the Uno parser ignores. Leave the track/motor supply disconnected during
 this experiment; the ESP firmware cannot guarantee the Uno's output state.
 
 ## One first installation, then OTA
@@ -135,9 +139,9 @@ confirms both the expected version and a new boot ID:
 
 ```sh
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.1.0 --dry-run
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.1.1 --dry-run
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.1.0
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.1.1
 ```
 
 OTA replaces the ESP application, including its update code. Always use a build
@@ -146,8 +150,8 @@ recovery; this experiment does not provide automatic rollback.
 
 ## Verification status
 
-Version **0.1.0** compiles successfully: **353,952 bytes** (below the 448 KiB
-image limit), with 29,276 bytes of static RAM. Host checks cover credential
+Version **0.1.1** compiles successfully: **361,232 bytes** (below the 448 KiB
+image limit), with 29,520 bytes of static RAM. Host checks cover credential
 boundaries, image/target checks, and confirmed-reboot handling. Browser tests
 cover Wi-Fi save/forget, setup visibility, bad files, upload failures, simulated
 restarts, offline handling, and desktop/mobile layouts down to 320 px.
@@ -163,9 +167,14 @@ Connected DTR/RTS wires can hold the device in download mode; leave them
 disconnected for a manual normal reset, release KEY, then press RST. The programmer
 was intentionally left in bootloader mode after the verified write.
 
-Application HTTP access, saved credentials, mDNS on the actual network, and
-consecutive OTA updates still await physical validation. A verified serial write
-does not establish those runtime results.
+Application HTTP access, Wi-Fi configuration through the setup page, saved
+credentials and mDNS HTTP access were subsequently verified on hardware. Two
+consecutive v0.1.0 OTA uploads passed the app's expected-version/new-boot-ID checks;
+the device reconnected to the router after both. The v0.1.1 stack test was then
+deployed over OTA and its web-to-Uno serial link and LED test passed. A further
+OTA update with the UART connected also passed, and the Uno link recovered with
+both enables LOW and zero timeout/bad-frame counts. See the
+[stack test report](../uno-stack-test/README.md) for the measurements and limits.
 
 References: [ESP8266 Arduino OTA documentation](https://arduino-esp8266.readthedocs.io/en/3.1.1/ota_updates/readme.html),
 [Espressif esptool commands](https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/basic-commands.html).

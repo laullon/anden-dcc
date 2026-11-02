@@ -45,6 +45,7 @@ jobs:
         with:
           python-version: '3.13'
       - run: python3 tests/check_esp13.py
+      - run: python3 tests/check_stack_link.py
       - uses: arduino/setup-arduino-cli@v2
         with:
           version: '1.x'
@@ -60,3 +61,16 @@ jobs:
           path: |
             build/esp13-ota/esp13-ota.ino.bin
             build/esp13-ota/manifest.json
+
+  uno-stack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: '1.x'
+      - run: arduino-cli core install arduino:avr@1.8.7
+      - run: tools/build-uno-stack.sh

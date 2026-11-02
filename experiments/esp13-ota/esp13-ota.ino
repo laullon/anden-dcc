@@ -5,13 +5,15 @@
 #include <ESP8266HTTPUpdateServer.h>
 #include "SetupPage.h"
 #include "WifiValidation.h"
+#include "UnoLink.h"
 
-// Independent ESP8266 experiment. No train commands or Uno GPIO control.
+// ESP8266 stack bench test. No train commands or bridge enable commands.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.1.0";
+constexpr char VERSION[] = "0.1.1";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
+UnoLink uno;
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer updater(false);  // No debug output on the Uno UART.
 bool mdnsReady = false;
@@ -70,12 +72,14 @@ void sendStatus() {
   body += F(",\"flashBytes\":"); body += ESP.getFlashChipRealSize();
   body += F(",\"layoutBytes\":"); body += ESP.getFlashChipSize();
   body += F(",\"freeHeap\":"); body += ESP.getFreeHeap();
+  body += F(",\"uno\":"); body += uno.json();
   body += F(",\"dccImplemented\":false}");
   sendJson(200, body);
 }
 
 void setup() {
-  // Do not write to the shared serial port. ESP ROM boot logs are unavoidable.
+  // Only checked protocol frames use the Uno UART. ROM startup noise is ignored.
+  uno.begin();
   WiFi.persistent(false);
   WiFi.mode(WIFI_AP_STA);
   bootId = uint32_t(random(0x7FFFFFFF));
@@ -91,6 +95,16 @@ void setup() {
     server.send_P(200, "text/html; charset=utf-8", SETUP_PAGE);
   });
   server.on("/api/status", HTTP_GET, sendStatus);
+  server.on("/api/uno/ping", HTTP_POST, [] {
+    bool ok=uno.query("PING");sendJson(ok?200:503,uno.json());
+  });
+  server.on("/api/uno/led", HTTP_POST, [] {
+    if (!uno.query("PING")) {sendJson(503,uno.json());return;}
+    if (!uno.outputsDisabled()) {
+      sendJson(409,F("{\"error\":\"Uno enable pins must both be LOW for the LED test.\"}"));return;
+    }
+    bool ok=uno.query("LED");sendJson(ok?200:503,uno.json());
+  });
   server.on("/setup/wifi", HTTP_POST, [] {
     String ssid = server.arg("ssid");
     String password = server.arg("password");
@@ -119,6 +133,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
+  uno.loop();
   if ((pendingConnect || pendingForget) && int32_t(millis() - applyAt) >= 0) {
     bool forget = pendingForget;
     pendingConnect = pendingForget = false;

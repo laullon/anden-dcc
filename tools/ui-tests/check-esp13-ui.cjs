@@ -7,7 +7,7 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
  const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),headless:true});
  try{
   const context=await browser.newContext({viewport:{width:1180,height:1000}});
-  let current={name:'anden-esp13',platform:'esp8266',appId:'ANDEN_ESP13_OTA_V1',version:'0.1.0',bootId:41,connected:true,configured:true,mdnsReady:true,ssid:'Workshop Wi-Fi',ip:'192.168.86.50',apIp:'192.168.13.1',apReady:true,otaMaxBytes:448*1024,freeHeap:32000,layoutBytes:1048576};
+  let current={name:'anden-esp13',platform:'esp8266',appId:'ANDEN_ESP13_OTA_V1',version:'0.1.1',bootId:41,connected:true,configured:true,mdnsReady:true,ssid:'Workshop Wi-Fi',ip:'192.168.86.50',apIp:'192.168.13.1',apReady:true,otaMaxBytes:448*1024,freeHeap:32000,layoutBytes:1048576,uno:{online:true,version:'0.1.0',enableA:false,enableB:false,adcA:0,adcB:1,roundTripMs:8,rxFrames:2,ledEdges:0}};
   let offline=false,uploadCount=0,acceptUpload=false,wifiCalls=[];
   await context.route('http://esp13.test/**',async route=>{
    const request=route.request(),pathname=new URL(request.url()).pathname;
@@ -15,16 +15,28 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
    if(pathname==='/setup/wifi'||pathname==='/setup/wifi/forget'){
     wifiCalls.push({pathname,body:request.postData()});return route.fulfill({status:202,json:{message:'Settings accepted.'}});
    }
+   if(pathname==='/api/uno/ping'||pathname==='/api/uno/led'){
+    if(!current.uno.online)return route.fulfill({status:503,json:current.uno});
+    if(pathname.endsWith('/led'))current.uno.ledEdges=15;
+    return route.fulfill({json:current.uno});
+   }
    if(pathname==='/update'){
-    uploadCount++;if(acceptUpload){current={...current,bootId:42,version:'0.1.1'};return route.fulfill({body:'Update Success! Rebooting...'});}
+    uploadCount++;if(acceptUpload){current={...current,bootId:42,version:'0.1.2'};return route.fulfill({body:'Update Success! Rebooting...'});}
     return route.fulfill({body:'Update error: test rejection'});
    }
    return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'experiments/esp13-ota/web/index.html'),'utf8')});
   });
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('http://esp13.test/');await page.waitForFunction(()=>document.getElementById('version').textContent==='v0.1.0');
+  await page.goto('http://esp13.test/');await page.waitForFunction(()=>document.getElementById('version').textContent==='v0.1.1');
   assert.equal(await page.locator('#setup').getAttribute('open'),null);
   assert.equal(await page.locator('#network-state').textContent(),'Connected');
+  assert.equal(await page.locator('#uno-state').textContent(),'Connected');
+  await page.locator('#ping-uno').click();await page.waitForFunction(()=>document.getElementById('uno-message').textContent.includes('Serial link is working'));
+  await page.locator('#blink-uno').click();await page.waitForFunction(()=>document.getElementById('uno-message').textContent.includes('Blink acknowledged'));
+  current.uno.online=false;await page.evaluate(()=>refreshStatus());assert.equal(await page.locator('#blink-uno').isDisabled(),true);
+  await page.locator('#ping-uno').click();await page.waitForFunction(()=>document.getElementById('uno-message').classList.contains('error'));
+  current.uno.online=true;current.uno.enableA=true;await page.evaluate(()=>refreshStatus());assert.equal(await page.locator('#blink-uno').isDisabled(),true);
+  current.uno.enableA=false;current.uno.ledEdges=0;await page.evaluate(()=>refreshStatus());
   await page.locator('#setup>summary').click();
   await page.locator('#ssid-input').fill('A draft network');await page.evaluate(()=>refreshStatus());
   assert.equal(await page.locator('#ssid-input').inputValue(),'A draft network');
@@ -48,8 +60,8 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
   await upload(valid);await page.waitForFunction(()=>document.getElementById('update-message').textContent.includes('test rejection'));
   assert.equal(uploadCount,1);assert.equal(await page.locator('#upload-button').isDisabled(),false);
   acceptUpload=true;await upload(valid);
-  await page.waitForFunction(()=>document.getElementById('update-message').textContent.includes('Back online — firmware v0.1.1.'));
-  assert.equal(uploadCount,2);assert.equal(await page.locator('#version').textContent(),'v0.1.1');
+  await page.waitForFunction(()=>document.getElementById('update-message').textContent.includes('Back online — firmware v0.1.2.'));
+  assert.equal(uploadCount,2);assert.equal(await page.locator('#version').textContent(),'v0.1.2');
   current={...current,ssid:'<img src=x onerror=alert(1)>'};await page.evaluate(()=>refreshStatus());
   assert.equal(await page.locator('#ssid img').count(),0);assert.equal(await page.locator('#ssid').textContent(),current.ssid);
   current={...current,ssid:'Workshop Wi-Fi'};await page.evaluate(()=>refreshStatus());
@@ -64,6 +76,6 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
   offline=true;await page.evaluate(()=>refreshStatus());
   assert.equal(await page.locator('#version').textContent(),'Offline');assert.equal(await page.locator('#upload-button').isDisabled(),true);
   assert.deepEqual(errors,[]);
-  console.log('PASS: ESP13 setup collapsed, Wi-Fi save/forget/drafts, safe SSID text, OTA wrong-image/profile/size rejection, failed upload recovery, verified reboot, offline state, desktop/mobile.');
+  console.log('PASS: ESP13 Uno ping/LED/offline/enable guards, setup collapsed, Wi-Fi save/forget/drafts, safe SSID text, OTA wrong-image/profile/size rejection, failed upload recovery, verified reboot, offline state, desktop/mobile.');
  }finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exit(1)});
