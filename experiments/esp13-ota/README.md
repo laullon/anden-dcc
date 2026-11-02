@@ -152,9 +152,20 @@ boundaries, image/target checks, and confirmed-reboot handling. Browser tests
 cover Wi-Fi save/forget, setup visibility, bad files, upload failures, simulated
 restarts, offline handling, and desktop/mobile layouts down to 320 px.
 
-These are software checks. First boot, saved credentials, mDNS on the actual
-network, and consecutive OTA updates still require an initial installation and
-physical validation.
+On **2026-11-02**, serial installation was completed on the ESP8266EX with
+**2 MB physical flash**, using a CP210x adapter connected to the raw ESP UART at
+**115200 baud** and a separate capable 3.3 V supply. The full original flash was
+backed up privately and validated before writing. Installation and a subsequent
+serial reflash both passed the programmer's flash-hash verification.
+
+The raw-UART connection requires both shield switches OFF to isolate the Uno.
+Connected DTR/RTS wires can hold the device in download mode; leave them
+disconnected for a manual normal reset, release KEY, then press RST. The programmer
+was intentionally left in bootloader mode after the verified write.
+
+Application HTTP access, saved credentials, mDNS on the actual network, and
+consecutive OTA updates still await physical validation. A verified serial write
+does not establish those runtime results.
 
 References: [ESP8266 Arduino OTA documentation](https://arduino-esp8266.readthedocs.io/en/3.1.1/ota_updates/readme.html),
 [Espressif esptool commands](https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/basic-commands.html).
