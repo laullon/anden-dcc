@@ -36,3 +36,27 @@ jobs:
       - run: npm ci --prefix tools/ui-tests
       - run: npx --prefix tools/ui-tests playwright install --with-deps chromium
       - run: npm test --prefix tools/ui-tests
+
+  esp13:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python3 tests/check_esp13.py
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: '1.x'
+      - name: Install tested ESP8266 core
+        run: |
+          arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
+          arduino-cli core install esp8266:esp8266@3.1.2 --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
+      - name: Compile and validate ESP13 OTA artifact
+        run: tools/build-esp13.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: esp13-ota-firmware
+          path: |
+            build/esp13-ota/esp13-ota.ino.bin
+            build/esp13-ota/manifest.json

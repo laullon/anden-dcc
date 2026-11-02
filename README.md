@@ -223,6 +223,15 @@ tools/               web embedding, OTA, capture decoding and UI checks
 - [x] Shared multi-locomotive roster and automatic F0 refresh.
 - [ ] Add sound functions and restricted movement.
 
+## ESP13 / Uno experiment
+
+A separate [ESP13 web + OTA firmware](experiments/esp13-ota/README.md) provides
+Wi-Fi setup and future wireless updates for the Uno shield experiment. It needs
+one initial serial installation; physical deployment and OTA validation are
+pending. It does not replace the Pico controller or provide Uno train control yet.
+The [Uno UART diagnostic](experiments/uno-esp13-probe/README.md) records the
+verified ESP13 bootloader communication.
+
 ## License
 
 [MIT licensed](LICENSE). Build it, change it, share it, sell it, or teach your

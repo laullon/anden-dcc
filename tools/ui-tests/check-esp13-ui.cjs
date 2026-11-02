@@ -1,0 +1,69 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'../..');
+const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,{recursive:true});
+(async()=>{
+ const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),headless:true});
+ try{
+  const context=await browser.newContext({viewport:{width:1180,height:1000}});
+  let current={name:'anden-esp13',platform:'esp8266',appId:'ANDEN_ESP13_OTA_V1',version:'0.1.0',bootId:41,connected:true,configured:true,mdnsReady:true,ssid:'Workshop Wi-Fi',ip:'192.168.86.50',apIp:'192.168.13.1',apReady:true,otaMaxBytes:448*1024,freeHeap:32000,layoutBytes:1048576};
+  let offline=false,uploadCount=0,acceptUpload=false,wifiCalls=[];
+  await context.route('http://esp13.test/**',async route=>{
+   const request=route.request(),pathname=new URL(request.url()).pathname;
+   if(pathname==='/api/status')return offline?route.abort():route.fulfill({json:current});
+   if(pathname==='/setup/wifi'||pathname==='/setup/wifi/forget'){
+    wifiCalls.push({pathname,body:request.postData()});return route.fulfill({status:202,json:{message:'Settings accepted.'}});
+   }
+   if(pathname==='/update'){
+    uploadCount++;if(acceptUpload){current={...current,bootId:42,version:'0.1.1'};return route.fulfill({body:'Update Success! Rebooting...'});}
+    return route.fulfill({body:'Update error: test rejection'});
+   }
+   return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'experiments/esp13-ota/web/index.html'),'utf8')});
+  });
+  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('http://esp13.test/');await page.waitForFunction(()=>document.getElementById('version').textContent==='v0.1.0');
+  assert.equal(await page.locator('#setup').getAttribute('open'),null);
+  assert.equal(await page.locator('#network-state').textContent(),'Connected');
+  await page.locator('#setup>summary').click();
+  await page.locator('#ssid-input').fill('A draft network');await page.evaluate(()=>refreshStatus());
+  assert.equal(await page.locator('#ssid-input').inputValue(),'A draft network');
+  await page.locator('#password').fill('prototype-password');await page.locator('#save-wifi').click();
+  await page.waitForFunction(()=>document.getElementById('wifi-message').textContent==='Settings accepted.');
+  assert(wifiCalls[0].body.includes('A draft network'));assert(wifiCalls[0].body.includes('prototype-password'));
+  assert.equal(await page.locator('#password').inputValue(),'');
+  await page.locator('#forget-wifi').click();await page.waitForFunction(()=>!document.getElementById('save-wifi').disabled);
+  assert.equal(wifiCalls[1].pathname,'/setup/wifi/forget');
+  async function upload(buffer,name='esp13.bin'){
+   await page.locator('#firmware').setInputFiles({name,mimeType:'application/octet-stream',buffer});
+   await page.locator('#upload-button').click();
+  }
+  await upload(Buffer.from('not ESP firmware'));
+  await page.waitForFunction(()=>document.getElementById('update-message').classList.contains('error'));
+  assert.equal(uploadCount,0);
+  const valid=Buffer.concat([Buffer.from([0xe9,1,3,0x20]),Buffer.from('ANDEN_ESP13_OTA_V1')]);
+  const wrongProfile=Buffer.from(valid);wrongProfile[3]=0x40;await upload(wrongProfile);
+  assert.equal(uploadCount,0);
+  await upload(Buffer.concat([valid,Buffer.alloc(448*1024)]));assert.equal(uploadCount,0);
+  await upload(valid);await page.waitForFunction(()=>document.getElementById('update-message').textContent.includes('test rejection'));
+  assert.equal(uploadCount,1);assert.equal(await page.locator('#upload-button').isDisabled(),false);
+  acceptUpload=true;await upload(valid);
+  await page.waitForFunction(()=>document.getElementById('update-message').textContent.includes('Back online — firmware v0.1.1.'));
+  assert.equal(uploadCount,2);assert.equal(await page.locator('#version').textContent(),'v0.1.1');
+  current={...current,ssid:'<img src=x onerror=alert(1)>'};await page.evaluate(()=>refreshStatus());
+  assert.equal(await page.locator('#ssid img').count(),0);assert.equal(await page.locator('#ssid').textContent(),current.ssid);
+  current={...current,ssid:'Workshop Wi-Fi'};await page.evaluate(()=>refreshStatus());
+  await page.screenshot({path:path.join(out,'esp13-setup-desktop.png'),fullPage:true});
+  for(const width of [390,320]){
+   await page.setViewportSize({width,height:1100});
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  }
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await page.waitForTimeout(150);
+  await page.screenshot({path:path.join(out,'esp13-setup-mobile.png'),fullPage:true});
+  offline=true;await page.evaluate(()=>refreshStatus());
+  assert.equal(await page.locator('#version').textContent(),'Offline');assert.equal(await page.locator('#upload-button').isDisabled(),true);
+  assert.deepEqual(errors,[]);
+  console.log('PASS: ESP13 setup collapsed, Wi-Fi save/forget/drafts, safe SSID text, OTA wrong-image/profile/size rejection, failed upload recovery, verified reboot, offline state, desktop/mobile.');
+ }finally{await browser.close()}
+})().catch(error=>{console.error(error);process.exit(1)});

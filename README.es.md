@@ -79,6 +79,13 @@ La documentación técnica está en inglés. Los datos Wi-Fi se guardan en la Pi
 no en el código. La red de configuración y OTA siguen abiertos por decisión del
 proyecto para este prototipo local.
 
+## Experimento ESP13 / Uno
+
+Hay un [firmware independiente para el ESP13](experiments/esp13-ota/README.md)
+con configuración Wi-Fi y actualizaciones OTA. Necesita una primera instalación
+por cable; la instalación física y las pruebas OTA están pendientes. La versión
+actual no controla trenes ni sustituye el firmware de la Pico.
+
 ## Licencia
 
 [Licencia MIT](LICENSE). Úsalo, modifícalo, compártelo, véndelo o monta tu propio
