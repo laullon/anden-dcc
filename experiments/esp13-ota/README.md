@@ -34,9 +34,42 @@ adapter TX → ESP **RX0**, RX → ESP **TX0**, and GND → GND. Keep the shield
 from the Uno USB; do not add a second power feed from the adapter. A Pico can
 serve as a temporary adapter, but is not required.
 
-The Mac's Uno USB connection is not a direct ESP programming port while stacked.
-The Uno has its own firmware and shares D0/D1 with the USB serial chip; do not run
-an ESP flashing command against that port assuming it reaches the ESP directly.
+### Using only the Uno as the serial adapter
+
+A classic Uno with a separate USB-to-serial chip can act as the adapter without
+changing its sketch. Temporarily **unstack** the ESP13 and hold the Uno ATmega328P
+in reset. With USB unplugged, connect:
+
+| Uno | Destination |
+| --- | --- |
+| RESET | Uno GND |
+| 5V | Shield Arduino 5V |
+| GND | Shield Arduino GND |
+| D0 / RX | Shield Arduino D1 / TX |
+| D1 / TX | Shield Arduino D0 / RX |
+
+Use the shield's **Arduino stacking pins**, with its existing level conversion,
+not the raw 3.3 V ESP RX0/TX0 header. Set both DIP switches ON, then reconnect the
+Uno USB. Keep the motor supply disconnected. Its USB port now reaches the ESP
+through the crossover, while the Uno processor stays inactive.
+
+The pin names describe the Uno processor's viewpoint: its D0 is driven by the
+USB chip's TX and D1 feeds the USB chip's RX. The shield's normal stacked routing
+connects the processor to the ESP; its DIP switches simply connect/disconnect
+those links. They do not supply this USB programming crossover. The earlier ROM
+SYNC diagnostic worked because the Uno sketch generated the ESP commands and
+reported their results to the Mac.
+
+This wiring is prepared for physical testing, not yet recorded as successful.
+After flashing and validating ESP OTA, unplug USB, remove all five jumpers, and
+restack the shield. The Uno's diagnostic sketch remains installed until it is
+explicitly replaced.
+
+Sources: [DOIT manual, page 9](https://pdf.direnc.net/upload/esp8266-esp13-serial-wifi-shield-datasheet.pdf#page=9),
+[USB serial pin directions](https://github.com/Jaycar-Electronics/usb-serial-converter),
+and [ESP13 Arduino-side programming pins](https://wiki.keyestudio.com/Ks0366_Keyestudio_ESP13_Shield_Serial_Port_Module).
+
+### Identify, back up, then upload
 
 Using current Espressif `esptool` and the **direct adapter's port**, hold the
 shield KEY button, press/release its RST, wait one second, then release KEY.
