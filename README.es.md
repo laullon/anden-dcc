@@ -91,7 +91,8 @@ nombres/direcciones/tipos guardados y F0 independiente, con señal DCC del Timer
 del Uno por **D10**. Ambos puentes siguen deshabilitados: faltan medir los pulsos
 físicos y probar vías alimentadas. La persistencia de la lista, las confirmaciones
 F0 y otro reinicio OTA ya están comprobados. Esta versión no sustituye el firmware
-de la Pico.
+de la Pico. El ESP **0.2.1** usa además el LED azul para indicar la conexión Wi-Fi
+y hacer un breve pulso por petición; el sondeo automático no lo activa.
 
 ## Licencia
 

@@ -6,10 +6,11 @@
 #include "SetupPage.h"
 #include "WifiValidation.h"
 #include "UnoLink.h"
+#include "StatusLed.h"
 
 // ESP8266 roster + stack bench test. No bridge-enable commands.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.2.0";
+constexpr char VERSION[] = "0.2.1";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
@@ -24,6 +25,16 @@ bool pendingConnect = false;
 uint32_t bootId = 0;
 uint32_t applyAt = 0;
 String nextSsid, nextPassword;
+StatusLed statusLed;
+bool statusLedOn=false;
+
+void refreshStatusLed() {
+  bool on=statusLed.on(millis(),WiFi.status()==WL_CONNECTED);
+  if(on!=statusLedOn) {
+    statusLedOn=on;
+    digitalWrite(StatusLed::PIN,on?LOW:HIGH);
+  }
+}
 
 String jsonString(const String& value) {
   String out = "\"";
@@ -54,6 +65,7 @@ void sendJson(int code, const String& body) {
 #include "RosterControl.h"
 
 void sendStatus() {
+  refreshStatusLed();
   bool connected = WiFi.status() == WL_CONNECTED;
   String body;
   body.reserve(500);
@@ -74,6 +86,9 @@ void sendStatus() {
   body += F(",\"flashBytes\":"); body += ESP.getFlashChipRealSize();
   body += F(",\"layoutBytes\":"); body += ESP.getFlashChipSize();
   body += F(",\"freeHeap\":"); body += ESP.getFreeHeap();
+  body += F(",\"led\":{\"pin\":16,\"activeLow\":true,\"on\":"); body += statusLedOn?"true":"false";
+  body += F(",\"pinHigh\":"); body += digitalRead(StatusLed::PIN)==HIGH?"true":"false";
+  body += F(",\"activityRequests\":"); body += statusLed.requests(); body+='}';
   body += F(",\"uno\":"); body += uno.json();
   body += F(",\"storageReady\":");body+=rosterStorage?"true":"false";
   body += F(",\"dccImplemented\":true,\"trackPower\":false,\"dcc\":");body+=dccStatus();body+='}';
@@ -81,6 +96,9 @@ void sendStatus() {
 }
 
 void setup() {
+  digitalWrite(StatusLed::PIN,HIGH); // Active LOW: initialize OFF before output mode.
+  pinMode(StatusLed::PIN,OUTPUT);
+  refreshStatusLed();
   // Only checked protocol frames use the Uno UART. ROM startup noise is ignored.
   loadRoster();uno.attach(roster);uno.begin();
   WiFi.persistent(false);
@@ -93,6 +111,13 @@ void setup() {
   WiFi.setAutoReconnect(stationConfigured);
   if (stationConfigured) WiFi.begin();
 
+  server.addHook([](const String& method,const String& url,WiFiClient*,ESP8266WebServer::ContentTypeFunction) {
+    if(statusLed.request(method.c_str(),url.c_str(),millis())) {
+      // Show the request immediately, including while a handler waits for the Uno.
+      statusLedOn=false;digitalWrite(StatusLed::PIN,HIGH);
+    }
+    return ESP8266WebServer::CLIENT_REQUEST_CAN_CONTINUE;
+  });
   server.on("/", HTTP_GET, [] {
     server.sendHeader("Cache-Control", "no-store");
     server.sendHeader("Content-Encoding","gzip");
@@ -137,8 +162,10 @@ void setup() {
 }
 
 void loop() {
+  refreshStatusLed();
   server.handleClient();
   uno.loop();
+  refreshStatusLed();
   if ((pendingConnect || pendingForget) && int32_t(millis() - applyAt) >= 0) {
     bool forget = pendingForget;
     pendingConnect = pendingForget = false;

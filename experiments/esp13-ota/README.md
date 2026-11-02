@@ -2,7 +2,7 @@
 
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
 Wi-Fi setup, browser-based firmware updates and a locomotive roster. Version
-**0.2.0** controls independent F0 packets on the Uno through a checked UART link.
+**0.2.1** controls independent F0 packets on the Uno through a checked UART link.
 The [Uno bench firmware](../uno-stack-test/README.md) emits logic on **D10**, with
 both motor bridges disabled. This is our own application, not AT modem firmware;
 it cannot update the Uno. The existing Pico W controller stays separate.
@@ -21,11 +21,36 @@ it cannot update the Uno. The existing Pico W controller stays separate.
 - Saves names/addresses and Electric, Diesel or Steam types in LittleFS.
 - Sends acknowledged F0 changes through the Uno; shows packet bytes and counters.
 - Adds web buttons for Uno ping and its L LED; both bridge enables stay LOW.
+- Uses the blue LED for Wi-Fi status and feedback on user requests.
 - Uses no application login or access-point password, as requested.
 
 The app sends only checked protocol frames on the Uno UART, with no debug
 logging. The ESP ROM still sends its usual boot message, which the Uno parser ignores. Leave the track/motor supply disconnected during
 this experiment; the ESP firmware cannot guarantee the Uno's output state.
+
+## Blue LED feedback
+
+ESP **0.2.1** uses the DOIT shield's blue LED on **GPIO16, active LOW**:
+
+- Blinks every 500 ms while disconnected from the configured router (including
+  when only the setup access point is running).
+- Stays ON when the router connection is established.
+- Dips OFF for 120 ms on page loads and user requests, then returns to Wi-Fi status.
+  New requests extend the dip; merely keeping the page open does not flash it.
+- Automatic `GET`/`HEAD /api/status` polls and background Uno UART polls are quiet.
+
+The server hook covers all routes, including Setup, OTA, roster commands and
+errors. Feedback uses timestamps and GPIO writes, with no added delay or UART
+logging. A long request can hold the LED off until the handler returns. This
+GPIO belongs to the ESP; the Uno L LED test remains separate. Generic ESP8266
+`LED_BUILTIN` may point at another pin and is deliberately not used.
+
+`GET /api/status` includes `led.pin`, `activeLow`, `on`, `pinHigh` (GPIO readback)
+and `activityRequests` (since boot). Readback confirms the driven pin state;
+physical LED operation still needs visual confirmation on each shield revision.
+
+Sources: [DOIT manual, LED definition](https://pdf.direnc.net/upload/esp8266-esp13-serial-wifi-shield-datasheet.pdf#page=6),
+[firsthand GPIO16/active-LOW identification on a DOIT ESP13](https://forum.arduino.cc/t/esp13-shield-by-doit-is-there-a-schematic-for-this-anywhere/479363/5).
 
 ## One first installation, then OTA
 
@@ -142,9 +167,9 @@ confirms both the expected version and a new boot ID:
 
 ```sh
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.0 --dry-run
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.1 --dry-run
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.0
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.1
 ```
 
 OTA replaces the ESP application, including its update code. Always use a build
@@ -172,6 +197,15 @@ needs physical measurement. See the [stack guide](../uno-stack-test/README.md)
 for pins, the UART protocol and API endpoints.
 
 ## Verification status
+
+ESP **0.2.1** compiles to **390,448 bytes** with **30,852 bytes static RAM**.
+Host checks cover disconnected/connected LED states, quiet status polling,
+request pulse extension and the millis rollover. On 2026-11-03, OTA confirmed a
+new 0.2.1 boot and the Uno/DCC link recovered with both enables LOW and no reported
+deadline faults. Live GPIO readback verified LOW while connected, HIGH after a
+user ping, and LOW again afterward; repeated status polls did not increment the
+activity counter. The GPIO16 mapping is based on the DOIT ESP13 identification
+linked above; visual confirmation is tracked separately from GPIO readback.
 
 Version **0.2.0** compiles successfully: **389,344 bytes** (below the 448 KiB
 image limit), with **30,844 bytes** of static RAM. Host checks cover credential

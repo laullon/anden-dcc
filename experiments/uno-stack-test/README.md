@@ -71,8 +71,9 @@ D13 is also the bridge B direction input. The web LED endpoint first requests
 fresh pin states and rejects the action if either enable is HIGH. The Uno keeps
 both enables LOW in its loop; there are no commands to enable a bridge. During
 reset/upload the MCU cannot hold outputs, which is why motor VIN staysdisconnected.
-Power LEDs stay on; this test does not assign an ESP user-LED pin or test powered
-motor-output indicators.
+Power LEDs stay on. ESP firmware 0.2.1 also uses its blue GPIO16 LED for
+[Wi-Fi/request feedback](../esp13-ota/README.md#blue-led-feedback). Powered
+motor-output indicators remain untested.
 
 ## Timing and analyzer check
 

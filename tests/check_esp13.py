@@ -79,7 +79,26 @@ with tempfile.TemporaryDirectory(prefix='anden-esp13-check-') as tmp:
 #include <cassert>
 #include <string>
 #include "WifiValidation.h"
+#include "StatusLed.h"
 int main() {
+  StatusLed led;
+  assert(led.on(0,false)); assert(led.on(499,false));
+  assert(!led.on(500,false)); assert(!led.on(999,false)); assert(led.on(1000,false));
+  assert(led.on(500,true));
+  assert(!led.request("GET","/api/status",0));
+  assert(!led.request("HEAD","/api/status",0));
+  assert(led.requests()==0 && led.on(0,true));
+  assert(led.request("GET","/",100));
+  assert(!led.on(100,true)); assert(!led.on(219,true)); assert(led.on(220,true));
+  assert(led.request("POST","/dcc/f0",300));
+  assert(led.request("POST","/locos/save",350));
+  assert(!led.on(469,true)); assert(led.on(470,true)); assert(led.requests()==3);
+  // Activity expiry must remain correct through the millis() rollover.
+  assert(led.request("GET","/missing",UINT32_MAX-15));
+  assert(!led.on(103,true)); assert(led.on(104,true));
+  assert(!led.request("GET","/api/status",200)); assert(led.requests()==4);
+  assert(led.request("POST","/setup/wifi",600)); assert(!led.on(719,false));
+  assert(!led.on(720,false)); assert(led.on(1000,false));
   assert(validSsid("x",1));
   std::string ssid(32,'x'); assert(validSsid(ssid.data(),ssid.size()));
   ssid+='x'; assert(!validSsid(ssid.data(),ssid.size()));
@@ -100,4 +119,4 @@ int main() {
     subprocess.run([os.environ.get('CXX','c++'), '-std=c++11', '-I', str(experiment),
                     str(source), '-o', str(binary)], check=True)
     subprocess.run([str(binary)], check=True)
-print('PASS: ESP13 embedded page, credential boundaries, app/platform/layout/size OTA guards, wrong-target refusal and verified-reboot helper flow.')
+print('PASS: ESP13 LED heartbeat/request pulses/quiet polling/rollover, embedded page, credential boundaries, app/platform/layout/size OTA guards, wrong-target refusal and verified-reboot helper flow.')

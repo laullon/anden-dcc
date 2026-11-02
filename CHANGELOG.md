@@ -1,5 +1,13 @@
 # Changelog
 
+## ESP13 feedback 0.2.1 · 2026-11-03
+
+- Use the DOIT shield blue LED on GPIO16 (active LOW) for Wi-Fi and UI feedback:
+  500 ms blinking while disconnected, steady when connected, and a 120 ms
+  off pulse on user requests. Automatic status polls remain quiet.
+- Add LED pin/state/request diagnostics and host checks for pulse extension,
+  background polling and millis rollover. Uno firmware remains at 0.2.0.
+
 ## ESP13 / Uno DCC experiment 0.2.0 · 2026-11-03
 
 - Generate F0 DCC packets on Uno D10 with Timer1 hardware toggles, whole-packet
