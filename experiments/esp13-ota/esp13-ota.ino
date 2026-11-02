@@ -7,9 +7,9 @@
 #include "WifiValidation.h"
 #include "UnoLink.h"
 
-// ESP8266 stack bench test. No train commands or bridge enable commands.
+// ESP8266 roster + stack bench test. No bridge-enable commands.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.1.1";
+constexpr char VERSION[] = "0.2.0";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
@@ -51,6 +51,8 @@ void sendJson(int code, const String& body) {
   server.send(code, "application/json", body);
 }
 
+#include "RosterControl.h"
+
 void sendStatus() {
   bool connected = WiFi.status() == WL_CONNECTED;
   String body;
@@ -73,13 +75,14 @@ void sendStatus() {
   body += F(",\"layoutBytes\":"); body += ESP.getFlashChipSize();
   body += F(",\"freeHeap\":"); body += ESP.getFreeHeap();
   body += F(",\"uno\":"); body += uno.json();
-  body += F(",\"dccImplemented\":false}");
+  body += F(",\"storageReady\":");body+=rosterStorage?"true":"false";
+  body += F(",\"dccImplemented\":true,\"trackPower\":false,\"dcc\":");body+=dccStatus();body+='}';
   sendJson(200, body);
 }
 
 void setup() {
   // Only checked protocol frames use the Uno UART. ROM startup noise is ignored.
-  uno.begin();
+  loadRoster();uno.attach(roster);uno.begin();
   WiFi.persistent(false);
   WiFi.mode(WIFI_AP_STA);
   bootId = uint32_t(random(0x7FFFFFFF));
@@ -92,7 +95,8 @@ void setup() {
 
   server.on("/", HTTP_GET, [] {
     server.sendHeader("Cache-Control", "no-store");
-    server.send_P(200, "text/html; charset=utf-8", SETUP_PAGE);
+    server.sendHeader("Content-Encoding","gzip");
+    server.send_P(200,"text/html; charset=utf-8",reinterpret_cast<const char*>(SETUP_PAGE),sizeof(SETUP_PAGE));
   });
   server.on("/api/status", HTTP_GET, sendStatus);
   server.on("/api/uno/ping", HTTP_POST, [] {
@@ -128,6 +132,7 @@ void setup() {
   // No authentication, as requested for this local prototype.
   updater.setup(&server, "/update");
   server.onNotFound([] { server.send(404, "text/plain", "Not found"); });
+  rosterRoutes();
   server.begin();
 }
 

@@ -46,6 +46,7 @@ jobs:
           python-version: '3.13'
       - run: python3 tests/check_esp13.py
       - run: python3 tests/check_stack_link.py
+      - run: python3 tests/check_uno_dcc.py
       - uses: arduino/setup-arduino-cli@v2
         with:
           version: '1.x'

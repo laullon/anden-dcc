@@ -86,8 +86,12 @@ con configuración Wi-Fi y actualizaciones OTA. La instalación inicial, Wi-Fi,
 mDNS y las actualizaciones OTA consecutivas ya están verificadas. La
 [prueba de las tres placas por USB](experiments/uno-stack-test/README.md) permite
 comprobar la comunicación con el Uno, hacer parpadear su LED L y consultar pines
-y lecturas ADC. Los puentes alimentados y el control DCC desde el Uno siguen
-pendientes; esta versión no sustituye el firmware de la Pico.
+y lecturas ADC. La versión **0.2.0** añade dos tarjetas de locomotoras (hasta ocho),
+nombres/direcciones/tipos guardados y F0 independiente, con señal DCC del Timer1
+del Uno por **D10**. Ambos puentes siguen deshabilitados: faltan medir los pulsos
+físicos y probar vías alimentadas. La persistencia de la lista, las confirmaciones
+F0 y otro reinicio OTA ya están comprobados. Esta versión no sustituye el firmware
+de la Pico.
 
 ## Licencia
 

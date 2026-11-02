@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <AndenStackLink.h>
+#include "UnoDcc.h"
 
-constexpr char VERSION[]="0.1.0";
+constexpr char VERSION[]="0.2.0";
 constexpr uint8_t ENABLE_A=3,ENABLE_B=11,BRAKE_A=9,BRAKE_B=8,DIR_A=12,DIR_B=13;
 AndenLink::Receiver receiver;
 uint8_t ledEdges=0;
@@ -17,21 +18,33 @@ void sendState(uint16_t sequence) {
       (digitalRead(BRAKE_A)?4:0)|(digitalRead(BRAKE_B)?8:0)|
       (digitalRead(DIR_A)?16:0)|(digitalRead(DIR_B)?32:0);
   char body[AndenLink::MAX_BODY+1],wire[AndenLink::MAX_BODY+8];
-  snprintf(body,sizeof(body),"AD1,%u,STATE,%s,%u,%u,%u,%u",sequence,VERSION,
-      unsigned(analogRead(A0)),unsigned(analogRead(A1)),unsigned(flags),unsigned(ledEdges));
+  auto dcc=UnoDcc::status();
+  snprintf(body,sizeof(body),"AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u",sequence,VERSION,
+      unsigned(analogRead(A0)),unsigned(analogRead(A1)),unsigned(flags),unsigned(ledEdges),
+      unsigned(dcc.running),unsigned(dcc.count),unsigned(dcc.signature),unsigned(dcc.mask),dcc.packets,unsigned(dcc.faults));
   size_t size=AndenLink::encode(wire,sizeof(wire),body);
   if (size) Serial.write(reinterpret_cast<const uint8_t*>(wire),size);
 }
 
 void command() {
-  char* parts[3];
-  if (AndenLink::fields(receiver.body,parts,3)!=3 || strcmp(parts[0],"AD1")) return;
+  char* parts[20];
+  size_t n=AndenLink::fields(receiver.body,parts,20);
+  if(n<3 || strcmp(parts[0],"AD1"))return;
   uint16_t sequence;
-  if (!AndenLink::number(parts[1],sequence) || !sequence) return;
-  if (!strcmp(parts[2],"LED")) {
-    // L is D13, also shield direction B. Both bridge enables stay LOW.
+  if(!AndenLink::number(parts[1],sequence)||!sequence)return;
+  if(!strcmp(parts[2],"ROSTER")){
+    uint16_t count;if(n<4 || !AndenLink::number(parts[3],count)||count>8 || n!=4+count*2)return;
+    uint8_t addresses[8]={0},mask=0;
+    for(uint8_t i=0;i<count;++i){uint16_t address,on;
+      if(!AndenLink::number(parts[4+i*2],address)||!address||address>127 ||
+         !AndenLink::number(parts[5+i*2],on)||on>1)return;
+      addresses[i]=address;if(on)mask|=1<<i;
+    }
+    if(!UnoDcc::set(count,addresses,mask))return;
+  }else if(n!=3)return;
+  else if(!strcmp(parts[2],"LED")){
     digitalWrite(DIR_B,HIGH);ledEdges=15;nextEdge=millis()+120;
-  } else if (strcmp(parts[2],"PING") && strcmp(parts[2],"STATUS")) return;
+  }else if(strcmp(parts[2],"PING") && strcmp(parts[2],"STATUS"))return;
   holdOutputsDisabled();sendState(sequence);
 }
 
@@ -39,6 +52,7 @@ void setup() {
   const uint8_t pins[]={ENABLE_A,ENABLE_B,BRAKE_A,BRAKE_B,DIR_A,DIR_B};
   for (uint8_t pin:pins) {digitalWrite(pin,LOW);pinMode(pin,OUTPUT);}
   Serial.begin(115200);
+  UnoDcc::begin();
 }
 
 void loop() {

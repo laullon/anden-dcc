@@ -1,5 +1,19 @@
 # Changelog
 
+## ESP13 / Uno DCC experiment 0.2.0 · 2026-11-03
+
+- Generate F0 DCC packets on Uno D10 with Timer1 hardware toggles, whole-packet
+  roster updates, idle packets and timing-deadline fault telemetry.
+- Add two loco cards (up to eight), independent F0, shared Electric/Diesel/Steam
+  artwork, editable names/addresses and persistent ESP LittleFS roster storage.
+- Keep F0 RAM-only, reset it OFF after ESP boot, and synchronize complete roster
+  snapshots with checked Uno acknowledgements. Keep both bridge enables LOW.
+- Gzip the self-contained ESP UI; preserve collapsed Wi-Fi/OTA Setup.
+- Verify live F0 commands, saved roster through another OTA, F0 reset-off, Uno
+  recovery, desktop/mobile UI, and native packet/boundary tests.
+- Uno physical pulse widths and powered motor-shield operation remain pending.
+- Pico firmware remains at 0.6.2.
+
 ## ESP13 / Uno bench experiment · 2026-11-02
 
 - ESP13 v0.1.1 adds checked UART communication with Uno stack-test v0.1.0.

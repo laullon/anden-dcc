@@ -1,11 +1,11 @@
 # ESP13 · web setup + OTA experiment
 
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
-Wi-Fi setup and browser-based firmware updates. It is **not AT modem firmware**,
-and does not provide a train-control protocol, DCC generation, or Uno updates.
-Version 0.1.1 adds [Uno stack bench tests](../uno-stack-test/README.md): checked
-serial ping/status, enable-pin readback, raw ADC values and a guarded L LED test.
-The existing Pico W controller stays separate.
+Wi-Fi setup, browser-based firmware updates and a locomotive roster. Version
+**0.2.0** controls independent F0 packets on the Uno through a checked UART link.
+The [Uno bench firmware](../uno-stack-test/README.md) emits logic on **D10**, with
+both motor bridges disabled. This is our own application, not AT modem firmware;
+it cannot update the Uno. The existing Pico W controller stays separate.
 
 ## What it does
 
@@ -17,6 +17,9 @@ The existing Pico W controller stays separate.
 - Accepts firmware updates from the collapsed **Setup → firmware** panel.
 - Provides `/api/status` with board identity, version, IPs, update space, boot ID
   and the Uno bench-test state.
+- Displays two loco cards initially, with room for eight short addresses (1–127).
+- Saves names/addresses and Electric, Diesel or Steam types in LittleFS.
+- Sends acknowledged F0 changes through the Uno; shows packet bytes and counters.
 - Adds web buttons for Uno ping and its L LED; both bridge enables stay LOW.
 - Uses no application login or access-point password, as requested.
 
@@ -27,9 +30,9 @@ this experiment; the ESP firmware cannot guarantee the Uno's output state.
 ## One first installation, then OTA
 
 **OTA support must already be running before a wireless update is possible.**
-We have verified the ESP13 ROM bootloader's UART connection, but have not
-identified a working OTA service in its existing firmware. This `.bin` is ready
-for an initial serial installation; it cannot install itself over Wi-Fi.
+An unmodified ESP13 needs one serial installation of this application. Its
+factory firmware may not offer a compatible updater. Once our web page is
+running, subsequent application updates use OTA.
 
 Before replacing the current ESP firmware, identify its flash chip and save a
 full flash backup. A direct UART adapter needs **3.3 V logic**. With such an
@@ -98,8 +101,8 @@ python -m esptool --chip esp8266 --port ADAPTER_PORT --before no-reset --after n
 ```
 
 Press the ESP13 RST with KEY released after the first upload. Disconnect the
-adapter signals before returning the shield switches ON. These are installation
-instructions, not a report of a completed hardware deployment.
+adapter signals before returning the shield switches ON. The direct CP210x
+installation was verified on our board; the Uno-only crossover remains untested.
 
 ## Build
 
@@ -139,19 +142,39 @@ confirms both the expected version and a new boot ID:
 
 ```sh
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.1.1 --dry-run
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.0 --dry-run
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.1.1
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.0
 ```
 
 OTA replaces the ESP application, including its update code. Always use a build
 that retains OTA support. A failed boot or interrupted update may require serial
 recovery; this experiment does not provide automatic rollback.
 
+## Roster storage and limits
+
+The ESP owns the roster, using the same model, packet encoder and SVG illustrations
+as the Pico UI. New boards start with addresses **3 and 4**; these are placeholders,
+not detected decoder addresses. Names, types and addresses survive ordinary sketch
+OTA with this layout. All F0 states start OFF after an ESP restart. Changing an
+address also resets its F0; renaming keeps it. F1–F4 are OFF in these packets.
+
+On first use, the app initializes the reserved 64 KB LittleFS partition if it
+cannot mount it; this does not overwrite SDK Wi-Fi settings. The roster uses
+`/locos.cfg` with a temporary-file/rename save. A filesystem image, erase or layout
+change can remove it. If storage fails, metadata saves report an error.
+
+The UI starts with two columns on desktop and one on small screens. F0 waits for
+the Uno to acknowledge the complete roster; offline controls stay disabled while
+saved metadata remains editable. The current build provides no rail power, speed,
+CV programming, extra functions or address finder. Packet timing on D10 still
+needs physical measurement. See the [stack guide](../uno-stack-test/README.md)
+for pins, the UART protocol and API endpoints.
+
 ## Verification status
 
-Version **0.1.1** compiles successfully: **361,232 bytes** (below the 448 KiB
-image limit), with 29,520 bytes of static RAM. Host checks cover credential
+Version **0.2.0** compiles successfully: **389,344 bytes** (below the 448 KiB
+image limit), with **30,844 bytes** of static RAM. Host checks cover credential
 boundaries, image/target checks, and confirmed-reboot handling. Browser tests
 cover Wi-Fi save/forget, setup visibility, bad files, upload failures, simulated
 restarts, offline handling, and desktop/mobile layouts down to 320 px.
@@ -175,6 +198,13 @@ deployed over OTA and its web-to-Uno serial link and LED test passed. A further
 OTA update with the UART connected also passed, and the Uno link recovered with
 both enables LOW and zero timeout/bad-frame counts. See the
 [stack test report](../uno-stack-test/README.md) for the measurements and limits.
+
+Version 0.2.0 was then deployed OTA with Uno 0.2.0. Independent F0 commands were
+acknowledged by the Uno, with bridge enables LOW and no reported timing-deadline
+faults. A second 0.2.0 OTA confirmed roster name/type/address persistence, F0 OFF
+after reboot and restored Uno synchronization. The real gzip-served page passed
+browser control and 320 px layout checks; physical pulse widths and powered
+motor-shield operation remain unmeasured.
 
 References: [ESP8266 Arduino OTA documentation](https://arduino-esp8266.readthedocs.io/en/3.1.1/ota_updates/readme.html),
 [Espressif esptool commands](https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/basic-commands.html).
