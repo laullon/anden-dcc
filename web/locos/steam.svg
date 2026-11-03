@@ -21,6 +21,6 @@
 <path d="M133 101v26m-13-13h26m23-13v26m-13-13h26m23-13v26m-13-13h26m23-13v26m-13-13h26m23-13v26m-13-13h26" stroke="#9f795d" stroke-width="2"/>
 <path d="M132 117h145m-109 0 16-10h89" fill="none" stroke="#d9c6a3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 <g fill="#f2d299"><circle cx="133" cy="117" r="3"/><circle cx="169" cy="117" r="3"/><circle cx="205" cy="117" r="3"/><circle cx="241" cy="117" r="3"/><circle cx="277" cy="117" r="3"/></g>
-<rect x="294" y="62" width="13" height="12" rx="3" fill="#bcc0a9"/><circle class="lamp" cx="301" cy="68" r="4"/>
-<circle class="lamp" cx="27" cy="97" r="3"/>
+<rect x="294" y="62" width="13" height="12" rx="3" fill="#bcc0a9"/><circle class="lamp lamp-right" cx="301" cy="68" r="4"/>
+<circle class="lamp lamp-left" cx="27" cy="97" r="3"/>
 </svg>

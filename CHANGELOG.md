@@ -1,5 +1,13 @@
 # Changelog
 
+## ESP13 power UI and directional lamps 0.5.1 · 2026-11-03
+
+- Show explicit track ON/OFF, unknown and bench states with a matching action.
+- Make the active power-off action red and retain off access while status is unknown.
+- Swap white headlights and red tail lights with direction on all three illustrations.
+- Darken the preview when F0 or track output is off; verify state and lamp rendering.
+- ESP-only update; Uno 0.5.0 remains compatible.
+
 ## ESP13 / Uno stationary locomotive test 0.5.0 · 2026-11-03
 
 - Add explicit track power, a browser-owned heartbeat and a two-second Uno lease.

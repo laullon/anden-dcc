@@ -61,7 +61,7 @@ const char PAGE[] = R"WEB(<!doctype html>
 <g fill="#b3bea8"><rect x="165" y="29" width="35" height="9" rx="2"/><rect x="215" y="34" width="12" height="4"/></g>
 <g fill="none" stroke="#bd876b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M74 37h59M80 33l41-9 10 7-45 3 35-10m-32-3h35M252 37h55m-46-4 28-14-23-12m0 0h-17m17 0 28 12-28 14"/></g>
 <path d="M78 36v-3m45 3v-3m139 3v-3m34 3v-3" stroke="#e5d3aa" stroke-width="3"/>
-<circle class="lamp" cx="51" cy="91" r="3.5"/><circle class="lamp" cx="331" cy="91" r="3.5"/>
+<circle class="lamp lamp-left" cx="51" cy="91" r="3.5"/><circle class="lamp lamp-right" cx="331" cy="91" r="3.5"/>
 </svg></template>
 <template id="art-diesel"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" data-model="333">
 <ellipse cx="191" cy="130" rx="160" ry="5" fill="#091f24" opacity=".45"/>
@@ -82,7 +82,7 @@ const char PAGE[] = R"WEB(<!doctype html>
 <path d="M62 110h13m17 0h13m17 0h13m108 0h13m17 0h13m17 0h13" stroke="#abbda5" stroke-width="2"/>
 <path d="M123 37v-4h18v4m55 0v-3h20v3m40 0v-4h25v4" fill="#6c8877"/>
 <path d="M42 96v-11m296 11V85" stroke="#e0c68d" stroke-width="1.5"/>
-<circle class="lamp" cx="42" cy="88" r="3.5"/><circle class="lamp" cx="337" cy="88" r="3.5"/>
+<circle class="lamp lamp-left" cx="42" cy="88" r="3.5"/><circle class="lamp lamp-right" cx="337" cy="88" r="3.5"/>
 </svg></template>
 <template id="art-steam"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" data-model="santa-fe">
 <ellipse cx="190" cy="131" rx="166" ry="5" fill="#091f24" opacity=".45"/>
@@ -107,8 +107,8 @@ const char PAGE[] = R"WEB(<!doctype html>
 <path d="M133 101v26m-13-13h26m23-13v26m-13-13h26m23-13v26m-13-13h26m23-13v26m-13-13h26m23-13v26m-13-13h26" stroke="#9f795d" stroke-width="2"/>
 <path d="M132 117h145m-109 0 16-10h89" fill="none" stroke="#d9c6a3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 <g fill="#f2d299"><circle cx="133" cy="117" r="3"/><circle cx="169" cy="117" r="3"/><circle cx="205" cy="117" r="3"/><circle cx="241" cy="117" r="3"/><circle cx="277" cy="117" r="3"/></g>
-<rect x="294" y="62" width="13" height="12" rx="3" fill="#bcc0a9"/><circle class="lamp" cx="301" cy="68" r="4"/>
-<circle class="lamp" cx="27" cy="97" r="3"/>
+<rect x="294" y="62" width="13" height="12" rx="3" fill="#bcc0a9"/><circle class="lamp lamp-right" cx="301" cy="68" r="4"/>
+<circle class="lamp lamp-left" cx="27" cy="97" r="3"/>
 </svg></template>
 <!-- LOCO_ART_END -->
 <footer class="footer"><span data-i18n="footer">Built for trains on display.</span><span>anden-dcc <span data-version>—</span> · PICO W</span></footer>
