@@ -1,5 +1,13 @@
 # Changelog
 
+## ESP13 stable power transitions 0.5.2 · 2026-11-03
+
+- Keep exactly one action visible while switching power on/off.
+- Fix the action column width, reserve status-text space and remove redundant
+  success messages so the power card and loco cards stay in place.
+- Keep DCC diagnostics compact and stable across power changes.
+- Verify delayed transitions at desktop, narrow-panel and phone widths.
+
 ## ESP13 power UI and directional lamps 0.5.1 · 2026-11-03
 
 - Show explicit track ON/OFF, unknown and bench states with a matching action.

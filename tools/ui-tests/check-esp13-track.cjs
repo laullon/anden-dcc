@@ -7,8 +7,8 @@ const root=path.resolve(__dirname,'../..');
  await page.route('http://esptrack.test/**',async route=>{
   const req=route.request(),u=new URL(req.url()),data=new URLSearchParams(req.postData());
   if(u.pathname==='/api/status'){if(state.dcc.finder)state.dcc.finder.waitMs=Math.max(0,settleUntil-Date.now());return route.fulfill({json:state})}
-  if(u.pathname==='/api/track/on'){on++;lease++;state.uno.enableA=state.uno.trackActive=true;state.uno.bench={supported:true,dccSupported:true,active:true,state:1,mode:3,remainingMs:2000};return route.fulfill({json:{lease}})}
-  if(u.pathname==='/api/track/off'){off++;state.uno.enableA=state.uno.trackActive=state.uno.bench.active=false;state.uno.bench.state=3;return route.fulfill({json:{ok:true}})}
+  if(u.pathname==='/api/track/on'){await new Promise(r=>setTimeout(r,350));on++;lease++;state.uno.enableA=state.uno.trackActive=true;state.uno.bench={supported:true,dccSupported:true,active:true,state:1,mode:3,remainingMs:2000};return route.fulfill({json:{lease}})}
+  if(u.pathname==='/api/track/off'){await new Promise(r=>setTimeout(r,350));off++;state.uno.enableA=state.uno.trackActive=state.uno.bench.active=false;state.uno.bench.state=3;return route.fulfill({json:{ok:true}})}
   if(u.pathname==='/api/track/keep'){keeps++;assert.equal(data.get('lease'),String(lease));return route.fulfill(refuseKeep?{status:409,json:{error:'Lease expired'}}:{json:{ok:true}})}
   if(u.pathname==='/dcc/direction'){const l=state.dcc.locos.find(l=>l.address===Number(data.get('address')));l.forward=data.get('forward')==='1';assert.equal(l.speed,0);return route.fulfill({json:state.dcc})}
   if(u.pathname==='/dcc/f0'){state.dcc.locos.find(l=>l.address===Number(data.get('address'))).f0=data.get('on')==='1';return route.fulfill({json:state.dcc})}
@@ -64,5 +64,24 @@ const root=path.resolve(__dirname,'../..');
  assert(await page.locator('#finder-add').isDisabled());await page.locator('#track-off').click();await page.waitForFunction(()=>!document.getElementById('finder-add').disabled);assert(await page.locator('#finder-add').isEnabled());
  await page.locator('#finder-add').click();assert.equal(await page.locator('#loco-address').inputValue(),'37');await page.locator('#cancel-loco').click();
  await page.locator('#finder-again').click();assert.equal(state.dcc.finder.stage,'idle');
- assert.deepEqual(errors,[]);console.log('PASS: clear power state/actions/unknown status, directional white/red lamps on all three locos, stationary track explicit-on/heartbeat/off/expiry/no-restart, per-loco direction/F0 while powered, metadata locks, old-firmware guards, leave-page off, mobile layout and guided search to 37 with settling/locks/result editor.');
+ await page.waitForFunction(()=>!finderBusy&&document.getElementById('finder-current').hidden);
+ // Delayed replies must not reveal two buttons or move the card/loco content.
+ const layout=()=>page.evaluate(()=>{
+  const box=e=>{const r=e.getBoundingClientRect();return [r.x+scrollX,r.y+scrollY,r.width,r.height]};
+  const visible=[...document.querySelectorAll('.track-action button')].filter(e=>!e.hidden);
+  return {power:box(document.getElementById('track-power')),locos:box(document.getElementById('loco-list')),button:box(visible[0]),buttons:visible.length};
+ });
+ for(const width of [1180,600,320]){
+  await page.setViewportSize({width,height:1100});await page.evaluate(()=>{message('track-message','');renderTrack()});
+  const before=await layout();await page.locator('#track-on').click();const pending=await layout();assert.equal(pending.buttons,1);
+  await page.waitForFunction(()=>document.getElementById('track-label').textContent==='Track is ON');const powered=await layout();
+  await page.locator('#track-off').click();const stopping=await layout();assert.equal(stopping.buttons,1);
+  await page.waitForFunction(()=>document.getElementById('track-label').textContent==='Track is OFF');const after=await layout();
+  for(const value of [pending,powered,stopping,after]){
+   assert.equal(value.buttons,1);
+   for(const key of ['power','button'])for(let i=0;i<4;i++)assert(Math.abs(value[key][i]-before[key][i])<1.1,JSON.stringify({width,key,before,value}));
+   assert(Math.abs(value.locos[1]-before.locos[1])<1.1,JSON.stringify({width,before,value}));
+  }
+ }
+ assert.deepEqual(errors,[]);console.log('PASS: stable off/pending/on/off layout at 1180/600/320px with delayed replies, clear power state/actions/unknown status, directional white/red lamps on all three locos, stationary track explicit-on/heartbeat/off/expiry/no-restart, per-loco direction/F0 while powered, metadata locks, old-firmware guards, leave-page off, mobile layout and guided search to 37 with settling/locks/result editor.');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
