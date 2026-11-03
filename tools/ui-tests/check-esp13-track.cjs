@@ -28,6 +28,10 @@ const root=path.resolve(__dirname,'../..');
   return route.fulfill({contentType:'text/html' ,body:fs.readFileSync(path.join(root,'experiments/esp13-ota/web/index.html'),'utf8')});
  });
  await page.goto('http://esptrack.test/');await page.waitForFunction(()=>document.querySelectorAll('.loco').length===2);
+ await page.locator('#find-address').click();assert(await page.locator('#finder-first').isEditable());assert(await page.locator('#finder-last').isEditable());assert(await page.locator('#finder-range button').isDisabled());
+ await page.locator('#finder-first').fill('7');await page.locator('#finder-last').fill('90');await page.evaluate(()=>refreshStatus());assert.equal(await page.locator('#finder-first').inputValue(),'7');assert.equal(await page.locator('#finder-last').inputValue(),'90');
+ state.uno.online=false;await page.evaluate(()=>refreshStatus());assert(await page.locator('#finder-first').isEditable());assert(await page.locator('#finder-range button').isDisabled());assert.equal(await page.locator('#finder-last').inputValue(),'90');
+ state.uno.online=true;await page.evaluate(()=>refreshStatus());await page.locator('#finder-first').fill('1');await page.locator('#finder-last').fill('100');await page.locator('#finder-close').click();
  assert.equal(on,0);assert(await page.locator('#track-on').isEnabled());assert(await page.locator('#track-on').isVisible());assert(await page.locator('#track-off').isHidden());assert.equal(await page.locator('#track-label').innerText(),'Track is OFF');
  await page.locator('.loco[data-id="1"] [data-forward="0"]').click();assert.equal(state.dcc.locos[0].forward,false);assert.equal(state.dcc.locos[1].forward,true);
  await page.locator('#track-on').click();await page.waitForFunction(()=>document.getElementById('track-label').textContent==='Track is ON');
@@ -83,5 +87,5 @@ const root=path.resolve(__dirname,'../..');
    assert(Math.abs(value.locos[1]-before.locos[1])<1.1,JSON.stringify({width,before,value}));
   }
  }
- assert.deepEqual(errors,[]);console.log('PASS: stable off/pending/on/off layout at 1180/600/320px with delayed replies, clear power state/actions/unknown status, directional white/red lamps on all three locos, stationary track explicit-on/heartbeat/off/expiry/no-restart, per-loco direction/F0 while powered, metadata locks, old-firmware guards, leave-page off, mobile layout and guided search to 37 with settling/locks/result editor.');
+ assert.deepEqual(errors,[]);console.log('PASS: editable range drafts with power off/offline, guarded Start search, stable off/pending/on/off layout at 1180/600/320px with delayed replies, clear power state/actions/unknown status, directional white/red lamps on all three locos, stationary track explicit-on/heartbeat/off/expiry/no-restart, per-loco direction/F0 while powered, metadata locks, old-firmware guards, leave-page off, mobile layout and guided search to 37 with settling/locks/result editor.');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

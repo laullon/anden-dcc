@@ -1,5 +1,11 @@
 # Changelog
 
+## ESP13 editable finder range 0.5.3 · 2026-11-03
+
+- Allow First/Last address drafts while track power is off or the Uno is offline.
+- Keep Start search guarded by the active page session and track power; explain
+  the requirement beside the button and preserve range drafts across polling.
+
 ## ESP13 stable power transitions 0.5.2 · 2026-11-03
 
 - Keep exactly one action visible while switching power on/off.
