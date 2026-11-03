@@ -10,7 +10,7 @@
 
 // ESP8266 roster + stack bench test. No bridge-enable commands.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.2.2";
+constexpr char VERSION[] = "0.2.3";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);

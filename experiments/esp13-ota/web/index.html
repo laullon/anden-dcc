@@ -16,9 +16,9 @@
   document.documentElement.dataset.theme=theme;
   document.documentElement.style.colorScheme=theme;
   document.querySelector('meta[name="theme-color"]').content=theme==='dark'?'#0b121a':'#f6f3ec';
-  const picker=document.getElementById('theme');if(picker)picker.value=preference;
+  for(const button of document.querySelectorAll('#theme [data-theme-choice]'))button.setAttribute('aria-pressed',String(button.dataset.themeChoice===preference));
  }
- window.andenTheme={get preference(){return preference},set(value){
+ window.andenTheme={get preference(){return preference},refresh:apply,set(value){
   preference=value==='light'||value==='dark'?value:'system';
   try{if(preference==='system')localStorage.removeItem(key);else localStorage.setItem(key,preference)}catch(error){}
   apply();
@@ -49,13 +49,14 @@
 .roster-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:30px}.roster-heading h2{font-size:20px;margin:0}.roster-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0 28px}.loco{background:var(--loco-bg);border:1px solid var(--line);border-radius:20px;overflow:hidden}.loco-top,.loco-bottom{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}.loco-name{font-size:18px;font-weight:650;margin:0;overflow-wrap:anywhere}.loco-art{height:150px;display:flex;justify-content:center;align-items:center;background:var(--art-bg)}.loco-art svg{width:94%;height:138px}.lamp{fill:var(--lamp-off)}.lights-on .lamp{fill:var(--lamp-on);filter:drop-shadow(0 0 5px var(--lamp-glow))}.loco-kind{font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}.light-pair{display:flex;gap:6px}.light-pair button{padding:9px 13px;background:transparent;border-color:var(--control-line);color:var(--soft-text)}.light-pair button[aria-pressed=true]{background:var(--button-bg);border-color:var(--button-bg);color:var(--button-text)}.loco-bytes{font:12px ui-monospace,monospace;color:var(--muted);padding:0 20px 18px}.edit-loco{padding:6px 10px;min-height:36px}.loco-dialog{color:inherit;background:var(--surface);border:1px solid var(--control-line);border-radius:20px;padding:24px;width:min(440px,calc(100% - 28px));max-height:90vh;overflow:auto}.loco-dialog::backdrop{background:var(--backdrop)}.loco-dialog h2{margin:0}.loco-dialog select{font:inherit;color:inherit;background:var(--field);border:1px solid var(--control-line);border-radius:10px;padding:12px;width:100%}.loco-preview{height:110px}.loco-preview svg{width:100%;height:100px}#dcc-info{color:var(--amber);font-size:13px}#roster-message{margin-bottom:18px}@media(max-width:560px){.roster-grid{grid-template-columns:1fr}.roster-heading h2{font-size:18px}}
 
 .header-tools{margin-left:auto;display:flex;align-items:center;gap:14px}
-.theme-picker{display:flex;align-items:center;gap:8px;margin:0;color:var(--muted);font-size:12px}
-.theme-picker select{font:inherit;font-size:14px;min-height:44px;padding:8px;border:1px solid var(--control-line);border-radius:10px;background:var(--field);color:var(--text)}
+.theme-picker{display:inline-flex;gap:3px;padding:3px;border:1px solid var(--control-line);border-radius:12px;background:var(--field);color:var(--muted);font-size:12px}
+.theme-picker button{min-height:44px;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--soft-text);font-size:12px}
+.theme-picker button[aria-pressed=true]{background:var(--button-bg);color:var(--button-text)}
 @media(max-width:560px){.header-tools{flex-basis:100%;justify-content:space-between}}
 </style>
 </head>
 <body><main>
-<header><div class="mark" aria-hidden="true">≋</div><div><div class="brand">anden<span style="color:var(--amber)">.</span></div><div class="eyebrow">ESP13 · Uno DCC</div></div><div class="header-tools"><div class="version" id="version">Connecting…</div><label class="theme-picker" for="theme"><span>Theme</span><select id="theme" aria-label="Theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label></div></header>
+<header><div class="mark" aria-hidden="true">≋</div><div><div class="brand">anden<span style="color:var(--amber)">.</span></div><div class="eyebrow">ESP13 · Uno DCC</div></div><div class="header-tools"><div class="version" id="version">Connecting…</div><div id="theme" class="theme-picker" role="group" aria-label="Theme"><button type="button" data-theme-choice="system" aria-pressed="true">System</button><button type="button" data-theme-choice="light" aria-pressed="false">Light</button><button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button></div></div></header>
 <div class="eyebrow">Your diorama, connected</div>
 <h1>Give your scene<br>some light.</h1>
 <p class="intro">Independent headlights for your locomotives. DCC runs on the Uno; this build keeps the motor bridges disabled.</p>
@@ -150,8 +151,10 @@
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-$('theme').value=andenTheme.preference;
-$('theme').addEventListener('change',event=>andenTheme.set(event.target.value));
+andenTheme.refresh();
+$('theme').addEventListener('click',event=>{
+ const button=event.target.closest('[data-theme-choice]');if(button)andenTheme.set(button.dataset.themeChoice);
+});
 let state=null, uploading=false, editing=false, changingWifi=false, stackBusy=false, rosterBusy=false, rosterRevision=0, lastRoster=[];
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error)}

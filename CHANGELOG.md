@@ -1,5 +1,11 @@
 # Changelog
 
+## ESP13 theme buttons 0.2.3 · 2026-11-03
+
+- Replace the theme dropdown with System / Light / Dark buttons and a highlighted
+  active choice. Keep system following and saved browser preferences.
+- Verify pressed states, keyboard activation, contrast and mobile touch targets.
+
 ## ESP13 themes 0.2.2 · 2026-11-03
 
 - Add a visible System / Light / Dark theme selector to the ESP panel.

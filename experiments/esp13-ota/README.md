@@ -2,7 +2,7 @@
 
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
 Wi-Fi setup, browser-based firmware updates and a locomotive roster. Version
-**0.2.2** controls independent F0 packets on the Uno through a checked UART link.
+**0.2.3** controls independent F0 packets on the Uno through a checked UART link.
 The [Uno bench firmware](../uno-stack-test/README.md) emits logic on **D10**, with
 both motor bridges disabled. This is our own application, not AT modem firmware;
 it cannot update the Uno. The existing Pico W controller stays separate.
@@ -31,15 +31,16 @@ this experiment; the ESP firmware cannot guarantee the Uno's output state.
 
 ## Appearance
 
-Use **Theme** in the header to select **System**, **Light** or **Dark**. System
-is the default and follows device appearance changes while the page is open.
+Use the **System**, **Light** and **Dark** buttons in the header. The current
+choice is highlighted. System is the default and follows device appearance
+changes while the page is open.
 Explicit choices are stored in this browser for this origin, survive reloads,
 and are applied before the page paints. Returning to System clears the override.
-If storage is unavailable, the selector still works for the current page.
+If storage is unavailable, the buttons still work for the current page.
 
 The light palette uses warm cream, pale green and dark text; dark keeps the
 existing slate and amber colors. Cards, dialogs, form fields and status/error
-messages use the selected palette. The selector remains usable while offline
+messages use the selected palette. The buttons remain usable while offline
 or during an update. Changing appearance sends no request to the ESP and does
 not change loco settings or trigger its activity LED. Each browser remembers
 its own choice; accessing the same board through another hostname/IP creates a
@@ -184,9 +185,9 @@ confirms both the expected version and a new boot ID:
 
 ```sh
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.2 --dry-run
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.3 --dry-run
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.2
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.3
 ```
 
 OTA replaces the ESP application, including its update code. Always use a build
@@ -214,6 +215,13 @@ needs physical measurement. See the [stack guide](../uno-stack-test/README.md)
 for pins, the UART protocol and API endpoints.
 
 ## Verification status
+
+ESP **0.2.3** replaces the appearance dropdown with three buttons. The image is
+**391,424 bytes**, with **30,852 bytes static RAM**. Checks cover exactly one
+pressed button, keyboard activation, saved choices, system following, both
+palettes' contrast, 44 px mobile touch targets and existing roster/Setup flows.
+OTA and the live button/reload/keyboard/mobile checks passed on the ESP, with
+the Uno/DCC link ready and both bridge enables LOW.
 
 ESP **0.2.2** compiles to **391,344 bytes** with **30,852 bytes static RAM**.
 Theme checks cover rendered text contrast, system appearance changes, explicit
