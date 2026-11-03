@@ -9,7 +9,7 @@ class LocoRoster {
   static constexpr uint8_t CAPACITY = 8;
   static constexpr uint8_t NAME_BYTES = 48;
   enum class Type : uint8_t { Electric, Diesel, Steam };
-  struct Loco { uint8_t id = 0, address = 0; bool f0 = false; Type type = Type::Electric; char name[NAME_BYTES + 1] = {}; };
+  struct Loco { uint8_t id = 0, address = 0; bool f0 = false, forward = true; Type type = Type::Electric; char name[NAME_BYTES + 1] = {}; };
   enum class Result { Ok, Invalid, Duplicate, Full, Missing };
   Loco entries[CAPACITY] = {};
   uint8_t count = 0;
@@ -51,7 +51,7 @@ class LocoRoster {
       entries[index].id = id;
     }
     // Changing decoder starts its requested lights off; renaming preserves F0.
-    if (entries[index].address != address) entries[index].f0 = false;
+    if (entries[index].address != address) {entries[index].f0=false;entries[index].forward=true;}
     if(type || !entries[index].address) entries[index].type=selected;
     entries[index].address = address;
     strcpy(entries[index].name, name);

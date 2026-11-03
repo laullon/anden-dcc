@@ -1,18 +1,18 @@
 #pragma once
 #include <stdint.h>
 
-// No-load bench tests only. The ADC limit is raw and intentionally uncalibrated.
+// Bench pulses and stationary track control. The ADC limit remains uncalibrated.
 class BridgeBench {
  public:
   static constexpr uint16_t DURATION_MS=3000,RAW_LIMIT=100;
-  enum State : uint8_t {Idle,Running,Complete,Stopped,RawTrip,TimingFault,GuardExpired};
+  enum State : uint8_t {Idle,Running,Complete,Stopped,RawTrip,TimingFault,GuardExpired,LeaseExpired};
   State state=Idle;
-  enum Mode : uint8_t {DcReverse,DcForward,Dcc};
+  enum Mode : uint8_t {DcReverse,DcForward,Dcc,Track};
   uint8_t mode=DcReverse;
   bool direction=false;
   bool active() const {return state==Running;}
   bool start(uint8_t requestedMode,uint32_t now,uint16_t raw,bool healthy) {
-    if(requestedMode>Dcc || active())return false; // A second command cannot extend a running pulse.
+    if(requestedMode>Track || active())return false; // A second command cannot extend a running pulse.
     if(!healthy){state=TimingFault;return false;}
     if(raw>=RAW_LIMIT){state=RawTrip;return false;}
     mode=requestedMode;direction=mode==DcForward;started=now;state=Running;return true;
@@ -22,12 +22,14 @@ class BridgeBench {
     if(!healthy)state=TimingFault;
     else if(guardExpired)state=GuardExpired;
     else if(raw>=RAW_LIMIT)state=RawTrip;
-    else if(uint32_t(now-started)>=DURATION_MS)state=Complete;
+    else if(uint32_t(now-started)>=duration())state=mode==Track?LeaseExpired:Complete;
   }
+  uint16_t duration() const {return mode==Track?2000:DURATION_MS;}
+  bool renew(uint32_t now){if(!active() || mode!=Track)return false;if(uint32_t(now-started)>=duration()){state=LeaseExpired;return false;}started=now;return true;}
   void stop(){if(active())state=Stopped;}
   uint16_t remaining(uint32_t now) const {
     uint32_t elapsed=now-started;
-    return active() && elapsed<DURATION_MS ? DURATION_MS-elapsed : 0;
+    return active() && elapsed<duration() ? duration()-elapsed : 0;
   }
  private:
   uint32_t started=0;

@@ -2,11 +2,12 @@
 #include <AndenStackLink.h>
 #include "UnoDcc.h"
 
-constexpr char VERSION[]="0.4.0";
+constexpr char VERSION[]="0.5.0";
 constexpr uint8_t ENABLE_A=3,ENABLE_B=11,BRAKE_A=9,BRAKE_B=8,DIR_A=12,DIR_B=13;
 AndenLink::Receiver receiver;
 BridgeBench bench;
 uint8_t ledEdges=0;
+bool controlReady=false;
 uint16_t rawA=0;
 uint32_t nextEdge=0,lastSense=0;
 
@@ -28,10 +29,11 @@ bool startBridge(uint8_t mode) {
   if(!bench.start(mode,millis(),rawA,UnoDcc::running))return false;
   ledEdges=0;digitalWrite(DIR_B,LOW);
   digitalWrite(DIR_A,mode==BridgeBench::DcForward?HIGH:LOW); // Brake A remains LOW: opposite bridge inputs.
-  if(!UnoDcc::armBridge(mode==BridgeBench::Dcc)){
+  if(mode==BridgeBench::Track){ATOMIC_BLOCK(ATOMIC_RESTORESTATE){UnoDcc::stream.startStopped();}}
+  if(!UnoDcc::armBridge(mode>=BridgeBench::Dcc)){
     bench.poll(millis(),rawA,false,false);serviceBridge();return false;
   }
-  if(mode==BridgeBench::Dcc){
+  if(mode>=BridgeBench::Dcc){
     uint32_t waiting=millis();
     while(bench.active() && UnoDcc::running && UnoDcc::bridgePending && uint32_t(millis()-waiting)<20)serviceBridge();
     if(UnoDcc::bridgePending || !UnoDcc::running){
@@ -48,7 +50,7 @@ void sendState(uint16_t sequence) {
       (digitalRead(DIR_A)?16:0)|(digitalRead(DIR_B)?32:0);
   char body[AndenLink::MAX_BODY+1],wire[AndenLink::MAX_BODY+8];
   auto dcc=UnoDcc::status();
-  snprintf(body,sizeof(body),"AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u",sequence,VERSION,
+  snprintf(body,sizeof(body),"AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,1",sequence,VERSION,
       unsigned(rawA),unsigned(analogRead(A1)),unsigned(flags),unsigned(ledEdges),
       unsigned(dcc.running),unsigned(dcc.count),unsigned(dcc.signature),unsigned(dcc.mask),dcc.packets,unsigned(dcc.faults),
       unsigned(bench.remaining(millis())),unsigned(bench.state),unsigned(bench.mode));
@@ -57,12 +59,33 @@ void sendState(uint16_t sequence) {
 }
 
 void command() {
-  char* parts[20];size_t n=AndenLink::fields(receiver.body,parts,20);
+  char* parts[30];size_t n=AndenLink::fields(receiver.body,parts,30);
   if(n<3 || strcmp(parts[0],"AD1"))return;
   uint16_t sequence;if(!AndenLink::number(parts[1],sequence)||!sequence)return;
   serviceBridge();
   if(!strcmp(parts[2],"BENCHSTOP") && n==3){
     bench.stop();UnoDcc::disarmBridge();serviceBridge();sendState(sequence);return;
+  }
+  if(!strcmp(parts[2],"TRACKON") && n==3){if(controlReady)startBridge(BridgeBench::Track);sendState(sequence);return;}
+  if(!strcmp(parts[2],"KEEP") && n==3){serviceBridge(true);if(bench.renew(millis()))UnoDcc::renewGuard();sendState(sequence);return;}
+  if(!strcmp(parts[2],"FIND") && n==7){
+    if(bench.active() && bench.mode!=BridgeBench::Track)return;
+    uint16_t values[4];for(uint8_t i=0;i<4;++i)if(!AndenLink::number(parts[3+i],values[i])||values[i]>127)return;
+    if(!UnoDcc::find(values[0],values[1],values[2],values[3]))return;
+    controlReady=true;sendState(sequence);return;
+  }
+  if(!strcmp(parts[2],"CONTROL")){
+    if(bench.active() && bench.mode!=BridgeBench::Track)return;
+    uint16_t count,mask,directions;
+    if(n<6 || !AndenLink::number(parts[3],count)||count>8 || n!=6+count*2 ||
+       !AndenLink::number(parts[4],mask)||mask>255 || !AndenLink::number(parts[5],directions)||directions>255)return;
+    uint8_t addresses[8]={0},speeds[8]={0};
+    for(uint8_t i=0;i<count;++i){uint16_t a,s;
+      if(!AndenLink::number(parts[6+i*2],a)||!a||a>127 || !AndenLink::number(parts[7+i*2],s)||s!=0)return;
+      addresses[i]=a;speeds[i]=s;
+    }
+    if(!UnoDcc::control(count,addresses,mask,directions,speeds))return;
+    controlReady=true;sendState(sequence);return;
   }
   if(!strcmp(parts[2],"DCCTEST") && n==3){startBridge(BridgeBench::Dcc);sendState(sequence);return;}
   if(!strcmp(parts[2],"PULSE") && n==4){
@@ -71,6 +94,7 @@ void command() {
   }
   if(!strcmp(parts[2],"ROSTER")){
     if(bench.active())return;
+    controlReady=false;
     uint16_t count;if(n<4 || !AndenLink::number(parts[3],count)||count>8 || n!=4+count*2)return;
     uint8_t addresses[8]={0},mask=0;
     for(uint8_t i=0;i<count;++i){uint16_t address,on;

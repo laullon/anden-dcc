@@ -10,7 +10,7 @@
 
 // ESP8266 roster + stack bench test. No bridge-enable commands.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.4.0";
+constexpr char VERSION[] = "0.5.0";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
@@ -105,6 +105,7 @@ void setup() {
   pinMode(StatusLed::PIN,OUTPUT);
   refreshStatusLed();
   // Only checked protocol frames use the Uno UART. ROM startup noise is ignored.
+  finder.settleMs=10000; // Three full worst-case 127-address F0/zero-speed cycles.
   loadRoster();uno.attach(roster);uno.begin();
   WiFi.persistent(false);
   WiFi.mode(WIFI_AP_STA);
@@ -120,6 +121,10 @@ void setup() {
     if(statusLed.request(method.c_str(),url.c_str(),millis())) {
       // Show the request immediately, including while a handler waits for the Uno.
       statusLedOn=false;digitalWrite(StatusLed::PIN,HIGH);
+    }
+    if(method=="POST" && (url=="/update" || url=="/setup/wifi" || url=="/setup/wifi/forget") && (finder.active() || uno.trackActive())){
+      sendJson(409,F("{\"error\":\"Finish the search and turn track power off before setup changes.\"}"));
+      return ESP8266WebServer::CLIENT_REQUEST_IS_HANDLED;
     }
     return ESP8266WebServer::CLIENT_REQUEST_CAN_CONTINUE;
   });
@@ -187,12 +192,15 @@ void setup() {
   updater.setup(&server, "/update");
   server.onNotFound([] { server.send(404, "text/plain", "Not found"); });
   rosterRoutes();
+  trackRoutes();
+  finderRoutes();
   server.begin();
 }
 
 void loop() {
   refreshStatusLed();
   server.handleClient();
+  serviceFinder();
   uno.loop();
   refreshStatusLed();
   if ((pendingConnect || pendingForget) && int32_t(millis() - applyAt) >= 0) {

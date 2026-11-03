@@ -59,8 +59,10 @@
 <header><div class="mark" aria-hidden="true">≋</div><div><div class="brand">anden<span style="color:var(--amber)">.</span></div><div class="eyebrow">ESP13 · Uno DCC</div></div><div class="header-tools"><div class="version" id="version">Connecting…</div><div id="theme" class="theme-picker" role="group" aria-label="Theme"><button type="button" data-theme-choice="system" aria-pressed="true">System</button><button type="button" data-theme-choice="light" aria-pressed="false">Light</button><button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button></div></div></header>
 <div class="eyebrow">Your diorama, connected</div>
 <h1>Give your scene<br>some light.</h1>
-<p class="intro">Independent headlight commands for your locomotives. Track operation is still disabled; Setup includes a separate motor-shield bench test.</p>
-<section aria-labelledby="roster-title"><div class="roster-heading"><h2 id="roster-title">Your locomotives</h2><button id="add-loco" class="secondary" type="button">+ Add loco</button></div><p id="dcc-info">Waiting for the Uno DCC generator…</p><div id="loco-list" class="roster-grid"></div><p id="empty-roster" class="muted" hidden>No locomotives yet. Add one to start.</p><p id="roster-message" class="message" role="status" aria-live="polite"></p></section>
+<p class="intro">Independent headlights and direction for your locomotives. Start with a stationary test, then bring your diorama to life.</p>
+<section class="card" aria-labelledby="track-title"><h2 id="track-title">Track power · stationary test</h2><p id="track-state" role="status">Power off</p><p class="muted">Speed stays at zero. Change direction to test directional headlights. Keep this page visible; losing its connection switches power off.</p><div class="actions"><button id="track-on" type="button" disabled>Power on</button><button id="track-off" type="button" class="secondary">■ Power off</button></div><p class="message" id="track-message" role="status"></p></section>
+<section id="finder-panel" class="card" hidden aria-labelledby="finder-title" style="margin-top:18px"><h2 id="finder-title">Find a locomotive address</h2><p class="muted">Use one locomotive on the test track. We switch its headlights in groups and ask what you see—no CV programming. Power on above first. Address 0 is broadcast and is excluded.</p><form id="finder-range"><div class="form-row"><div><label for="finder-first">First address</label><input id="finder-first" type="number" min="1" max="127" value="1" required></div><div><label for="finder-last">Last address</label><input id="finder-last" type="number" min="1" max="127" value="100" required></div></div><div class="actions"><button type="submit">Start search</button></div></form><div id="finder-current" hidden><h3 id="finder-question"></h3><p class="muted" id="finder-detail"></p><p id="finder-wait"></p><div id="finder-answers" class="actions"><button data-finder-answer="on" type="button">Lights are on</button><button data-finder-answer="off" type="button">Lights are off</button><button data-finder-answer="retry" type="button" class="secondary">Repeat</button></div></div><div class="actions"><button id="finder-add" type="button" hidden>Use this address</button><button id="finder-again" type="button" class="secondary" hidden>New search</button><button id="finder-cancel" type="button" class="secondary" hidden>Cancel search</button><button id="finder-close" type="button" class="secondary">Close</button></div><p class="message" id="finder-message" role="status"></p></section>
+<section aria-labelledby="roster-title"><div class="roster-heading"><h2 id="roster-title">Your locomotives</h2><div class="light-pair"><button id="find-address" type="button">Find address</button><button id="add-loco" class="secondary" type="button">+ Add loco</button></div></div><p id="dcc-info">Waiting for the Uno DCC generator…</p><div id="loco-list" class="roster-grid"></div><p id="empty-roster" class="muted" hidden>No locomotives yet. Add one to start.</p><p id="roster-message" class="message" role="status" aria-live="polite"></p></section>
 <dialog id="loco-dialog" class="loco-dialog"><form id="loco-form"><h2 id="editor-title">Edit locomotive</h2><input type="hidden" id="loco-id" name="id"><label for="loco-name">Name</label><input id="loco-name" name="name" maxlength="48" placeholder="Optional name"><label for="loco-address">Short DCC address</label><input id="loco-address" name="address" type="number" min="1" max="127" required><label for="loco-type">Locomotive type</label><select id="loco-type" name="type"><option value="electric">Electric</option><option value="diesel">Diesel</option><option value="steam">Steam</option></select><div id="loco-preview" class="loco-preview"></div><p id="editor-message" class="message" role="status"></p><div class="actions"><button id="save-loco" type="submit">Save loco</button><button id="cancel-loco" class="secondary" type="button">Cancel</button><button id="remove-loco" class="secondary" type="button">Remove</button></div></form></dialog>
 <!-- LOCO_ART_START -->
 <template id="art-electric"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" data-model="269">
@@ -138,7 +140,7 @@
  <section class="card" aria-labelledby="recovery-title"><h2 id="recovery-title">Always a way back</h2><div class="status">Setup network</div><p class="muted detail" id="ap-name">anden-esp13 · open Wi-Fi</p><a class="mono" id="ap-link" href="http://192.168.13.1/">192.168.13.1</a><p class="muted">Available even when your router is out of reach.</p></section>
  <section class="card stack-card" aria-labelledby="uno-title"><h2 id="uno-title">Uno + motor shield</h2><div class="status"><span class="dot" id="uno-dot"></span><span id="uno-state">Checking Uno…</span></div><p class="muted detail" id="uno-detail">Waiting for a checked serial reply</p><div class="stack-readouts mono"><span id="uno-outputs">Enable pins: unknown</span><span id="uno-adc">A0 / A1: —</span></div><div class="actions"><button class="secondary stack-action" id="ping-uno" type="button" disabled>Ping Uno</button><button class="stack-action" id="blink-uno" type="button" disabled>Blink Uno L LED</button></div><p class="message" id="uno-message" role="status" aria-live="polite"></p><p class="muted">The L LED also shares the shield’s direction B pin. Its blink test is blocked while a motor output is enabled.</p></section>
 </div>
-<p class="note">DCC runs on Uno D10. Setup can route it through D12 to bridge A for a timed scope test. Keep tracks and loads disconnected; continuous track operation is not enabled.</p>
+<p class="note">Track A carries DCC through D12. Speed is held at zero in this first test. The raw current cutoff is conservative and uncalibrated; a trip requires an explicit restart. Setup also includes the no-load bench tests.</p>
 <details id="setup"><summary>Setup <span class="muted">· Wi-Fi &amp; firmware</span></summary><div class="setup">
 <section class="section" aria-labelledby="bench-title"><h3 id="bench-title">Motor shield bench test</h3><p class="muted">No trains or loads connected. The DC buttons check each polarity; <strong>DCC · 3 s</strong> sends the roster’s DCC waveform through bridge A. Every test switches off automatically after 3 seconds. Bridge B stays off.</p><p class="muted">For DC, measure A+ / A− with a voltmeter. For DCC, use your scope setup to inspect the 58 / 100 µs target half-bits. D12 is routed in firmware; no jumper is needed.</p><div class="actions"><button id="bridge-positive" type="button" disabled>A + · 3 s</button><button id="bridge-negative" type="button" disabled>A − · 3 s</button><button id="bridge-dcc" type="button" disabled>DCC · 3 s</button><button id="bridge-stop" class="secondary" type="button" disabled>Stop test</button></div><p class="message" id="bench-status" role="status" aria-live="polite">Waiting for Uno bench-test support…</p></section>
 <section class="section"><h3>Join your network</h3><p class="muted">Use a 2.4 GHz Wi-Fi network. Its details stay on this ESP13 and survive firmware updates made with the same flash layout.</p>
@@ -160,12 +162,41 @@ let state=null, uploading=false, editing=false, changingWifi=false, stackBusy=fa
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function message(id,text,error=false){if($(id).textContent!==text)$(id).textContent=text;$(id).classList.toggle('error',error)}
 function lock(value){for(const control of document.querySelectorAll('form input,form button,form select'))control.disabled=value;$('upload-button').disabled=value||!state;renderUno();renderRoster()}
+let trackLease=0,trackBusy=false,keepBusy=false,trackRevision=0;
+function renderTrack(){
+ const u=state&&state.uno,active=!!(u&&u.trackActive);
+ $('track-state').textContent=active?'Power on · speed zero':'Power off';
+ $('track-on').disabled=!!state?.dcc?.finder?.active||!u||!u.online||!u.trackSupported||!state.dcc?.ready||u.enableA||u.enableB||trackBusy||uploading||changingWifi||stackBusy||rosterBusy;
+ $('track-off').disabled=!state;
+
+}
+async function trackRequest(path,data={}){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),1200);
+ try{const response=await fetch('/api/track/'+path,{method:'POST',body:new URLSearchParams(data),signal:controller.signal});const result=await response.json();if(!response.ok)throw Error(result.error||'Track command failed.');return result}finally{clearTimeout(timer)}
+}
+$('track-on').onclick=async()=>{
+ if(trackBusy)return;trackBusy=true;const revision=++trackRevision;++rosterRevision;
+ try{const result=await trackRequest('on');if(document.hidden||revision!==trackRevision){await trackRequest('off');return}trackLease=result.lease;message('track-message','Power on. Lights and direction are ready; speed stays zero.');}
+ catch(error){message('track-message',error.message,true)}finally{trackBusy=false;await refreshStatus()}
+};
+$('track-off').onclick=async()=>{
+ ++trackRevision;++rosterRevision;trackLease=0;
+ try{await trackRequest('off');message('track-message','Power off.');}catch(error){message('track-message',error.message,true)}finally{await refreshStatus()}
+};
+setInterval(async()=>{
+ if(!trackLease || keepBusy)return;keepBusy=true;
+ try{await trackRequest('keep',{lease:trackLease})}catch(error){trackLease=0;message('track-message','Connection lost or test stopped. Power must be switched on again.',true);navigator.sendBeacon('/api/track/off',new URLSearchParams());}
+ finally{keepBusy=false}
+},500);
+function leaveTrack(){++trackRevision;if(trackLease){trackLease=0;navigator.sendBeacon('/api/track/off',new URLSearchParams());}}
+addEventListener('pagehide',leaveTrack);document.addEventListener('visibilitychange',()=>{if(document.hidden)leaveTrack()});
 function renderUno(){
+ renderTrack();renderFinder();
  clearTimeout(benchPollTimer);benchPollTimer=0;
  const u=state&&state.uno,online=!!(u&&u.online),disabled=online&&u.enableA===false&&u.enableB===false,b=u&&u.bench,active=online&&b&&b.active;
  $('uno-state').textContent=online?'Connected':'Not detected';$('uno-dot').classList.toggle('connected',online);
  $('uno-detail').textContent=online?'v'+u.version+' · '+u.roundTripMs+' ms round trip · '+u.rxFrames+' checked replies':'Check the Uno test sketch and both ESP13 switches. No motor commands are sent.';
- $('uno-outputs').textContent=online?(disabled?'D3 LOW · D11 LOW':active?'D3 HIGH · '+(b.mode===2?'DCC':'DC')+' bench test · D11 LOW':'Enable input HIGH — LED test blocked'):'Enable pins: unknown';
+ $('uno-outputs').textContent=online?(disabled?'D3 LOW · D11 LOW':active?'D3 HIGH · '+(b.mode>=2?'DCC':'DC')+' bench test · D11 LOW':'Enable input HIGH — LED test blocked'):'Enable pins: unknown';
  $('uno-adc').textContent=online?'A0 / A1: '+u.adcA+' / '+u.adcB+' raw ADC':'A0 / A1: —';
  $('ping-uno').disabled=!state||uploading||changingWifi||stackBusy||rosterBusy;
  $('blink-uno').disabled=!disabled||uploading||changingWifi||stackBusy||rosterBusy;
@@ -173,7 +204,10 @@ function renderUno(){
  $('bridge-positive').disabled=$('bridge-negative').disabled=!online||!supported||!disabled||busy;
  $('bridge-dcc').disabled=!online||!supported||!b.dccSupported||!disabled||busy||!(state.dcc&&state.dcc.ready);
  $('bridge-stop').disabled=!state||!supported||busy;
- const labels=['Ready — outputs off.',(b&&b.mode===2?'DCC burst':'DC pulse')+' active — auto-off in '+Math.ceil((b&&b.remainingMs||0)/1000)+' s.','Test complete — outputs off.','Test stopped — outputs off.','Raw A0 cutoff tripped — outputs off. Disconnect power and inspect.','Timing fault — outputs off.','Backup timeout tripped — outputs off.'];
+ const setupLocked=!!u?.trackActive||!!state?.dcc?.finder?.active;
+ for(const c of document.querySelectorAll('#wifi-form input,#wifi-form button,#update-form input,#update-form button'))c.disabled=setupLocked||busy||uploading||changingWifi;
+ if(!state)$('upload-button').disabled=true;
+ const labels=['Ready — outputs off.',(b&&b.mode===3?'Stationary track':b&&b.mode===2?'DCC burst':'DC pulse')+' active — auto-off in '+Math.ceil((b&&b.remainingMs||0)/1000)+' s.','Test complete — outputs off.','Test stopped — outputs off.','Raw A0 cutoff tripped — outputs off. Disconnect power and inspect.','Timing fault — outputs off.','Backup timeout tripped — outputs off.','Control connection expired — power off.'];
  message('bench-status',!supported?'Install Uno bench-test firmware to use these controls.':!online?'Uno offline. Any running pulse has its own local timeout.':labels[b.state]||'Outputs off.',supported&&b.state>=4);
  if(active&&!busy)benchPollTimer=setTimeout(()=>{benchPollTimer=0;refreshStatus()},300);
 }
@@ -201,7 +235,7 @@ async function readStatus(){
 async function refreshStatus(){
  if(uploading||stackBusy||rosterBusy)return;const revision=rosterRevision;
  try{
-  const current=await readStatus();if(uploading||revision!==rosterRevision)return;if(current.appId!=='ANDEN_ESP13_OTA_V1')throw Error('This is not the ESP13 OTA firmware');state=current;
+  const current=await readStatus();if(uploading||revision!==rosterRevision)return;if(current.appId!=='ANDEN_ESP13_OTA_V1')throw Error('This is not the ESP13 OTA firmware');state=current;finderSeenAt=Date.now();
   $('version').textContent='v'+state.version;$('network-state').textContent=state.connected?'Connected':state.configured?'Connecting…':'Not configured';
   $('network-dot').classList.toggle('connected',state.connected);$('ssid').textContent=state.ssid||'Choose your network in Setup';
   $('network-hint').textContent=state.connected?(state.mdnsReady?'Also available as anden-esp13.local on your network.':'Use the router IP above to open this board.'):state.configured?'If this persists, check the network name, password and 2.4 GHz availability.':'The open setup network is ready to use.';
@@ -258,26 +292,28 @@ function kindName(kind){return ({electric:'Electric',diesel:'Diesel',steam:'Stea
 function art(target,kind){target.replaceChildren();const template=$('art-'+kind);if(template)target.append(template.content.cloneNode(true))}
 function renderRoster(){
  if(state&&state.dcc&&Array.isArray(state.dcc.locos))lastRoster=state.dcc.locos;
- const d=state&&state.dcc,motorActive=!!(state&&state.uno&&(state.uno.enableA||state.uno.enableB)),ready=!!(d&&d.ready)&&!motorActive,locked=uploading||changingWifi||stackBusy||rosterBusy||motorActive;
- $('dcc-info').textContent=d&&d.running?'Uno D10 · logic only · 58 / 100 µs target half-bits · '+d.packets+' packets · '+d.timingFaults+' missed deadlines'+(motorActive?' · timed bridge test active':ready?'':' · synchronizing roster'):'Waiting for the Uno DCC generator. Both motor bridges remain disabled.';
- $('add-loco').disabled=!state||locked||lastRoster.length>=8||state.storageReady===false;
+ const d=state&&state.dcc,motorActive=!!(state&&state.uno&&(state.uno.enableA||state.uno.enableB)),trackActive=!!state?.uno?.trackActive,ready=!!(d&&d.ready)&&(!motorActive||trackActive),locked=uploading||changingWifi||stackBusy||rosterBusy||(motorActive&&!trackActive)||!!d?.finder?.active;
+ $('dcc-info').textContent=d&&d.running?'Uno D10 · logic only · 58 / 100 µs target half-bits · '+d.packets+' packets · '+d.timingFaults+' missed deadlines'+(motorActive?(trackActive?' · track A on · speed zero':' · timed bridge test active'):ready?'':' · synchronizing roster'):'Waiting for the Uno DCC generator. Both motor bridges remain disabled.';
+ $('add-loco').disabled=!state||locked||motorActive||lastRoster.length>=8||state.storageReady===false;
  $('empty-roster').hidden=lastRoster.length!==0;$('loco-list').replaceChildren();
  for(const loco of lastRoster){
   const card=document.createElement('article');card.className='loco'+(loco.f0?' lights-on':'');card.dataset.id=loco.id;
   const top=document.createElement('div');top.className='loco-top';
   const title=document.createElement('div'),name=document.createElement('h3');name.className='loco-name';name.textContent=loco.name||kindName(loco.type)+' locomotive';
   const sub=document.createElement('div');sub.className='loco-kind';sub.textContent=kindName(loco.type)+' · address '+loco.address;title.append(name,sub);
-  const edit=document.createElement('button');edit.type='button';edit.className='secondary edit-loco';edit.textContent='Edit';edit.disabled=!state||locked;edit.onclick=()=>openLoco(loco);top.append(title,edit);
+  const edit=document.createElement('button');edit.type='button';edit.className='secondary edit-loco';edit.textContent='Edit';edit.disabled=!state||locked||motorActive;edit.onclick=()=>openLoco(loco);top.append(title,edit);
   const picture=document.createElement('div');picture.className='loco-art';art(picture,loco.type||'electric');
   const bottom=document.createElement('div');bottom.className='loco-bottom';const label=document.createElement('span');label.textContent='F0 · Headlights';const pair=document.createElement('div');pair.className='light-pair';
   for(const [text,on] of [['Off',false],['On',true]]){const button=document.createElement('button');button.type='button';button.textContent=text;button.dataset.on=Number(on);button.setAttribute('aria-pressed',String(loco.f0===on));button.disabled=!ready||locked;button.onclick=()=>rosterCommand('/dcc/f0',{address:loco.address,on:Number(on)});pair.append(button)}
-  bottom.append(label,pair);const bytes=document.createElement('div');bytes.className='loco-bytes';bytes.textContent=(loco.bytes||[]).join(' ')+' · requested F0 '+(loco.f0?'ON':'OFF');card.append(top,picture,bottom,bytes);$('loco-list').append(card);
+  bottom.append(label,pair);const bytes=document.createElement('div');bytes.className='loco-bytes';bytes.textContent=(loco.bytes||[]).join(' ')+' · requested F0 '+(loco.f0?'ON':'OFF');const direction=document.createElement('div');direction.className='loco-bottom';const dl=document.createElement('span');dl.textContent='Direction';const dp=document.createElement('div');dp.className='light-pair';
+  for(const [text,forward] of [['← Rev',false],['Fwd →',true]]){const button=document.createElement('button');button.type='button';button.textContent=text;button.dataset.forward=Number(forward);button.setAttribute('aria-pressed',String((loco.forward!==false)===forward));button.disabled=!ready||locked||!state?.uno?.trackSupported;button.onclick=()=>rosterCommand('/dcc/direction',{address:loco.address,forward:Number(forward)});dp.append(button)}
+  direction.append(dl,dp);card.append(top,picture,bottom,direction,bytes);$('loco-list').append(card);
  }
 }
 async function rosterCommand(path,data){
  if(uploading||changingWifi||stackBusy||rosterBusy||!state)return false;
  ++rosterRevision;rosterBusy=true;lock(true);message('roster-message','Sending…');
- try{const response=await fetch(path,{method:'POST',body:new URLSearchParams(data)}),result=await response.json();if(!response.ok)throw Error(result.error||'Could not update loco');state.dcc=result;message('roster-message',path==='/dcc/f0'?'Uno acknowledged the F0 packets. Track power remains disabled.':'Locomotive settings saved.');return true}
+ try{const response=await fetch(path,{method:'POST',body:new URLSearchParams(data)}),result=await response.json();if(!response.ok)throw Error(result.error||'Could not update loco');state.dcc=result;message('roster-message',path==='/dcc/f0'?'Headlights acknowledged.':path==='/dcc/direction'?'Direction acknowledged · speed zero.':'Locomotive settings saved.');return true}
  catch(error){message('roster-message',error.message,true);message('editor-message',error.message,true);return false}
  finally{rosterBusy=false;lock(false);await refreshStatus()}
 }
@@ -298,5 +334,37 @@ $('loco-form').onsubmit=async event=>{
 };
 $('remove-loco').onclick=async()=>{if(confirm('Remove this locomotive?')&&await rosterCommand('/locos/remove',{id:$('loco-id').value}))$('loco-dialog').close()};
 
+let finderSeenAt=Date.now(),finderBusy=false;
+function renderFinder(){
+ const f=state?.dcc?.finder||{stage:'idle',active:false},online=!!state?.uno?.online;
+ if(f.active)$('finder-panel').hidden=false;
+ $('find-address').disabled=!state?.uno?.trackSupported||uploading||changingWifi||stackBusy||rosterBusy;
+ $('finder-range').hidden=f.stage!=='idle';$('finder-current').hidden=f.stage==='idle';
+ const question=['verifyOn','verifyOff','split','confirmOn','confirmOff'].includes(f.stage);
+ $('finder-answers').hidden=!question;
+ const remaining=Math.max(0,(f.waitMs||0)-(Date.now()-finderSeenAt));
+ for(const b of $('finder-answers').querySelectorAll('button'))b.disabled=!online||finderBusy||remaining>0||!state?.uno?.trackActive;
+ for(const b of $('finder-range').querySelectorAll('input,button'))b.disabled=finderBusy||!online||!state?.uno?.trackActive||!trackLease;
+ const titles={verifyOn:'Can we turn the lights on?',verifyOff:'Can we turn the lights off?',split:'Are the headlights on or off?',confirmOn:'Confirm: lights on?',confirmOff:'Confirm: lights off?',cleanup:'Turning search lights off…',found:'Address '+f.result+' found',failed:'Address not confirmed'};
+ $('finder-question').textContent=titles[f.stage]||'Find an address';
+ $('finder-detail').textContent=f.stage==='split'?'Candidates '+f.low+'–'+f.high+'. Lights ON for '+f.low+'–'+f.middle+'; OFF for the other addresses.':f.stage==='found'?'The on/off confirmation passed. You can add or edit this locomotive after switching power off.':f.stage==='failed'?'Check the range, F0 headlights and track contact, then try again.':f.stage==='cleanup'?'Please wait while the searched range is cleared and the saved roster is restored.':'Watch the locomotive’s headlights. Speed remains zero.';
+ $('finder-wait').textContent=question?(remaining?'Let the lights settle · '+Math.ceil(remaining/1000)+' s':'Answer what you see on the locomotive.') : '';
+ $('finder-cancel').hidden=!f.active;$('finder-cancel').disabled=finderBusy||!online||f.stage==='cleanup';
+ $('finder-close').hidden=f.active;$('finder-again').hidden=!['found','failed'].includes(f.stage);
+ $('finder-add').hidden=f.stage!=='found';$('finder-add').disabled=finderBusy||state?.uno?.enableA!==false;
+}
+async function finderCommand(path,data){
+ if(finderBusy)return;finderBusy=true;++rosterRevision;renderFinder();
+ try{const response=await fetch(path,{method:'POST',body:new URLSearchParams(data)}),result=await response.json();if(!response.ok)throw Error(result.error||'Search command failed.');state.dcc=result;finderSeenAt=Date.now();message('finder-message','');}
+ catch(error){message('finder-message',error.message,true)}finally{finderBusy=false;renderFinder();await refreshStatus()}
+}
+$('find-address').onclick=()=>{$('finder-panel').hidden=!$('finder-panel').hidden;renderFinder()};
+$('finder-range').onsubmit=event=>{event.preventDefault();const first=Number($('finder-first').value),last=Number($('finder-last').value);if(!Number.isInteger(first)||!Number.isInteger(last)||first<1||last>127||first>last){message('finder-message','Use an ordered range from 1 to 127.',true);return}finderCommand('/finder/start',{first,last})};
+for(const b of document.querySelectorAll('[data-finder-answer]'))b.onclick=()=>finderCommand('/finder/answer',{step:state.dcc.finder.step,answer:b.dataset.finderAnswer});
+$('finder-cancel').onclick=()=>finderCommand('/finder/cancel',{step:state.dcc.finder.step});
+$('finder-again').onclick=()=>finderCommand('/finder/cancel',{step:state.dcc.finder.step});
+$('finder-close').onclick=()=>{$('finder-panel').hidden=true};
+$('finder-add').onclick=()=>{const address=state?.dcc?.finder?.result;if(!address)return;openLoco(lastRoster.find(l=>l.address===address)||null);$('loco-address').value=address};
+setInterval(()=>{if(!$('finder-panel').hidden)renderFinder()},250);
 refreshStatus();setInterval(refreshStatus,2500);
 </script></body></html>

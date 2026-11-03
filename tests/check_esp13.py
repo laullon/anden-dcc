@@ -88,6 +88,7 @@ int main() {
   assert(!led.request("GET","/api/status",0));
   assert(!led.request("HEAD","/api/status",0));
   assert(led.requests()==0 && led.on(0,true));
+  assert(!led.request("POST","/api/track/keep",0));assert(led.requests()==0);
   assert(led.request("GET","/",100));
   assert(!led.on(100,true)); assert(!led.on(219,true)); assert(led.on(220,true));
   assert(led.request("POST","/dcc/f0",300));

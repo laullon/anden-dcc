@@ -226,21 +226,22 @@ tools/               web embedding, OTA, capture decoding and UI checks
 ## ESP13 / Uno experiment
 
 The separate [ESP13 firmware](experiments/esp13-ota/README.md) and
-[Uno bench firmware](experiments/uno-stack-test/README.md), both **0.4.0**, support
-the stacked ESP13 / Uno / Deek-Robot experiment. The panel has a saved eight-loco
-roster with independent F0 logic on **D10**, System / Light / Dark buttons,
-Wi-Fi setup, OTA, blue-LED feedback, checked serial diagnostics and an L LED test.
+[Uno firmware](experiments/uno-stack-test/README.md), both **0.5.0**, support the
+stacked ESP13 / Uno / Deek-Robot controller. The panel has eight saved locomotive
+cards, independent F0 and forward/reverse controls, System / Light / Dark buttons,
+Wi-Fi setup, OTA, blue-LED feedback and checked serial diagnostics.
 
-**Setup → Motor shield bench test** adds fixed three-second DC pulses, a
-[DCC scope burst](experiments/uno-stack-test/DCC-SCOPE.md) on bridge A, and Stop. Both bridges are off at startup/idle; B always stays off.
-These are no-load meter/scope tests, with a raw ADC cutoff and an interrupt-backed timeout.
-Follow the [15 V power/isolation and meter guide](experiments/uno-stack-test/POWER-TEST.md).
-DCC reaches the power stage only during that timed scope test. Continuous track
-mode, loaded current calibration/protection and train operation remain pending.
+The [first-locomotive guide](experiments/uno-stack-test/FIRST-LOCO-TEST.md) covers
+stationary track power and the guided address finder. **Speed stays zero.** Power
+requires an explicit start, sends startup stop packets, and expires locally if the
+browser heartbeat disappears. The existing raw cutoff is uncalibrated; loaded
+protection and actual locomotive behavior still need hardware verification.
 
-Serial installation, Wi-Fi/mDNS, repeated OTA, roster persistence and the web/Uno
-logic path have been checked on hardware. The [Uno UART diagnostic](experiments/uno-esp13-probe/README.md)
-records the earlier ESP13 bootloader work. The Pico controller remains separate.
+The search narrows a user-selected short-address range by asking about headlights,
+then confirms the result on/off. It does not read or write CVs. Setup retains the
+three-second no-load DC and [DCC scope tests](experiments/uno-stack-test/DCC-SCOPE.md).
+Use the [15 V supply and VIN isolation wiring](experiments/uno-stack-test/POWER-TEST.md).
+Bridge B remains disabled. The Pico controller remains separate.
 
 ## License
 

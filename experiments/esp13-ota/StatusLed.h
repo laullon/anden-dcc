@@ -11,6 +11,7 @@ class StatusLed {
   bool request(const char* method,const char* path,uint32_t now) {
     // The server hook supplies the path with its query string removed.
     if((!strcmp(method,"GET") || !strcmp(method,"HEAD")) && !strcmp(path,"/api/status"))return false;
+    if(!strcmp(path,"/api/track/keep"))return false;
     active=true;lastActivity=now;++activityRequests;return true;
   }
   bool on(uint32_t now,bool connected) {

@@ -1,5 +1,7 @@
 # Uno + ESP13 + L298P: bench firmware
 
+**New: ESP/Uno 0.5.0** adds [stationary track power, direction and guided address discovery](FIRST-LOCO-TEST.md). Speed stays zero. The sections below describe the historical 0.4.0 bench release; use the linked guide for current track controls and protocol.
+
 Version **0.4.0** combines the eight-loco F0 generator on **D10 / OC1B** with
 separate **three-second, no-load DC and DCC tests on bridge A**. The ESP hosts the web
 controls; the Uno owns pulse timing and cutoff. Both enables are LOW at startup

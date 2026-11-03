@@ -20,9 +20,15 @@ int main(){
  assert(b.start(true,6000,0,true));b.poll(6001,0,false,false);assert(b.state==BridgeBench::TimingFault);
  assert(b.start(true,7000,0,true));b.poll(7001,0,true,true);assert(b.state==BridgeBench::GuardExpired);
  assert(b.start(false,UINT32_MAX-999,0,true));b.poll(1999,0,true,false);assert(b.active()&&b.remaining(1999)==1);b.poll(2000,0,true,false);assert(b.state==BridgeBench::Complete);
- assert(!b.start(3,3000,0,true));assert(!b.active());
+ assert(!b.start(4,3000,0,true));assert(!b.active());
  assert(b.start(BridgeBench::Dcc,3000,0,true));assert(b.mode==BridgeBench::Dcc);assert(!b.start(BridgeBench::DcForward,3100,0,true));assert(b.mode==BridgeBench::Dcc);
  b.poll(6000,0,true,false);assert(b.state==BridgeBench::Complete);
+ assert(b.start(BridgeBench::Track,10000,0,true));assert(b.remaining(10000)==2000);
+ b.poll(11999,0,true,false);assert(b.active());assert(b.renew(11999));
+ b.poll(13998,0,true,false);assert(b.active());b.poll(13999,0,true,false);assert(b.state==BridgeBench::LeaseExpired);assert(!b.renew(14000));
+ assert(b.start(BridgeBench::Track,20000,0,true));b.poll(20001,100,true,false);assert(b.state==BridgeBench::RawTrip);assert(!b.renew(20002));
+ assert(b.start(BridgeBench::Track,UINT32_MAX-999,0,true));b.poll(1000,0,true,false);assert(b.state==BridgeBench::LeaseExpired);
+ assert(b.start(BridgeBench::Track,30000,0,true));assert(!b.renew(32000));assert(b.state==BridgeBench::LeaseExpired);
  BridgeGuard g;assert(!g.tick());g.arm();for(unsigned i=1;i<60000;++i)assert(!g.tick());assert(g.tick()&&g.expired);assert(!g.tick());
  g.arm();assert(!g.expired);g.disarm();for(unsigned i=0;i<60001;++i)assert(!g.tick());
  assert(uint32_t(BridgeGuard::HALVES)*100<=6000000UL);

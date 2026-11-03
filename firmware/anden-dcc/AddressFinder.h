@@ -12,13 +12,13 @@ class AddressFinder {
   enum class Stage { Idle, VerifyOn, VerifyOff, Split, ConfirmOn, ConfirmOff, Cleanup, Found, Failed };
   Stage stage = Stage::Idle;
   uint8_t first=1, last=100, low=1, high=100, result=0;
-  uint32_t step=0, changed=0, action=0;
+  uint32_t step=0, changed=0, action=0, settleMs=SETTLE_MS;
   bool success=false;
   bool active() const { return stage>=Stage::VerifyOn && stage<=Stage::Cleanup; }
   uint8_t middle() const { return low+(high-low)/2; }
   uint32_t wait(uint32_t now) const {
     uint32_t elapsed=now-changed;
-    return active() && elapsed<SETTLE_MS ? SETTLE_MS-elapsed : 0;
+    return active() && elapsed<settleMs ? settleMs-elapsed : 0;
   }
   const char* name() const {
     switch(stage) {

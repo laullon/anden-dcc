@@ -1,5 +1,7 @@
 # ESP13 · web setup + OTA experiment
 
+**New: ESP/Uno 0.5.0** adds [stationary track power, direction and guided address discovery](../uno-stack-test/FIRST-LOCO-TEST.md). Speed stays zero. The sections below describe the historical 0.4.0 bench release; use the linked guide for current track controls and protocol.
+
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
 Wi-Fi setup, browser-based firmware updates and a locomotive roster. Version
 **0.4.0** controls independent F0 packets on the Uno through a checked UART link.

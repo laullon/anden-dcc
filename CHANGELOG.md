@@ -1,5 +1,15 @@
 # Changelog
 
+## ESP13 / Uno stationary locomotive test 0.5.0 · 2026-11-03
+
+- Add explicit track power, a browser-owned heartbeat and a two-second Uno lease.
+- Keep speed fixed at zero, send startup broadcast stops, and add per-loco direction.
+- Port the guided Pico address finder with range, binary questions and confirmation.
+- Generate search packets in the Uno without a large SRAM table; repeat zero-speed
+  packets and use a ten-second settling interval for the full range.
+- Keep current/timing cutoff, default-off behavior and bench tests; add packet,
+  lease and browser checks. See the first-locomotive guide for verification limits.
+
 ## ESP13 / Uno timed DCC scope test 0.4.0 · 2026-11-03
 
 - Route DCC to D12 through the normal shield header for a fixed three-second

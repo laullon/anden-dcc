@@ -53,6 +53,19 @@ bool set(uint8_t count,const uint8_t* addresses,uint8_t mask){
   while(stream.pending!=255 && uint32_t(millis()-start)<20){}
   return stream.pending==255;
 }
+bool control(uint8_t count,const uint8_t* addresses,uint8_t mask,uint8_t directions,const uint8_t* speeds){
+  if(!running || !stream.prepareControl(count,addresses,mask,directions,speeds))return false;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){stream.commit();}
+  uint32_t started=millis();while(stream.pending!=255 && uint32_t(millis()-started)<20){}
+  return stream.pending==255;
+}
+bool find(uint8_t first,uint8_t last,uint8_t low,uint8_t high){
+  if(!running || !stream.prepareFinder(first,last,low,high))return false;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){stream.commit();}
+  uint32_t started=millis();while(stream.pending!=255 && uint32_t(millis()-started)<20){}
+  return stream.pending==255;
+}
+void renewGuard(){ATOMIC_BLOCK(ATOMIC_RESTORESTATE){if(dccBridge && !bridgePending && !bridgeGuard.expired)bridgeGuard.arm();}}
 struct Status {uint8_t count,mask;uint16_t signature,faults;uint32_t packets;bool running;};
 Status status(){Status s;ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
   const auto& bank=stream.banks[stream.active];s.count=bank.count;s.mask=bank.mask;s.signature=bank.signature;

@@ -81,20 +81,20 @@ proyecto para este prototipo local.
 
 ## Experimento ESP13 / Uno
 
-El [firmware ESP13](experiments/esp13-ota/README.md) y el del
-[Uno](experiments/uno-stack-test/README.md), ambos **0.4.0**, permiten probar las
-tres placas apiladas. Incluyen hasta ocho locomotoras guardadas, F0 independiente
-como señal lógica por **D10**, botones Sistema / Claro / Oscuro, Wi-Fi, OTA,
-indicaciones con el LED azul y diagnósticos de la comunicación y del LED L.
+Los firmwares [ESP13](experiments/esp13-ota/README.md) y
+[Uno](experiments/uno-stack-test/README.md), ambos **0.5.0**, añaden alimentación
+DCC para una primera prueba estacionaria, luces F0 y dirección independiente por
+locomotora. **La velocidad permanece en cero.** La vía requiere un encendido
+explícito y se apaga si pierde los mensajes de mantenimiento del navegador.
 
-En **Setup → Motor shield bench test** hay pulsos de continua de tres segundos
-para el puente A, una [ráfaga DCC para osciloscopio](experiments/uno-stack-test/DCC-SCOPE.md)
-y un botón Stop. A y B arrancan deshabilitados; B permanece
-apagado. Son pruebas en vacío con multímetro/osciloscopio, límite ADC sin calibrar y timeout
-por interrupción. Sigue la [guía de alimentación de 15 V y aislamiento de VIN](experiments/uno-stack-test/POWER-TEST.md).
-DCC llega a la etapa de potencia durante esa prueba temporizada; faltan el modo
-de vía continuo, calibrar la protección bajo carga y probar trenes. La versión de la Pico sigue
-siendo independiente.
+También incluyen el buscador guiado de dirección de la Pico: indica un intervalo
+entre 1 y 127 y responde si ves las luces encendidas o apagadas. No lee ni escribe
+CVs. Sigue la [guía de primera prueba](experiments/uno-stack-test/FIRST-LOCO-TEST.md)
+y la [alimentación de 15 V con aislamiento de VIN](experiments/uno-stack-test/POWER-TEST.md).
+El límite de corriente sigue sin calibrar; la protección bajo carga y el
+comportamiento de las locomotoras necesitan verificación física. El puente B
+permanece apagado y las pruebas de banco de tres segundos siguen disponibles.
+La versión de la Pico es independiente.
 
 ## Licencia
 
