@@ -1,5 +1,14 @@
 # Changelog
 
+## ESP13 themes 0.2.2 · 2026-11-03
+
+- Add a visible System / Light / Dark theme selector to the ESP panel.
+- Follow live system appearance changes by default; save explicit choices in
+  browser storage and apply them before paint. Storage failures remain usable.
+- Theme loco cards, forms, editor dialogs, status/error messages and native controls.
+- Check text contrast, saved choices, system changes, drafts, offline operation
+  and mobile layouts without sending controller commands. Uno remains at 0.2.0.
+
 ## ESP13 feedback 0.2.1 · 2026-11-03
 
 - Use the DOIT shield blue LED on GPIO16 (active LOW) for Wi-Fi and UI feedback:

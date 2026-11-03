@@ -2,7 +2,7 @@
 
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
 Wi-Fi setup, browser-based firmware updates and a locomotive roster. Version
-**0.2.1** controls independent F0 packets on the Uno through a checked UART link.
+**0.2.2** controls independent F0 packets on the Uno through a checked UART link.
 The [Uno bench firmware](../uno-stack-test/README.md) emits logic on **D10**, with
 both motor bridges disabled. This is our own application, not AT modem firmware;
 it cannot update the Uno. The existing Pico W controller stays separate.
@@ -21,12 +21,29 @@ it cannot update the Uno. The existing Pico W controller stays separate.
 - Saves names/addresses and Electric, Diesel or Steam types in LittleFS.
 - Sends acknowledged F0 changes through the Uno; shows packet bytes and counters.
 - Adds web buttons for Uno ping and its L LED; both bridge enables stay LOW.
+- Offers System / Light / Dark appearance, remembered by each browser.
 - Uses the blue LED for Wi-Fi status and feedback on user requests.
 - Uses no application login or access-point password, as requested.
 
 The app sends only checked protocol frames on the Uno UART, with no debug
 logging. The ESP ROM still sends its usual boot message, which the Uno parser ignores. Leave the track/motor supply disconnected during
 this experiment; the ESP firmware cannot guarantee the Uno's output state.
+
+## Appearance
+
+Use **Theme** in the header to select **System**, **Light** or **Dark**. System
+is the default and follows device appearance changes while the page is open.
+Explicit choices are stored in this browser for this origin, survive reloads,
+and are applied before the page paints. Returning to System clears the override.
+If storage is unavailable, the selector still works for the current page.
+
+The light palette uses warm cream, pale green and dark text; dark keeps the
+existing slate and amber colors. Cards, dialogs, form fields and status/error
+messages use the selected palette. The selector remains usable while offline
+or during an update. Changing appearance sends no request to the ESP and does
+not change loco settings or trigger its activity LED. Each browser remembers
+its own choice; accessing the same board through another hostname/IP creates a
+separate browser origin and therefore a separate preference.
 
 ## Blue LED feedback
 
@@ -167,9 +184,9 @@ confirms both the expected version and a new boot ID:
 
 ```sh
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.1 --dry-run
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.2 --dry-run
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.1
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.2
 ```
 
 OTA replaces the ESP application, including its update code. Always use a build
@@ -197,6 +214,14 @@ needs physical measurement. See the [stack guide](../uno-stack-test/README.md)
 for pins, the UART protocol and API endpoints.
 
 ## Verification status
+
+ESP **0.2.2** compiles to **391,344 bytes** with **30,852 bytes static RAM**.
+Theme checks cover rendered text contrast, system appearance changes, explicit
+choices across reloads, invalid/blocked storage, preserved edit drafts, offline
+selection, and 320 px page/dialog layout. Both palettes were visually reviewed;
+existing roster, Wi-Fi and OTA browser checks also passed. OTA installation and
+live light/dark selection/reload were then checked on the ESP. The roster metadata
+was preserved, the Uno/DCC link recovered, and both bridge enables remained LOW.
 
 ESP **0.2.1** compiles to **390,448 bytes** with **30,852 bytes static RAM**.
 Host checks cover disconnected/connected LED states, quiet status polling,
