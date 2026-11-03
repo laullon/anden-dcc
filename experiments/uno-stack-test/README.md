@@ -1,9 +1,12 @@
-# Uno + ESP13 + L298P: logic-only DCC bench test
+# Uno + ESP13 + L298P: bench firmware
 
-Version **0.2.0** adds an eight-loco F0 packet generator on Uno **D10 / OC1B**.
-The ESP hosts the roster and web controls; the Uno generates the signal with
-Timer1. **Both motor-shield enables stay LOW. Keep motor VIN and tracks
-disconnected.** This stage tests logic and communication, with no powered rails.
+Version **0.3.0** combines the eight-loco F0 generator on **D10 / OC1B** with a
+separate **three-second, no-load DC pulse on bridge A**. The ESP hosts the web
+controls; the Uno owns pulse timing and cutoff. Both enables are LOW at startup
+and idle. **No trains or loads:** DCC is still logic-only, with no DCC track mode.
+
+Start USB-only as below. For motor VIN and the meter test, follow the
+[powered bench guide](POWER-TEST.md), including VIN isolation before 15 V.
 
 ## Setup
 
@@ -28,7 +31,7 @@ signal wires; the ESP uses its normal stacked UART connection and level conversi
 
    ```sh
    python3 experiments/esp13-ota/ota.py --host ESP_IP \
-     --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.0
+     --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.3.0
    ```
 
 4. Turn both switches **ON** to connect Uno and ESP. No reset is required.
@@ -54,23 +57,23 @@ The Uno sketch uses AVR core 1.8.7; the ESP uses ESP8266 core 3.1.2.
 | Function | Uno pin | Test behavior |
 | --- | --- | --- |
 | DCC logic test output | **D10 / OC1B** | Repeating 5 V logic waveform |
-| Shield enable A | D3 | Held LOW |
+| Shield enable A | D3 | LOW except during the fixed bench pulse |
 | Shield enable B | D11 | Held LOW |
 | Shield brake A / B | D9 / D8 | LOW |
-| Shield direction A | D12 | LOW; no DCC on this pin |
+| Shield direction A | D12 | LOW at idle; DC polarity during a bench pulse; no DCC |
 | Shield direction B / Uno L LED | D13 | Eight short flashes on request, then LOW |
 | Current-sense A / B | A0 / A1 | Raw ADC readings; not converted to amperes |
 | Uno RX / TX | D0 / D1 | Checked UART messages to/from ESP |
 
-**Do not jumper D10 to D12 in this build:** D12 is driven LOW, so that would
+**Do not jumper D10 to D12 in this build:** D12 is driven as an output, so that would
 connect two outputs together. D10 is reserved for an isolated timing test.
 Timer1 is reserved too; its OC1A output is disconnected, so D9 remains an
 ordinary GPIO. Do not add a Servo library or another Timer1 user to this sketch.
 
 D13 is also the bridge B direction input. The web LED endpoint first requests
 fresh pin states and rejects the action if either enable is HIGH. The Uno keeps
-both enables LOW in its loop; there are no commands to enable a bridge. During
-reset/upload the MCU cannot hold outputs, which is why motor VIN staysdisconnected.
+B LOW and A LOW except during an explicit no-load pulse. During reset/upload the
+MCU cannot hold outputs, which is why motor VIN stays disconnected for uploads.
 Power LEDs stay on. ESP firmware 0.2.1 also uses its blue GPIO16 LED for
 [Wi-Fi/request feedback](../esp13-ota/README.md#blue-led-feedback). Powered
 motor-output indicators remain untested.
@@ -90,7 +93,7 @@ telemetry; they do not measure the physical pulse widths.
 
 When an analyzer is available, first confirm that its inputs tolerate **5 V**
 (or use a suitable input interface). Then connect CH0 to **D10** and analyzer GND
-to **Uno GND**, with motor VIN/tracks stilldisconnected. Capture at 8 MS/s for
+to **Uno GND**, with motor VIN/tracks still disconnected. Capture at 8 MS/s for
 100 ms and check both states for each address:
 
 | Address | F0 off | F0 on |
@@ -119,6 +122,8 @@ Requests:
 AD1,id,PING
 AD1,id,STATUS
 AD1,id,LED
+AD1,id,PULSE,0|1
+AD1,id,BENCHSTOP
 AD1,id,ROSTER,count,addr1,f01,addr2,f02,...
 ```
 
@@ -126,20 +131,22 @@ A roster request supplies all addresses and F0 states together (count 0–8;
 addresses 1–127; F0 0/1). The Uno acknowledges after the snapshot is active.
 The ESP reconciles its desired roster after reconnecting to the Uno.
 
-Version 0.2.0 response:
+Version 0.3.0 response:
 
 ```text
-AD1,id,STATE,version,adcA,adcB,flags,ledEdges,dccRunning,dccCount,dccSignature,dccMask,packetCount,timingFaults
+AD1,id,STATE,version,adcA,adcB,flags,ledEdges,dccRunning,dccCount,dccSignature,dccMask,packetCount,timingFaults,benchRemainingMs,benchState
 ```
 
 Flag bits 0..5 report enable A, enable B, brake A, brake B, direction A, direction B.
 `dccSignature` is a CRC16 of count, mask and address list. The ESP also accepts the
-old eight-field response during staged upgrades, but disables DCC controls until
+old eight- and fourteen-field responses during staged upgrades. Bench controls
+need the new sixteen-field response; DCC controls wait until
 a capable Uno is online and has acknowledged the current roster.
 
 The ESP polls status every two seconds. Timeout counts include periods when the
 switches were intentionally OFF. ADC values are uncalibrated and can vary with
-USB/RF noise; there is no software current cutoff in this build.
+USB/RF noise. The no-load pulse has a raw A0 cutoff, described in the powered
+bench guide; calibrated current/overload protection remains future work.
 
 - `GET /api/status` includes `uno` and `dcc`, with `trackPower: false`.
 - `POST /dcc/f0` takes `address` and `on=0|1`; requires the Uno snapshot ACK.
@@ -149,6 +156,9 @@ USB/RF noise; there is no software current cutoff in this build.
 - `POST /api/uno/ping` returns a fresh checked Uno response, or HTTP 503.
 - `POST /api/uno/led` requires a fresh reply with both enables LOW; HTTP 409 blocks
   an unsafe enable state. A successful reply starts the short L LED pattern.
+- `POST /api/uno/bridge` takes `direction=0|1`; requires a fresh capable Uno
+  response with both enables LOW. The pulse length is fixed on the Uno.
+- `POST /api/uno/bench-stop` requests immediate local bench cancellation.
 - ESP OTA uses `/update`; it updates only the ESP, not the Uno.
 
 The Uno UART is also connected to its USB converter. Switches OFF isolate the ESP
@@ -175,5 +185,7 @@ the ESP API rather than writing from the Mac into that shared serial input.
   independent F0/packet updates and no JavaScript errors. Mocked browser tests
   also cover roster edits, duplicates, stale polls, failures and offline handling.
 
-**Not yet tested:** physical D10 pulse widths, powered bridge operation, rail
+See the [powered bench guide](POWER-TEST.md) for the subsequent 0.3.0 checks.
+
+**Not yet tested by the earlier logic checks:** physical D10 pulse widths, powered bridge operation, rail
 waveforms, current/overload behavior under load, or control of an actual decoder.

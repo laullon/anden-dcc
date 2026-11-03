@@ -2,9 +2,10 @@
 
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
 Wi-Fi setup, browser-based firmware updates and a locomotive roster. Version
-**0.2.3** controls independent F0 packets on the Uno through a checked UART link.
+**0.3.0** controls independent F0 packets on the Uno through a checked UART link.
 The [Uno bench firmware](../uno-stack-test/README.md) emits logic on **D10**, with
-both motor bridges disabled. This is our own application, not AT modem firmware;
+DCC track operation disabled. Setup also provides a separate no-load DC bench
+test for bridge A. This is our own application, not AT modem firmware;
 it cannot update the Uno. The existing Pico W controller stays separate.
 
 ## What it does
@@ -20,9 +21,10 @@ it cannot update the Uno. The existing Pico W controller stays separate.
 - Displays two loco cards initially, with room for eight short addresses (1–127).
 - Saves names/addresses and Electric, Diesel or Steam types in LittleFS.
 - Sends acknowledged F0 changes through the Uno; shows packet bytes and counters.
-- Adds web buttons for Uno ping and its L LED; both bridge enables stay LOW.
+- Adds Uno ping and L LED controls; the LED test requires both enables LOW.
 - Offers System / Light / Dark appearance, remembered by each browser.
 - Uses the blue LED for Wi-Fi status and feedback on user requests.
+- Adds three-second DC bridge-A pulses and Stop under Setup for no-load testing.
 - Uses no application login or access-point password, as requested.
 
 The app sends only checked protocol frames on the Uno UART, with no debug
@@ -185,9 +187,9 @@ confirms both the expected version and a new boot ID:
 
 ```sh
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.3 --dry-run
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.3.0 --dry-run
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.2.3
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.3.0
 ```
 
 OTA replaces the ESP application, including its update code. Always use a build
@@ -209,12 +211,33 @@ change can remove it. If storage fails, metadata saves report an error.
 
 The UI starts with two columns on desktop and one on small screens. F0 waits for
 the Uno to acknowledge the complete roster; offline controls stay disabled while
-saved metadata remains editable. The current build provides no rail power, speed,
+saved metadata remains editable. The current build provides no DCC track mode, speed,
 CV programming, extra functions or address finder. Packet timing on D10 still
 needs physical measurement. See the [stack guide](../uno-stack-test/README.md)
 for pins, the UART protocol and API endpoints.
 
+## No-load motor shield test
+
+ESP/Uno **0.3.0** adds **Setup → Motor shield bench test**. It provides A + / A −
+three-second DC pulses and Stop, with live enable/status reporting. This is
+separate from DCC and needs empty output terminals except for a voltmeter.
+Follow the [power wiring and meter guide](../uno-stack-test/POWER-TEST.md), including
+VIN isolation. It is not a locomotive or calibrated overload test.
+
+The Uno starts each pulse only on request, times it locally, rejects extension,
+and stops on its raw A0 limit or a timing fault. An interrupt countdown also
+limits a stalled-main-loop pulse. There is no automatic restart after a fault or
+reconnection. B stays off; roster/LED commands are blocked while A is enabled.
+Legacy Uno replies remain supported, but the bench buttons stay disabled until
+the new firmware is detected. An ESP update does not update the Uno.
+
 ## Verification status
+
+ESP **0.3.0** compiles to **393,920 bytes** with **30,940 bytes static RAM**.
+Native policy and browser checks cover the fixed pulse, stop/fault states,
+capability detection, legacy replies and roster lock. See the powered bench guide
+for hardware observations and remaining measurement limits. The powered no-load
+meter test produced about +15 V / −15 V on A; both enables returned LOW.
 
 ESP **0.2.3** replaces the appearance dropdown with three buttons. The image is
 **391,424 bytes**, with **30,852 bytes static RAM**. Checks cover exactly one

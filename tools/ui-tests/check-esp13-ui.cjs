@@ -8,7 +8,7 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
  try{
   const context=await browser.newContext({viewport:{width:1180,height:1000}});
   let current={name:'anden-esp13',platform:'esp8266',appId:'ANDEN_ESP13_OTA_V1',version:'0.1.1',bootId:41,connected:true,configured:true,mdnsReady:true,ssid:'Workshop Wi-Fi',ip:'192.168.86.50',apIp:'192.168.13.1',apReady:true,otaMaxBytes:448*1024,freeHeap:32000,layoutBytes:1048576,uno:{online:true,version:'0.1.0',enableA:false,enableB:false,adcA:0,adcB:1,roundTripMs:8,rxFrames:2,ledEdges:0}};
-  let offline=false,uploadCount=0,acceptUpload=false,wifiCalls=[];
+  let offline=false,uploadCount=0,acceptUpload=false,wifiCalls=[],bridgeCalls=[],refusePulse=false;
   await context.route('http://esp13.test/**',async route=>{
    const request=route.request(),pathname=new URL(request.url()).pathname;
    if(pathname==='/api/status')return offline?route.abort():route.fulfill({json:current});
@@ -19,6 +19,14 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
     if(!current.uno.online)return route.fulfill({status:503,json:current.uno});
     if(pathname.endsWith('/led'))current.uno.ledEdges=15;
     return route.fulfill({json:current.uno});
+   }
+   if(pathname==='/api/uno/bridge'){
+    bridgeCalls.push(new URLSearchParams(request.postData()).get('direction'));
+    if(refusePulse){current.uno.bench={supported:true,active:false,state:4,remainingMs:0};return route.fulfill({status:409,json:{...current.uno,error:'Raw A0 cutoff tripped.'}})}
+    current.uno.enableA=true;current.uno.bench={supported:true,active:true,state:1,remainingMs:3000};return route.fulfill({json:current.uno});
+   }
+   if(pathname==='/api/uno/bench-stop'){
+    current.uno.enableA=false;current.uno.bench={supported:true,active:false,state:3,remainingMs:0};return route.fulfill({json:current.uno});
    }
    if(pathname==='/update'){
     uploadCount++;if(acceptUpload){current={...current,bootId:42,version:'0.1.2'};return route.fulfill({body:'Update Success! Rebooting...'});}
@@ -38,6 +46,18 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
   current.uno.online=true;current.uno.enableA=true;await page.evaluate(()=>refreshStatus());assert.equal(await page.locator('#blink-uno').isDisabled(),true);
   current.uno.enableA=false;current.uno.ledEdges=0;await page.evaluate(()=>refreshStatus());
   await page.locator('#setup>summary').click();
+  assert.equal(await page.locator('#bridge-positive').isDisabled(),true);
+  current.uno.bench={supported:true,active:false,state:0,remainingMs:0};await page.evaluate(()=>refreshStatus());
+  await page.locator('#bridge-positive').click();await page.waitForFunction(()=>document.getElementById('uno-message').textContent.includes('DC test started'));
+  assert.equal(await page.locator('#bridge-negative').isDisabled(),true);assert.equal(await page.locator('#blink-uno').isDisabled(),true);
+  assert((await page.locator('#uno-outputs').innerText()).includes('D3 HIGH'));
+  await page.locator('#bridge-stop').click();await page.waitForFunction(()=>document.getElementById('bench-status').textContent.includes('Test stopped'));
+  assert.equal(current.uno.enableA,false);await page.locator('#bridge-negative').click();await page.waitForFunction(()=>document.getElementById('uno-message').textContent.includes('DC test started'));
+  current.uno.enableA=false;current.uno.bench={supported:true,active:false,state:2,remainingMs:0};await page.evaluate(()=>refreshStatus());
+  assert.deepEqual(bridgeCalls,['1','0']);assert((await page.locator('#bench-status').innerText()).includes('Test complete'));
+  refusePulse=true;await page.locator('#bridge-positive').click();await page.waitForFunction(()=>document.getElementById('uno-message').classList.contains('error'));
+  assert((await page.locator('#bench-status').innerText()).includes('cutoff'));assert.equal(await page.locator('#bench-status').getAttribute('class'),'message error');
+  current.uno.bench={supported:true,active:false,state:0,remainingMs:0};refusePulse=false;await page.evaluate(()=>refreshStatus());
   await page.locator('#ssid-input').fill('A draft network');await page.evaluate(()=>refreshStatus());
   assert.equal(await page.locator('#ssid-input').inputValue(),'A draft network');
   await page.locator('#password').fill('prototype-password');await page.locator('#save-wifi').click();
@@ -76,6 +96,6 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
   offline=true;await page.evaluate(()=>refreshStatus());
   assert.equal(await page.locator('#version').textContent(),'Offline');assert.equal(await page.locator('#upload-button').isDisabled(),true);
   assert.deepEqual(errors,[]);
-  console.log('PASS: ESP13 Uno ping/LED/offline/enable guards, setup collapsed, Wi-Fi save/forget/drafts, safe SSID text, OTA wrong-image/profile/size rejection, failed upload recovery, verified reboot, offline state, desktop/mobile.');
+  console.log('PASS: ESP13 bounded bridge pulse/stop/completion/cutoff/legacy guards, Uno ping/LED/offline/enable guards, setup collapsed, Wi-Fi save/forget/drafts, safe SSID text, OTA wrong-image/profile/size rejection, failed upload recovery, verified reboot, offline state, desktop/mobile.');
  }finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exit(1)});

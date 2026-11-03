@@ -59,7 +59,7 @@
 <header><div class="mark" aria-hidden="true">≋</div><div><div class="brand">anden<span style="color:var(--amber)">.</span></div><div class="eyebrow">ESP13 · Uno DCC</div></div><div class="header-tools"><div class="version" id="version">Connecting…</div><div id="theme" class="theme-picker" role="group" aria-label="Theme"><button type="button" data-theme-choice="system" aria-pressed="true">System</button><button type="button" data-theme-choice="light" aria-pressed="false">Light</button><button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button></div></div></header>
 <div class="eyebrow">Your diorama, connected</div>
 <h1>Give your scene<br>some light.</h1>
-<p class="intro">Independent headlights for your locomotives. DCC runs on the Uno; this build keeps the motor bridges disabled.</p>
+<p class="intro">Independent headlight commands for your locomotives. Track operation is still disabled; Setup includes a separate motor-shield bench test.</p>
 <section aria-labelledby="roster-title"><div class="roster-heading"><h2 id="roster-title">Your locomotives</h2><button id="add-loco" class="secondary" type="button">+ Add loco</button></div><p id="dcc-info">Waiting for the Uno DCC generator…</p><div id="loco-list" class="roster-grid"></div><p id="empty-roster" class="muted" hidden>No locomotives yet. Add one to start.</p><p id="roster-message" class="message" role="status" aria-live="polite"></p></section>
 <dialog id="loco-dialog" class="loco-dialog"><form id="loco-form"><h2 id="editor-title">Edit locomotive</h2><input type="hidden" id="loco-id" name="id"><label for="loco-name">Name</label><input id="loco-name" name="name" maxlength="48" placeholder="Optional name"><label for="loco-address">Short DCC address</label><input id="loco-address" name="address" type="number" min="1" max="127" required><label for="loco-type">Locomotive type</label><select id="loco-type" name="type"><option value="electric">Electric</option><option value="diesel">Diesel</option><option value="steam">Steam</option></select><div id="loco-preview" class="loco-preview"></div><p id="editor-message" class="message" role="status"></p><div class="actions"><button id="save-loco" type="submit">Save loco</button><button id="cancel-loco" class="secondary" type="button">Cancel</button><button id="remove-loco" class="secondary" type="button">Remove</button></div></form></dialog>
 <!-- LOCO_ART_START -->
@@ -136,10 +136,11 @@
 <div class="grid">
  <section class="card" aria-labelledby="network-title"><h2 id="network-title">Your Wi-Fi</h2><div class="status"><span class="dot" id="network-dot"></span><span id="network-state">Checking…</span></div><p class="muted detail" id="ssid">Waiting for the board</p><a class="mono" id="lan-link" hidden></a><p class="muted" id="network-hint">Network status refreshes automatically.</p></section>
  <section class="card" aria-labelledby="recovery-title"><h2 id="recovery-title">Always a way back</h2><div class="status">Setup network</div><p class="muted detail" id="ap-name">anden-esp13 · open Wi-Fi</p><a class="mono" id="ap-link" href="http://192.168.13.1/">192.168.13.1</a><p class="muted">Available even when your router is out of reach.</p></section>
- <section class="card stack-card" aria-labelledby="uno-title"><h2 id="uno-title">Uno + motor shield</h2><div class="status"><span class="dot" id="uno-dot"></span><span id="uno-state">Checking Uno…</span></div><p class="muted detail" id="uno-detail">Waiting for a checked serial reply</p><div class="stack-readouts mono"><span id="uno-outputs">Enable pins: unknown</span><span id="uno-adc">A0 / A1: —</span></div><div class="actions"><button class="secondary stack-action" id="ping-uno" type="button" disabled>Ping Uno</button><button class="stack-action" id="blink-uno" type="button" disabled>Blink Uno L LED</button></div><p class="message" id="uno-message" role="status" aria-live="polite"></p><p class="muted">The L LED also shares the shield’s direction B pin. Both bridge enables stay LOW during this test.</p></section>
+ <section class="card stack-card" aria-labelledby="uno-title"><h2 id="uno-title">Uno + motor shield</h2><div class="status"><span class="dot" id="uno-dot"></span><span id="uno-state">Checking Uno…</span></div><p class="muted detail" id="uno-detail">Waiting for a checked serial reply</p><div class="stack-readouts mono"><span id="uno-outputs">Enable pins: unknown</span><span id="uno-adc">A0 / A1: —</span></div><div class="actions"><button class="secondary stack-action" id="ping-uno" type="button" disabled>Ping Uno</button><button class="stack-action" id="blink-uno" type="button" disabled>Blink Uno L LED</button></div><p class="message" id="uno-message" role="status" aria-live="polite"></p><p class="muted">The L LED also shares the shield’s direction B pin. Its blink test is blocked while a motor output is enabled.</p></section>
 </div>
-<p class="note">Logic output only: DCC is on Uno D10. Shield D12 stays LOW, both enables stay LOW, and no track power is supplied. Physical timing measurements are pending.</p>
+<p class="note">DCC is logic-only on Uno D10. Setup has a separate, timed DC test for bridge A. Keep tracks and loads disconnected; DCC has not been routed to the motor shield.</p>
 <details id="setup"><summary>Setup <span class="muted">· Wi-Fi &amp; firmware</span></summary><div class="setup">
+<section class="section" aria-labelledby="bench-title"><h3 id="bench-title">Motor shield bench test</h3><p class="muted">No trains or loads connected. These buttons apply <strong>steady DC to A+ / A− for 3 seconds</strong>, then switch it off automatically. Bridge B stays off. This is separate from the DCC signal.</p><p class="muted">With the 15 V supply connected, use your meter in DC-volts mode across A+ and A−. Start with A +, then A − to check both polarities.</p><div class="actions"><button id="bridge-positive" type="button" disabled>A + · 3 s</button><button id="bridge-negative" type="button" disabled>A − · 3 s</button><button id="bridge-stop" class="secondary" type="button" disabled>Stop test</button></div><p class="message" id="bench-status" role="status" aria-live="polite">Waiting for Uno bench-test support…</p></section>
 <section class="section"><h3>Join your network</h3><p class="muted">Use a 2.4 GHz Wi-Fi network. Its details stay on this ESP13 and survive firmware updates made with the same flash layout.</p>
 <form id="wifi-form" action="/setup/wifi" method="post"><div class="form-row"><div><label for="ssid-input">Network name</label><input id="ssid-input" name="ssid" required autocomplete="off" placeholder="Your Wi-Fi name"></div><div><label for="password">Wi-Fi password</label><input id="password" name="password" type="password" maxlength="64" autocomplete="new-password" placeholder="Blank for an open network"></div></div><div class="actions"><button id="save-wifi" type="submit">Save &amp; connect</button><button class="secondary" id="forget-wifi" type="button">Forget saved Wi-Fi</button></div></form><p class="message" id="wifi-message" role="status" aria-live="polite"></p></section>
 <section class="section"><h3>Send a firmware update</h3><p class="muted">Choose the <strong>ESP13 OTA .bin</strong> built for this experiment. Keep the board powered until it returns. No login or password is required.</p>
@@ -155,38 +156,48 @@ andenTheme.refresh();
 $('theme').addEventListener('click',event=>{
  const button=event.target.closest('[data-theme-choice]');if(button)andenTheme.set(button.dataset.themeChoice);
 });
-let state=null, uploading=false, editing=false, changingWifi=false, stackBusy=false, rosterBusy=false, rosterRevision=0, lastRoster=[];
+let state=null, uploading=false, editing=false, changingWifi=false, stackBusy=false, rosterBusy=false, rosterRevision=0, lastRoster=[], benchPollTimer=0;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error)}
+function message(id,text,error=false){if($(id).textContent!==text)$(id).textContent=text;$(id).classList.toggle('error',error)}
 function lock(value){for(const control of document.querySelectorAll('form input,form button,form select'))control.disabled=value;$('upload-button').disabled=value||!state;renderUno();renderRoster()}
 function renderUno(){
- const u=state&&state.uno,online=!!(u&&u.online),disabled=online&&u.enableA===false&&u.enableB===false;
+ clearTimeout(benchPollTimer);benchPollTimer=0;
+ const u=state&&state.uno,online=!!(u&&u.online),disabled=online&&u.enableA===false&&u.enableB===false,b=u&&u.bench,active=online&&b&&b.active;
  $('uno-state').textContent=online?'Connected':'Not detected';$('uno-dot').classList.toggle('connected',online);
  $('uno-detail').textContent=online?'v'+u.version+' · '+u.roundTripMs+' ms round trip · '+u.rxFrames+' checked replies':'Check the Uno test sketch and both ESP13 switches. No motor commands are sent.';
- $('uno-outputs').textContent=online?(disabled?'D3 LOW · D11 LOW':'Enable input HIGH — LED test blocked'):'Enable pins: unknown';
+ $('uno-outputs').textContent=online?(disabled?'D3 LOW · D11 LOW':active?'D3 HIGH · DC bench test · D11 LOW':'Enable input HIGH — LED test blocked'):'Enable pins: unknown';
  $('uno-adc').textContent=online?'A0 / A1: '+u.adcA+' / '+u.adcB+' raw ADC':'A0 / A1: —';
  $('ping-uno').disabled=!state||uploading||changingWifi||stackBusy||rosterBusy;
  $('blink-uno').disabled=!disabled||uploading||changingWifi||stackBusy||rosterBusy;
+ const busy=uploading||changingWifi||stackBusy||rosterBusy,supported=!!(b&&b.supported);
+ $('bridge-positive').disabled=$('bridge-negative').disabled=!online||!supported||!disabled||busy;
+ $('bridge-stop').disabled=!state||!supported||busy;
+ const labels=['Ready — outputs off.','DC pulse active — auto-off in '+Math.ceil((b&&b.remainingMs||0)/1000)+' s.','Test complete — outputs off.','Test stopped — outputs off.','Raw A0 cutoff tripped — outputs off. Disconnect power and inspect.','Timing fault — outputs off.','Backup timeout tripped — outputs off.'];
+ message('bench-status',!supported?'Install Uno bench-test firmware to use these controls.':!online?'Uno offline. Any running pulse has its own local timeout.':labels[b.state]||'Outputs off.',supported&&b.state>=4);
+ if(active&&!busy)benchPollTimer=setTimeout(()=>{benchPollTimer=0;refreshStatus()},300);
 }
-async function stackAction(action){
+async function stackAction(action,data=null){
  if(uploading||changingWifi||stackBusy||rosterBusy||!state)return;
- stackBusy=true;lock(true);message('uno-message','Waiting for the Uno…');
+ ++rosterRevision;stackBusy=true;lock(true);message('uno-message','Waiting for the Uno…');
  try{
-  const response=await fetch('/api/uno/'+action,{method:'POST'}),result=await response.json();
+  const response=await fetch('/api/uno/'+action,{method:'POST',...(data?{body:new URLSearchParams(data)}:{})}),result=await response.json();
   if(result.online!==undefined)state.uno=result;
   if(!response.ok)throw Error(result.error||'The Uno did not return a checked reply. Check the sketch and switches.');
-  message('uno-message',action==='led'?'Blink acknowledged — watch the Uno L LED. Both bridge enables remain LOW.':'Uno replied. Serial link is working.');
+  message('uno-message',action==='led'?'Blink acknowledged — watch the Uno L LED. Both bridge enables remain LOW.':action==='bridge'?'Bridge A DC test started. It switches off locally after 3 seconds.':action==='bench-stop'?'Bench test stopped. Both enables are LOW.':'Uno replied. Serial link is working.');
  }catch(error){message('uno-message',error.message,true)}
  finally{stackBusy=false;lock(false);await refreshStatus()}
 }
 $('ping-uno').addEventListener('click',()=>stackAction('ping'));
 $('blink-uno').addEventListener('click',()=>stackAction('led'));
+$('bridge-positive').onclick=()=>stackAction('bridge',{direction:1});
+$('bridge-negative').onclick=()=>stackAction('bridge',{direction:0});
+$('bridge-stop').onclick=()=>stackAction('bench-stop');
 async function readStatus(){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
  try{const response=await fetch('/api/status',{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('Board did not return status');return await response.json()}finally{clearTimeout(timer)}
 }
 async function refreshStatus(){
- if(uploading)return;const revision=rosterRevision;
+ if(uploading||stackBusy||rosterBusy)return;const revision=rosterRevision;
  try{
   const current=await readStatus();if(uploading||revision!==rosterRevision)return;if(current.appId!=='ANDEN_ESP13_OTA_V1')throw Error('This is not the ESP13 OTA firmware');state=current;
   $('version').textContent='v'+state.version;$('network-state').textContent=state.connected?'Connected':state.configured?'Connecting…':'Not configured';
@@ -245,8 +256,8 @@ function kindName(kind){return ({electric:'Electric',diesel:'Diesel',steam:'Stea
 function art(target,kind){target.replaceChildren();const template=$('art-'+kind);if(template)target.append(template.content.cloneNode(true))}
 function renderRoster(){
  if(state&&state.dcc&&Array.isArray(state.dcc.locos))lastRoster=state.dcc.locos;
- const d=state&&state.dcc,ready=!!(d&&d.ready),locked=uploading||changingWifi||stackBusy||rosterBusy;
- $('dcc-info').textContent=d&&d.running?'Uno D10 · logic only · 58 / 100 µs target half-bits · '+d.packets+' packets · '+d.timingFaults+' missed deadlines'+(ready?'':' · synchronizing roster'):'Waiting for the Uno DCC generator. Both motor bridges remain disabled.';
+ const d=state&&state.dcc,motorActive=!!(state&&state.uno&&(state.uno.enableA||state.uno.enableB)),ready=!!(d&&d.ready)&&!motorActive,locked=uploading||changingWifi||stackBusy||rosterBusy||motorActive;
+ $('dcc-info').textContent=d&&d.running?'Uno D10 · logic only · 58 / 100 µs target half-bits · '+d.packets+' packets · '+d.timingFaults+' missed deadlines'+(motorActive?' · DC bench test active':ready?'':' · synchronizing roster'):'Waiting for the Uno DCC generator. Both motor bridges remain disabled.';
  $('add-loco').disabled=!state||locked||lastRoster.length>=8||state.storageReady===false;
  $('empty-roster').hidden=lastRoster.length!==0;$('loco-list').replaceChildren();
  for(const loco of lastRoster){

@@ -1,5 +1,15 @@
 # Changelog
 
+## ESP13 / Uno no-load bridge test 0.3.0 · 2026-11-03
+
+- Add fixed three-second DC pulses in both bridge-A directions and a Stop command.
+- Keep startup/idle disabled and B off; add raw A0 cutoff and a Timer1-interrupt
+  backup cutoff. Repeated commands cannot extend or reverse an active pulse.
+- Add Setup bench controls, active/fault diagnostics, roster locks and legacy
+  Uno compatibility. DCC remains on D10, separate from the motor-shield test.
+- Verify isolated 15 V supply and about +15 V / −15 V no-load bridge-A output,
+  with both enables LOW after testing. Add native and browser checks.
+
 ## ESP13 theme buttons 0.2.3 · 2026-11-03
 
 - Replace the theme dropdown with System / Light / Dark buttons and a highlighted

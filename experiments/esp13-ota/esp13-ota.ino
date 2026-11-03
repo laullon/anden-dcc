@@ -10,7 +10,7 @@
 
 // ESP8266 roster + stack bench test. No bridge-enable commands.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.2.3";
+constexpr char VERSION[] = "0.3.0";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
@@ -60,6 +60,10 @@ uint32_t otaCapacity() {
 void sendJson(int code, const String& body) {
   server.sendHeader("Cache-Control", "no-store");
   server.send(code, "application/json", body);
+}
+
+void sendUnoError(int code,const String& error) {
+  String body=uno.json();body.remove(body.length()-1);body+=",\"error\":"+jsonString(error)+"}";sendJson(code,body);
 }
 
 #include "RosterControl.h"
@@ -133,6 +137,22 @@ void setup() {
       sendJson(409,F("{\"error\":\"Uno enable pins must both be LOW for the LED test.\"}"));return;
     }
     bool ok=uno.query("LED");sendJson(ok?200:503,uno.json());
+  });
+  server.on("/api/uno/bridge",HTTP_POST,[]{
+    String direction=server.arg("direction");
+    if(direction!="0" && direction!="1"){sendUnoError(400,F("Direction must be 0 or 1."));return;}
+    if(!uno.query("PING")){sendUnoError(503,F("The Uno did not reply."));return;}
+    if(!uno.benchSupported()){sendUnoError(501,F("Install the Uno bench-test firmware first."));return;}
+    if(!uno.outputsDisabled()){sendUnoError(409,F("An output is already enabled. Stop the test first."));return;}
+    String command="PULSE,"+direction;
+    if(!uno.query(command.c_str())){sendUnoError(503,F("The Uno did not acknowledge the pulse."));return;}
+    if(!uno.benchActive()){sendUnoError(409,F("Pulse refused or cut off. Check the bench status and raw A0 reading."));return;}
+    sendJson(200,uno.json());
+  });
+  server.on("/api/uno/bench-stop",HTTP_POST,[]{
+    if(!uno.query("BENCHSTOP")){sendUnoError(503,F("Stop not acknowledged. The local pulse timeout still applies."));return;}
+    if(!uno.outputsDisabled()){sendUnoError(409,F("An enable pin is still HIGH."));return;}
+    sendJson(200,uno.json());
   });
   server.on("/setup/wifi", HTTP_POST, [] {
     String ssid = server.arg("ssid");

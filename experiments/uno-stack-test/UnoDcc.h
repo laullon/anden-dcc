@@ -2,12 +2,19 @@
 #include <Arduino.h>
 #include <util/atomic.h>
 #include <UnoDccStream.h>
+#include "BridgeBench.h"
 
 static_assert(F_CPU==16000000UL,"Uno DCC timing requires a 16 MHz CPU");
 namespace UnoDcc {
 UnoDccStream stream;
+BridgeGuard bridgeGuard;
 volatile bool running=false;
 volatile uint16_t deadlineFaults=0;
+// D3 is the Uno shield's enable A. Only this atomic operation can set it HIGH.
+bool armBridge(){bool armed=false;ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+  if(running){bridgeGuard.arm();PORTD|=_BV(PD3);armed=true;}
+}return armed;}
+void disarmBridge(){ATOMIC_BLOCK(ATOMIC_RESTORESTATE){PORTD&=~_BV(PD3);bridgeGuard.disarm();}}
 void begin(){
   pinMode(10,OUTPUT);digitalWrite(10,LOW);
   uint8_t empty[1]={0};stream.prepare(0,empty,0);stream.commit();
@@ -37,8 +44,9 @@ Status status(){Status s;ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
 }return s;}
 }
 ISR(TIMER1_COMPB_vect){
+  if(UnoDcc::bridgeGuard.tick())PORTD&=~_BV(PD3);
   uint16_t due=OCR1B+UnoDcc::stream.nextHalfTicks();
   if(int16_t(due-TCNT1)<=8){
-    TCCR1A=0;TIMSK1=0;PORTB&=~_BV(PB2);UnoDcc::running=false;++UnoDcc::deadlineFaults;
+    TCCR1A=0;TIMSK1=0;PORTB&=~_BV(PB2);PORTD&=~_BV(PD3);UnoDcc::running=false;++UnoDcc::deadlineFaults;
   }else OCR1B=due;
 }

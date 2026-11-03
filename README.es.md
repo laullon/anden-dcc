@@ -81,20 +81,19 @@ proyecto para este prototipo local.
 
 ## Experimento ESP13 / Uno
 
-Hay un [firmware independiente para el ESP13](experiments/esp13-ota/README.md)
-con configuración Wi-Fi y actualizaciones OTA. La instalación inicial, Wi-Fi,
-mDNS y las actualizaciones OTA consecutivas ya están verificadas. La
-[prueba de las tres placas por USB](experiments/uno-stack-test/README.md) permite
-comprobar la comunicación con el Uno, hacer parpadear su LED L y consultar pines
-y lecturas ADC. La versión **0.2.0** añade dos tarjetas de locomotoras (hasta ocho),
-nombres/direcciones/tipos guardados y F0 independiente, con señal DCC del Timer1
-del Uno por **D10**. Ambos puentes siguen deshabilitados: faltan medir los pulsos
-físicos y probar vías alimentadas. La persistencia de la lista, las confirmaciones
-F0 y otro reinicio OTA ya están comprobados. Esta versión no sustituye el firmware
-de la Pico. El ESP **0.2.1** usa además el LED azul para indicar la conexión Wi-Fi
-y hacer un breve pulso por petición; el sondeo automático no lo activa.
-El ESP **0.2.2** añade los temas Sistema / Claro / Oscuro con la elección
-guardada en cada navegador.
+El [firmware ESP13](experiments/esp13-ota/README.md) y el del
+[Uno](experiments/uno-stack-test/README.md), ambos **0.3.0**, permiten probar las
+tres placas apiladas. Incluyen hasta ocho locomotoras guardadas, F0 independiente
+como señal lógica por **D10**, botones Sistema / Claro / Oscuro, Wi-Fi, OTA,
+indicaciones con el LED azul y diagnósticos de la comunicación y del LED L.
+
+En **Setup → Motor shield bench test** hay pulsos de continua de tres segundos
+para el puente A y un botón Stop. A y B arrancan deshabilitados; B permanece
+apagado. Es una prueba en vacío con multímetro, límite ADC sin calibrar y timeout
+por interrupción. Sigue la [guía de alimentación de 15 V y aislamiento de VIN](experiments/uno-stack-test/POWER-TEST.md).
+DCC todavía no llega a la etapa de potencia; faltan medir la señal física,
+calibrar la protección bajo carga y probar trenes. La versión de la Pico sigue
+siendo independiente.
 
 ## Licencia
 
