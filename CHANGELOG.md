@@ -1,5 +1,17 @@
 # Changelog
 
+## ESP13 / Uno timed DCC scope test 0.4.0 · 2026-11-03
+
+- Route DCC to D12 through the normal shield header for a fixed three-second
+  bridge-A scope burst, with packet-boundary start and no extra jumper.
+- Keep D10 as the hardware reference; add a fixed-phase ISR mirror and late-edge
+  fail-off, preserving the raw cutoff, Stop and interrupt backup timeout.
+- Add mode/capability telemetry, a DCC test button, synchronized-roster guard
+  and compatibility with older Uno replies/DC tests.
+- Add actual-ISR register simulation and validate auto-off under Uno UART load.
+- Confirm the no-load powered waveform visually on a scope; exact physical
+  pulse timing and loaded operation remain unmeasured.
+
 ## ESP13 / Uno no-load bridge test 0.3.0 · 2026-11-03
 
 - Add fixed three-second DC pulses in both bridge-A directions and a Stop command.

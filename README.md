@@ -226,17 +226,17 @@ tools/               web embedding, OTA, capture decoding and UI checks
 ## ESP13 / Uno experiment
 
 The separate [ESP13 firmware](experiments/esp13-ota/README.md) and
-[Uno bench firmware](experiments/uno-stack-test/README.md), both **0.3.0**, support
+[Uno bench firmware](experiments/uno-stack-test/README.md), both **0.4.0**, support
 the stacked ESP13 / Uno / Deek-Robot experiment. The panel has a saved eight-loco
 roster with independent F0 logic on **D10**, System / Light / Dark buttons,
 Wi-Fi setup, OTA, blue-LED feedback, checked serial diagnostics and an L LED test.
 
-**Setup → Motor shield bench test** adds fixed three-second DC pulses on bridge A
-and a Stop button. Both bridges are off at startup/idle; B always stays off.
-This is a no-load meter test, with a raw ADC cutoff and an interrupt-backed timeout.
+**Setup → Motor shield bench test** adds fixed three-second DC pulses, a
+[DCC scope burst](experiments/uno-stack-test/DCC-SCOPE.md) on bridge A, and Stop. Both bridges are off at startup/idle; B always stays off.
+These are no-load meter/scope tests, with a raw ADC cutoff and an interrupt-backed timeout.
 Follow the [15 V power/isolation and meter guide](experiments/uno-stack-test/POWER-TEST.md).
-DCC has not been routed to the power stage; physical waveform checks, loaded
-current calibration/protection and train operation remain pending.
+DCC reaches the power stage only during that timed scope test. Continuous track
+mode, loaded current calibration/protection and train operation remain pending.
 
 Serial installation, Wi-Fi/mDNS, repeated OTA, roster persistence and the web/Uno
 logic path have been checked on hardware. The [Uno UART diagnostic](experiments/uno-esp13-probe/README.md)

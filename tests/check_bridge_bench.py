@@ -20,6 +20,9 @@ int main(){
  assert(b.start(true,6000,0,true));b.poll(6001,0,false,false);assert(b.state==BridgeBench::TimingFault);
  assert(b.start(true,7000,0,true));b.poll(7001,0,true,true);assert(b.state==BridgeBench::GuardExpired);
  assert(b.start(false,UINT32_MAX-999,0,true));b.poll(1999,0,true,false);assert(b.active()&&b.remaining(1999)==1);b.poll(2000,0,true,false);assert(b.state==BridgeBench::Complete);
+ assert(!b.start(3,3000,0,true));assert(!b.active());
+ assert(b.start(BridgeBench::Dcc,3000,0,true));assert(b.mode==BridgeBench::Dcc);assert(!b.start(BridgeBench::DcForward,3100,0,true));assert(b.mode==BridgeBench::Dcc);
+ b.poll(6000,0,true,false);assert(b.state==BridgeBench::Complete);
  BridgeGuard g;assert(!g.tick());g.arm();for(unsigned i=1;i<60000;++i)assert(!g.tick());assert(g.tick()&&g.expired);assert(!g.tick());
  g.arm();assert(!g.expired);g.disarm();for(unsigned i=0;i<60001;++i)assert(!g.tick());
  assert(uint32_t(BridgeGuard::HALVES)*100<=6000000UL);
@@ -27,4 +30,4 @@ int main(){
 ''')
     subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'experiments/uno-stack-test'),str(source),'-o',str(exe)],check=True)
     subprocess.run([str(exe)],check=True)
-print('PASS: bridge default-off, fixed 3-second/no-extension pulse, manual stop, raw cutoff, timing/guard faults, rollover and independent half-bit guard.')
+print('PASS: bridge default-off, fixed 3-second DC/DCC modes and no-extension pulse, manual stop, raw cutoff, timing/guard faults, rollover and independent half-bit guard.')

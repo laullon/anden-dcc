@@ -82,17 +82,18 @@ proyecto para este prototipo local.
 ## Experimento ESP13 / Uno
 
 El [firmware ESP13](experiments/esp13-ota/README.md) y el del
-[Uno](experiments/uno-stack-test/README.md), ambos **0.3.0**, permiten probar las
+[Uno](experiments/uno-stack-test/README.md), ambos **0.4.0**, permiten probar las
 tres placas apiladas. Incluyen hasta ocho locomotoras guardadas, F0 independiente
 como señal lógica por **D10**, botones Sistema / Claro / Oscuro, Wi-Fi, OTA,
 indicaciones con el LED azul y diagnósticos de la comunicación y del LED L.
 
 En **Setup → Motor shield bench test** hay pulsos de continua de tres segundos
-para el puente A y un botón Stop. A y B arrancan deshabilitados; B permanece
-apagado. Es una prueba en vacío con multímetro, límite ADC sin calibrar y timeout
+para el puente A, una [ráfaga DCC para osciloscopio](experiments/uno-stack-test/DCC-SCOPE.md)
+y un botón Stop. A y B arrancan deshabilitados; B permanece
+apagado. Son pruebas en vacío con multímetro/osciloscopio, límite ADC sin calibrar y timeout
 por interrupción. Sigue la [guía de alimentación de 15 V y aislamiento de VIN](experiments/uno-stack-test/POWER-TEST.md).
-DCC todavía no llega a la etapa de potencia; faltan medir la señal física,
-calibrar la protección bajo carga y probar trenes. La versión de la Pico sigue
+DCC llega a la etapa de potencia durante esa prueba temporizada; faltan el modo
+de vía continuo, calibrar la protección bajo carga y probar trenes. La versión de la Pico sigue
 siendo independiente.
 
 ## Licencia

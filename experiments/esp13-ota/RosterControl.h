@@ -33,7 +33,8 @@ bool saveRoster(const LocoRoster& value){
 String dccStatus(){
   String out="{\"ready\":";out+=uno.matches(roster)?"true":"false";
   out+=",\"running\":";out+=uno.dccReady()?"true":"false";
-  out+=",\"pin\":10,\"halfOneUs\":58,\"halfZeroUs\":100,\"maxLocos\":8,\"trackPower\":false,\"packets\":"+String(uno.packetCount());
+  out+=",\"pin\":10,\"bridgePin\":12,\"halfOneUs\":58,\"halfZeroUs\":100,\"maxLocos\":8,\"trackPower\":";
+  out+=uno.dccPowerActive()?"true":"false";out+=",\"packets\":"+String(uno.packetCount());
   out+=",\"timingFaults\":"+String(uno.faultCount())+",\"locos\":[";
   for(uint8_t i=0;i<roster.count;++i){if(i)out+=',';const auto& l=roster.entries[i];
     out+="{\"id\":"+String(l.id)+",\"address\":"+String(l.address)+",\"name\":"+jsonString(l.name)+",\"type\":"+jsonString(LocoRoster::typeName(l.type));

@@ -1,19 +1,21 @@
 #pragma once
 #include <stdint.h>
 
-// No-load DC bench test only. The ADC limit is raw and intentionally uncalibrated.
+// No-load bench tests only. The ADC limit is raw and intentionally uncalibrated.
 class BridgeBench {
  public:
   static constexpr uint16_t DURATION_MS=3000,RAW_LIMIT=100;
   enum State : uint8_t {Idle,Running,Complete,Stopped,RawTrip,TimingFault,GuardExpired};
   State state=Idle;
+  enum Mode : uint8_t {DcReverse,DcForward,Dcc};
+  uint8_t mode=DcReverse;
   bool direction=false;
   bool active() const {return state==Running;}
-  bool start(bool forward,uint32_t now,uint16_t raw,bool healthy) {
-    if(active())return false; // A second command cannot extend a running pulse.
+  bool start(uint8_t requestedMode,uint32_t now,uint16_t raw,bool healthy) {
+    if(requestedMode>Dcc || active())return false; // A second command cannot extend a running pulse.
     if(!healthy){state=TimingFault;return false;}
     if(raw>=RAW_LIMIT){state=RawTrip;return false;}
-    direction=forward;started=now;state=Running;return true;
+    mode=requestedMode;direction=mode==DcForward;started=now;state=Running;return true;
   }
   void poll(uint32_t now,uint16_t raw,bool healthy,bool guardExpired) {
     if(!active())return;

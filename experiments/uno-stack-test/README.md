@@ -1,12 +1,13 @@
 # Uno + ESP13 + L298P: bench firmware
 
-Version **0.3.0** combines the eight-loco F0 generator on **D10 / OC1B** with a
-separate **three-second, no-load DC pulse on bridge A**. The ESP hosts the web
+Version **0.4.0** combines the eight-loco F0 generator on **D10 / OC1B** with
+separate **three-second, no-load DC and DCC tests on bridge A**. The ESP hosts the web
 controls; the Uno owns pulse timing and cutoff. Both enables are LOW at startup
-and idle. **No trains or loads:** DCC is still logic-only, with no DCC track mode.
+and idle. **No trains or loads:** there is no continuous track mode.
 
 Start USB-only as below. For motor VIN and the meter test, follow the
 [powered bench guide](POWER-TEST.md), including VIN isolation before 15 V.
+The [timed DCC scope guide](DCC-SCOPE.md) covers the new D12 route; no jumper is needed.
 
 ## Setup
 
@@ -31,7 +32,7 @@ signal wires; the ESP uses its normal stacked UART connection and level conversi
 
    ```sh
    python3 experiments/esp13-ota/ota.py --host ESP_IP \
-     --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.3.0
+     --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.4.0
    ```
 
 4. Turn both switches **ON** to connect Uno and ESP. No reset is required.
@@ -60,7 +61,7 @@ The Uno sketch uses AVR core 1.8.7; the ESP uses ESP8266 core 3.1.2.
 | Shield enable A | D3 | LOW except during the fixed bench pulse |
 | Shield enable B | D11 | Held LOW |
 | Shield brake A / B | D9 / D8 | LOW |
-| Shield direction A | D12 | LOW at idle; DC polarity during a bench pulse; no DCC |
+| Shield direction A | D12 | LOW at idle; DC polarity or DCC during a bench test |
 | Shield direction B / Uno L LED | D13 | Eight short flashes on request, then LOW |
 | Current-sense A / B | A0 / A1 | Raw ADC readings; not converted to amperes |
 | Uno RX / TX | D0 / D1 | Checked UART messages to/from ESP |
@@ -123,6 +124,7 @@ AD1,id,PING
 AD1,id,STATUS
 AD1,id,LED
 AD1,id,PULSE,0|1
+AD1,id,DCCTEST
 AD1,id,BENCHSTOP
 AD1,id,ROSTER,count,addr1,f01,addr2,f02,...
 ```
@@ -131,16 +133,16 @@ A roster request supplies all addresses and F0 states together (count 0–8;
 addresses 1–127; F0 0/1). The Uno acknowledges after the snapshot is active.
 The ESP reconciles its desired roster after reconnecting to the Uno.
 
-Version 0.3.0 response:
+Version 0.4.0 response:
 
 ```text
-AD1,id,STATE,version,adcA,adcB,flags,ledEdges,dccRunning,dccCount,dccSignature,dccMask,packetCount,timingFaults,benchRemainingMs,benchState
+AD1,id,STATE,version,adcA,adcB,flags,ledEdges,dccRunning,dccCount,dccSignature,dccMask,packetCount,timingFaults,benchRemainingMs,benchState,benchMode
 ```
 
 Flag bits 0..5 report enable A, enable B, brake A, brake B, direction A, direction B.
 `dccSignature` is a CRC16 of count, mask and address list. The ESP also accepts the
 old eight- and fourteen-field responses during staged upgrades. Bench controls
-need the new sixteen-field response; DCC controls wait until
+need a sixteen-field response; the DCC scope test needs seventeen fields. Roster controls wait until
 a capable Uno is online and has acknowledged the current roster.
 
 The ESP polls status every two seconds. Timeout counts include periods when the
@@ -148,7 +150,8 @@ switches were intentionally OFF. ADC values are uncalibrated and can vary with
 USB/RF noise. The no-load pulse has a raw A0 cutoff, described in the powered
 bench guide; calibrated current/overload protection remains future work.
 
-- `GET /api/status` includes `uno` and `dcc`, with `trackPower: false`.
+- `GET /api/status` includes `uno` and `dcc`; `trackPower` reports an enabled
+  DCC scope burst, not a measurement of supply voltage.
 - `POST /dcc/f0` takes `address` and `on=0|1`; requires the Uno snapshot ACK.
 - `POST /locos/save` takes optional `id`, `address`, `name`, and `type`.
 - `POST /locos/remove` takes `id`. Metadata edits persist even if the Uno is offline;
@@ -158,6 +161,7 @@ bench guide; calibrated current/overload protection remains future work.
   an unsafe enable state. A successful reply starts the short L LED pattern.
 - `POST /api/uno/bridge` takes `direction=0|1`; requires a fresh capable Uno
   response with both enables LOW. The pulse length is fixed on the Uno.
+- `POST /api/uno/dcc-test` starts a fixed DCC burst with a ready roster.
 - `POST /api/uno/bench-stop` requests immediate local bench cancellation.
 - ESP OTA uses `/update`; it updates only the ESP, not the Uno.
 

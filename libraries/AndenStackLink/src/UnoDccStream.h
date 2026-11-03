@@ -46,6 +46,7 @@ class UnoDccStream {
     return true;
   }
   void commit(){pending=active^1;}
+  bool atPacketStart() const {return position==0 && !second;}
   uint16_t nextHalfTicks() {
     if(!second){
       if(!position && pending!=255){active=pending;pending=255;slot=0;}

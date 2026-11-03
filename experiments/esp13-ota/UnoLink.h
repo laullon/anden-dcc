@@ -32,6 +32,9 @@ class UnoLink {
   bool benchSupported() const {return benchCapable;}
   bool benchActive() const {return online() && benchCapable && benchState==1 && (flags&1);}
   uint8_t benchResult() const {return benchState;}
+  uint8_t benchMode() const {return mode;}
+  bool dccBenchSupported() const {return dccBenchCapable;}
+  bool dccPowerActive() const {return benchActive() && mode==2;}
   uint32_t packetCount() const{return packets;}
   uint16_t faultCount() const{return faults;}
 
@@ -79,6 +82,8 @@ class UnoLink {
     out+=F(",\"dccPackets\":");out+=packets;
     out+=F(",\"timingFaults\":");out+=faults;
     out+=F(",\"bench\":{\"supported\":");out+=benchCapable?"true":"false";
+    out+=F(",\"dccSupported\":");out+=dccBenchCapable?"true":"false";
+    out+=F(",\"mode\":");out+=mode;
     out+=F(",\"active\":");out+=benchActive()?"true":"false";
     out+=F(",\"remainingMs\":");out+=benchRemaining;
     out+=F(",\"state\":");out+=benchState;
@@ -94,13 +99,13 @@ class UnoLink {
   bool dirty=true,capable=false,dccRunning=false;
   uint16_t dccCount=0,dccMask=0,dccSignature=0,faults=0;
   uint32_t packets=0;
-  bool benchCapable=false;
+  bool benchCapable=false,dccBenchCapable=false;
   uint16_t benchRemaining=0;
-  uint8_t benchState=0;
+  uint8_t benchState=0,mode=0;
   bool accept(uint16_t expected) {
-    char* parts[16];
-    size_t n=AndenLink::fields(receiver.body,parts,16);
-    if ((n!=8 && n!=14 && n!=16) || strcmp(parts[0],"AD1") ||
+    char* parts[17];
+    size_t n=AndenLink::fields(receiver.body,parts,17);
+    if ((n!=8 && n!=14 && n!=16 && n!=17) || strcmp(parts[0],"AD1") ||
         strcmp(parts[2],"STATE")) return false;
     uint16_t id,a,b,f,edges;
     if (!AndenLink::number(parts[1],id) || id!=expected ||
@@ -120,8 +125,10 @@ class UnoLink {
       for(const char* p=parts[12];*p;++p){if(*p<'0'||*p>'9'||total>(UINT32_MAX-uint8_t(*p-'0'))/10)return false;total=total*10+(*p-'0');}
     }
     uint16_t remaining=0,testState=0;
-    if(n==16 && (!AndenLink::number(parts[14],remaining)||remaining>3000 || !AndenLink::number(parts[15],testState)||testState>6))return false;
-    benchCapable=n==16;benchRemaining=remaining;benchState=testState;
+    if(n>=16 && (!AndenLink::number(parts[14],remaining)||remaining>3000 || !AndenLink::number(parts[15],testState)||testState>6))return false;
+    uint16_t reportedMode=(f&16)?1:0;
+    if(n==17 && (!AndenLink::number(parts[16],reportedMode)||reportedMode>2))return false;
+    benchCapable=n>=16;dccBenchCapable=n==17;benchRemaining=remaining;benchState=testState;mode=reportedMode;
     capable=n>=14;dccRunning=running;dccCount=count;dccSignature=sig;dccMask=mask;faults=misses;packets=total;
     memcpy(version,parts[3],length+1);adcA=a;adcB=b;flags=f;ledEdges=edges;return true;
   }

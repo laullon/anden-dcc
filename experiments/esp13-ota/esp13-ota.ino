@@ -10,7 +10,7 @@
 
 // ESP8266 roster + stack bench test. No bridge-enable commands.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.3.0";
+constexpr char VERSION[] = "0.4.0";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
@@ -95,7 +95,8 @@ void sendStatus() {
   body += F(",\"activityRequests\":"); body += statusLed.requests(); body+='}';
   body += F(",\"uno\":"); body += uno.json();
   body += F(",\"storageReady\":");body+=rosterStorage?"true":"false";
-  body += F(",\"dccImplemented\":true,\"trackPower\":false,\"dcc\":");body+=dccStatus();body+='}';
+  body += F(",\"dccImplemented\":true,\"trackPower\":");body+=uno.dccPowerActive()?"true":"false";
+  body += F(",\"dcc\":");body+=dccStatus();body+='}';
   sendJson(200, body);
 }
 
@@ -147,6 +148,14 @@ void setup() {
     String command="PULSE,"+direction;
     if(!uno.query(command.c_str())){sendUnoError(503,F("The Uno did not acknowledge the pulse."));return;}
     if(!uno.benchActive()){sendUnoError(409,F("Pulse refused or cut off. Check the bench status and raw A0 reading."));return;}
+    sendJson(200,uno.json());
+  });
+  server.on("/api/uno/dcc-test",HTTP_POST,[]{
+    if(!uno.query("PING")){sendUnoError(503,F("The Uno did not reply."));return;}
+    if(!uno.dccBenchSupported()){sendUnoError(501,F("Install the Uno DCC bench-test firmware first."));return;}
+    if(!uno.outputsDisabled() || !uno.matches(roster)){sendUnoError(409,F("Wait for outputs off and the roster to synchronize."));return;}
+    if(!uno.query("DCCTEST")){sendUnoError(503,F("The Uno did not acknowledge the DCC test."));return;}
+    if(!uno.dccPowerActive()){sendUnoError(409,F("DCC test refused or cut off. Check the bench and timing status."));return;}
     sendJson(200,uno.json());
   });
   server.on("/api/uno/bench-stop",HTTP_POST,[]{

@@ -1,8 +1,9 @@
 # Uno / ESP13 / L298P: first powered bench test
 
-This is a **no-load DC test**, separate from DCC. Leave trains, rails and loads
+This guide starts with a **no-load DC test**. The separate
+[timed DCC scope test](DCC-SCOPE.md) is available in firmware 0.4.0. Leave trains, rails and loads
 disconnected from both bridges. The firmware can pulse **bridge A for 3 seconds**
-in either direction; B stays disabled. It does not provide DCC track operation.
+in either direction; B stays disabled. There is no continuous track mode.
 
 ## Power wiring
 
@@ -39,7 +40,7 @@ Sources: [DCC-EX isolation and power wiring](https://dcc-ex.com/ex-commandstatio
 
 ## Meter test
 
-Install **Uno 0.3.0** and **ESP 0.3.0** using the stack README. Keep motor VIN
+Install **Uno 0.4.0** and **ESP 0.4.0** using the stack README. Keep motor VIN
 unplugged for the Uno upload; both ESP switches OFF. Afterward turn the switches
 ON, confirm the link, and reconnect the isolated motor supply.
 
@@ -74,7 +75,7 @@ reading on the unloaded terminals need not settle to exactly zero immediately.
   status polls can observe the pulse but never start or renew one.
 
 The assembly still needs calibrated overload behavior, physical DCC waveform
-checks, startup stop packets and a suitable power-stage interface before using
+checks under load, startup stop packets and validated continuous gating before using
 trains. Do not connect a logic analyzer directly to powered bridge outputs.
 
 ## Observations, 2026-11-03
@@ -89,6 +90,7 @@ trains. Do not connect a logic analyzer directly to powered bridge outputs.
 - With motor VIN disconnected, USB telemetry observed a forward pulse stop after
   3.025 seconds. A duplicate pulse did not extend/reverse it. Reverse direction
   and manual Stop passed; B stayed LOW and the DCC packet counter advanced.
+- The user also observed the three-second DC pulse on a battery-powered scope.
 - Native tests cover deadline expiry, no extension, stop, raw cutoff, signal and
   guard faults, millis rollover and the interrupt guard countdown. Browser checks
   cover capability detection, both pulse requests, Stop, completion, fault display,

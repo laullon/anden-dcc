@@ -2,7 +2,7 @@
 #include <AndenStackLink.h>
 #include "UnoDcc.h"
 
-constexpr char VERSION[]="0.3.0";
+constexpr char VERSION[]="0.4.0";
 constexpr uint8_t ENABLE_A=3,ENABLE_B=11,BRAKE_A=9,BRAKE_B=8,DIR_A=12,DIR_B=13;
 AndenLink::Receiver receiver;
 BridgeBench bench;
@@ -22,16 +22,23 @@ void serviceBridge(bool fresh=false) {
   if(!bench.active()){digitalWrite(ENABLE_A,LOW);digitalWrite(DIR_A,LOW);}
 }
 
-bool startBridge(bool direction) {
+bool startBridge(uint8_t mode) {
   serviceBridge(true);
   if(digitalRead(ENABLE_A) || digitalRead(ENABLE_B) || bench.active())return false;
-  if(!bench.start(direction,millis(),rawA,UnoDcc::running))return false;
+  if(!bench.start(mode,millis(),rawA,UnoDcc::running))return false;
   ledEdges=0;digitalWrite(DIR_B,LOW);
-  digitalWrite(DIR_A,direction?HIGH:LOW); // Brake A remains LOW: opposite bridge inputs.
-  if(!UnoDcc::armBridge()){
+  digitalWrite(DIR_A,mode==BridgeBench::DcForward?HIGH:LOW); // Brake A remains LOW: opposite bridge inputs.
+  if(!UnoDcc::armBridge(mode==BridgeBench::Dcc)){
     bench.poll(millis(),rawA,false,false);serviceBridge();return false;
   }
-  return true;
+  if(mode==BridgeBench::Dcc){
+    uint32_t waiting=millis();
+    while(bench.active() && UnoDcc::running && UnoDcc::bridgePending && uint32_t(millis()-waiting)<20)serviceBridge();
+    if(UnoDcc::bridgePending || !UnoDcc::running){
+      bench.poll(millis(),rawA,false,false);UnoDcc::disarmBridge();serviceBridge();return false;
+    }
+  }
+  return bench.active() && digitalRead(ENABLE_A);
 }
 
 void sendState(uint16_t sequence) {
@@ -41,10 +48,10 @@ void sendState(uint16_t sequence) {
       (digitalRead(DIR_A)?16:0)|(digitalRead(DIR_B)?32:0);
   char body[AndenLink::MAX_BODY+1],wire[AndenLink::MAX_BODY+8];
   auto dcc=UnoDcc::status();
-  snprintf(body,sizeof(body),"AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u",sequence,VERSION,
+  snprintf(body,sizeof(body),"AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u",sequence,VERSION,
       unsigned(rawA),unsigned(analogRead(A1)),unsigned(flags),unsigned(ledEdges),
       unsigned(dcc.running),unsigned(dcc.count),unsigned(dcc.signature),unsigned(dcc.mask),dcc.packets,unsigned(dcc.faults),
-      unsigned(bench.remaining(millis())),unsigned(bench.state));
+      unsigned(bench.remaining(millis())),unsigned(bench.state),unsigned(bench.mode));
   size_t size=AndenLink::encode(wire,sizeof(wire),body);
   if(size)Serial.write(reinterpret_cast<const uint8_t*>(wire),size);
 }
@@ -57,6 +64,7 @@ void command() {
   if(!strcmp(parts[2],"BENCHSTOP") && n==3){
     bench.stop();UnoDcc::disarmBridge();serviceBridge();sendState(sequence);return;
   }
+  if(!strcmp(parts[2],"DCCTEST") && n==3){startBridge(BridgeBench::Dcc);sendState(sequence);return;}
   if(!strcmp(parts[2],"PULSE") && n==4){
     uint16_t direction;if(!AndenLink::number(parts[3],direction)||direction>1)return;
     startBridge(direction);sendState(sequence);return;

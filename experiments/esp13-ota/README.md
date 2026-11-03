@@ -2,10 +2,10 @@
 
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
 Wi-Fi setup, browser-based firmware updates and a locomotive roster. Version
-**0.3.0** controls independent F0 packets on the Uno through a checked UART link.
+**0.4.0** controls independent F0 packets on the Uno through a checked UART link.
 The [Uno bench firmware](../uno-stack-test/README.md) emits logic on **D10**, with
-DCC track operation disabled. Setup also provides a separate no-load DC bench
-test for bridge A. This is our own application, not AT modem firmware;
+continuous track operation disabled. Setup also provides no-load DC and timed
+DCC scope tests for bridge A. This is our own application, not AT modem firmware;
 it cannot update the Uno. The existing Pico W controller stays separate.
 
 ## What it does
@@ -24,7 +24,7 @@ it cannot update the Uno. The existing Pico W controller stays separate.
 - Adds Uno ping and L LED controls; the LED test requires both enables LOW.
 - Offers System / Light / Dark appearance, remembered by each browser.
 - Uses the blue LED for Wi-Fi status and feedback on user requests.
-- Adds three-second DC bridge-A pulses and Stop under Setup for no-load testing.
+- Adds three-second DC / DCC bridge-A tests and Stop under Setup, with no loads.
 - Uses no application login or access-point password, as requested.
 
 The app sends only checked protocol frames on the Uno UART, with no debug
@@ -187,9 +187,9 @@ confirms both the expected version and a new boot ID:
 
 ```sh
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.3.0 --dry-run
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.4.0 --dry-run
 python3 experiments/esp13-ota/ota.py --host ESP_IP \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.3.0
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.4.0
 ```
 
 OTA replaces the ESP application, including its update code. Always use a build
@@ -211,12 +211,19 @@ change can remove it. If storage fails, metadata saves report an error.
 
 The UI starts with two columns on desktop and one on small screens. F0 waits for
 the Uno to acknowledge the complete roster; offline controls stay disabled while
-saved metadata remains editable. The current build provides no DCC track mode, speed,
-CV programming, extra functions or address finder. Packet timing on D10 still
-needs physical measurement. See the [stack guide](../uno-stack-test/README.md)
+saved metadata remains editable. The current build provides no continuous DCC track mode, speed,
+CV programming, extra functions or address finder. Quantitative physical pulse timing
+still needs measurement. See the [stack guide](../uno-stack-test/README.md)
 for pins, the UART protocol and API endpoints.
 
 ## No-load motor shield test
+
+ESP/Uno **0.4.0** adds **DCC · 3 s** to the same panel. It routes the timed waveform
+through the normal D12 shield input, with no jumper, starting at a packet boundary.
+The new mode needs a 17-field Uno reply and a ready roster; legacy DC tests remain
+available. See the [DCC scope guide](../uno-stack-test/DCC-SCOPE.md) for capture,
+phase/cutoff behavior and validation limits. `trackPower` now reports an active
+DCC test; it does not measure whether motor VIN is present.
 
 ESP/Uno **0.3.0** adds **Setup → Motor shield bench test**. It provides A + / A −
 three-second DC pulses and Stop, with live enable/status reporting. This is
@@ -232,6 +239,11 @@ Legacy Uno replies remain supported, but the bench buttons stay disabled until
 the new firmware is detected. An ESP update does not update the Uno.
 
 ## Verification status
+
+ESP **0.4.0** compiles to **394,768 bytes**, with **30,972 bytes static RAM**.
+The native ISR phase/guard model and browser DCC/legacy-mode tests passed. The
+Uno also passed VIN-disconnected USB/UART DCC bursts and automatic Stop. Powered
+waveform observations belong in the DCC scope guide.
 
 ESP **0.3.0** compiles to **393,920 bytes** with **30,940 bytes static RAM**.
 Native policy and browser checks cover the fixed pulse, stop/fault states,

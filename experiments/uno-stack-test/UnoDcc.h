@@ -4,17 +4,33 @@
 #include <UnoDccStream.h>
 #include "BridgeBench.h"
 
+#if !defined(__AVR_ATmega328P__)
+#error "This direct-port routing requires an ATmega328P Uno"
+#endif
 static_assert(F_CPU==16000000UL,"Uno DCC timing requires a 16 MHz CPU");
 namespace UnoDcc {
 UnoDccStream stream;
 BridgeGuard bridgeGuard;
 volatile bool running=false;
 volatile uint16_t deadlineFaults=0;
-// D3 is the Uno shield's enable A. Only this atomic operation can set it HIGH.
-bool armBridge(){bool armed=false;ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-  if(running){bridgeGuard.arm();PORTD|=_BV(PD3);armed=true;}
+volatile bool dccBridge=false,bridgePending=false;
+constexpr uint16_t BRIDGE_DELAY_TICKS=40,BRIDGE_LATE_TICKS=2; // 20 us phase; 1 us sampled lateness.
+// Only this helper and the packet-boundary ISR can set enable A HIGH.
+bool armBridge(bool dcc=false){bool armed=false;ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+  if(running){
+    PORTD&=~_BV(PD3);bridgeGuard.disarm();bridgeGuard.expired=false;
+    dccBridge=dcc;bridgePending=dcc;
+    if(!dcc){bridgeGuard.arm();PORTD|=_BV(PD3);}
+    armed=true;
+  }
 }return armed;}
-void disarmBridge(){ATOMIC_BLOCK(ATOMIC_RESTORESTATE){PORTD&=~_BV(PD3);bridgeGuard.disarm();}}
+void disarmBridge(){ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+  PORTD&=~_BV(PD3);dccBridge=false;bridgePending=false;bridgeGuard.disarm();PORTB&=~_BV(PB4);
+}}
+void timingFault(){
+  PORTD&=~_BV(PD3);dccBridge=false;bridgePending=false;
+  TCCR1A=0;TIMSK1=0;PORTB&=~(_BV(PB2)|_BV(PB4));running=false;++deadlineFaults;
+}
 void begin(){
   pinMode(10,OUTPUT);digitalWrite(10,LOW);
   uint8_t empty[1]={0};stream.prepare(0,empty,0);stream.commit();
@@ -44,9 +60,21 @@ Status status(){Status s;ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
 }return s;}
 }
 ISR(TIMER1_COMPB_vect){
-  if(UnoDcc::bridgeGuard.tick())PORTD&=~_BV(PD3);
-  uint16_t due=OCR1B+UnoDcc::stream.nextHalfTicks();
-  if(int16_t(due-TCNT1)<=8){
-    TCCR1A=0;TIMSK1=0;PORTB&=~_BV(PB2);PORTD&=~_BV(PD3);UnoDcc::running=false;++UnoDcc::deadlineFaults;
-  }else OCR1B=due;
+  const uint16_t edge=OCR1B;
+  if(UnoDcc::dccBridge && (!UnoDcc::bridgePending || UnoDcc::stream.atPacketStart())){
+    // Mirror D10 at a fixed phase after the compare, before variable packet work.
+    // Waiting absorbs normal UART/Timer0 ISR latency; a late mirror fails OFF.
+    const uint16_t target=edge+UnoDcc::BRIDGE_DELAY_TICKS;
+    uint16_t now;do{now=TCNT1;}while(int16_t(now-target)<0);
+    if(uint16_t(now-target)>UnoDcc::BRIDGE_LATE_TICKS){UnoDcc::timingFault();return;}
+    if(PINB&_BV(PB2))PORTB|=_BV(PB4);else PORTB&=~_BV(PB4);
+    if(UnoDcc::bridgePending){
+      UnoDcc::bridgePending=false;UnoDcc::bridgeGuard.arm();PORTD|=_BV(PD3);
+    }
+  }
+  if(UnoDcc::bridgeGuard.tick()){
+    PORTD&=~_BV(PD3);UnoDcc::dccBridge=false;UnoDcc::bridgePending=false;PORTB&=~_BV(PB4);
+  }
+  uint16_t due=edge+UnoDcc::stream.nextHalfTicks();
+  if(int16_t(due-TCNT1)<=8)UnoDcc::timingFault();else OCR1B=due;
 }
