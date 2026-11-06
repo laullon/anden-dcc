@@ -10,7 +10,7 @@
 
 // ESP8266 roster + stack bench test. No bridge-enable commands.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.5.3";
+constexpr char VERSION[] = "0.5.4";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
@@ -58,6 +58,7 @@ uint32_t otaCapacity() {
 }
 
 void sendJson(int code, const String& body) {
+  server.keepAlive(false); // Release the single HTTP client between control requests.
   server.sendHeader("Cache-Control", "no-store");
   server.send(code, "application/json", body);
 }
@@ -93,6 +94,7 @@ void sendStatus() {
   body += F(",\"led\":{\"pin\":16,\"activeLow\":true,\"on\":"); body += statusLedOn?"true":"false";
   body += F(",\"pinHigh\":"); body += digitalRead(StatusLed::PIN)==HIGH?"true":"false";
   body += F(",\"activityRequests\":"); body += statusLed.requests(); body+='}';
+  body += F(",\"trackStopReason\":");body+=jsonString(trackStopReason);
   body += F(",\"uno\":"); body += uno.json();
   body += F(",\"storageReady\":");body+=rosterStorage?"true":"false";
   body += F(",\"dccImplemented\":true,\"trackPower\":");body+=uno.dccPowerActive()?"true":"false";
@@ -109,7 +111,7 @@ void setup() {
   loadRoster();uno.attach(roster);uno.begin();
   WiFi.persistent(false);
   WiFi.mode(WIFI_AP_STA);
-  bootId = uint32_t(random(0x7FFFFFFF));
+  bootId = uint32_t(random(0x7FFFFFFF));browserLease.seed(uint16_t(bootId));
   WiFi.hostname(HOST);
   WiFi.softAPConfig(AP_IP, AP_IP, IPAddress(255, 255, 255, 0));
   apReady = WiFi.softAP(HOST);  // Open recovery/setup network, intentionally.
@@ -129,6 +131,7 @@ void setup() {
     return ESP8266WebServer::CLIENT_REQUEST_CAN_CONTINUE;
   });
   server.on("/", HTTP_GET, [] {
+    server.keepAlive(false);
     server.sendHeader("Cache-Control", "no-store");
     server.sendHeader("Content-Encoding","gzip");
     server.send_P(200,"text/html; charset=utf-8",reinterpret_cast<const char*>(SETUP_PAGE),sizeof(SETUP_PAGE));
@@ -195,11 +198,13 @@ void setup() {
   trackRoutes();
   finderRoutes();
   server.begin();
+  server.getServer().setNoDelay(true);
 }
 
 void loop() {
   refreshStatusLed();
   server.handleClient();
+  serviceTrackLease();
   serviceFinder();
   uno.loop();
   refreshStatusLed();

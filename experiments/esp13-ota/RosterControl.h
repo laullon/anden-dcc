@@ -69,22 +69,41 @@ String dccStatus(){
   }
   return out+"],\"finder\":"+finderStatus()+"}";
 }
-uint16_t trackLease=0,leaseSequence=0;
+#include "BrowserLease.h"
+BrowserLease browserLease;
+const char* trackStopReason="Track A output is disabled.";
+void serviceTrackLease(){
+  if(!browserLease.active())return;
+  if(browserLease.expired(millis())){
+    browserLease.stop();trackStopReason="Browser connection lost (6 seconds).";uno.query("BENCHSTOP");return;
+  }
+  if(browserLease.due(millis())){
+    if(!uno.query("KEEP") || !uno.trackActive()){
+      browserLease.stop();trackStopReason="Uno link or output stopped.";uno.query("BENCHSTOP");return;
+    }
+    browserLease.renewed(millis());
+  }
+}
 void trackRoutes(){
   server.on("/api/track/on",HTTP_POST,[]{
     if(finder.active() || !uno.query("PING") || !uno.trackSupported() || !uno.outputsDisabled()){sendUnoError(409,F("Track firmware and a connected, stopped roster are required."));return;}
     if(!uno.syncRoster(roster) || !uno.query("TRACKON") || !uno.trackActive()){sendUnoError(409,F("Track start refused. Check current cutoff and timing status."));return;}
-    if(!++leaseSequence)++leaseSequence;trackLease=leaseSequence;
+    uint16_t trackLease=browserLease.start(millis());trackStopReason="Track A output is disabled.";
     sendJson(200,"{\"lease\":"+String(trackLease)+"}");
   });
   server.on("/api/track/keep",HTTP_POST,[]{
     uint16_t lease;
-    if(!AndenLink::number(server.arg("lease").c_str(),lease) || !lease || lease!=trackLease){sendUnoError(409,F("Track session expired. Turn power on explicitly."));return;}
-    if(!uno.query("KEEP") || !uno.trackActive()){trackLease=0;sendUnoError(409,F("Track stopped. Check status before restarting."));return;}
+    if(!AndenLink::number(server.arg("lease").c_str(),lease) || !browserLease.accepts(lease,millis())){sendUnoError(409,F("Track session expired. Turn power on explicitly."));return;}
+    if(!uno.query("KEEP") || !uno.trackActive()){browserLease.stop();trackStopReason="Uno link or output stopped.";sendUnoError(409,F("Track stopped. Check status before restarting."));return;}
+    browserLease.touch(lease,millis());browserLease.renewed(millis());
     sendJson(200,F("{\"ok\":true}"));
   });
   server.on("/api/track/off",HTTP_POST,[]{
-    trackLease=0;bool ok=uno.query("BENCHSTOP") && uno.outputsDisabled();
+    if(server.hasArg("lease")){
+      uint16_t lease;
+      if(!AndenLink::number(server.arg("lease").c_str(),lease) || !browserLease.accepts(lease,millis())){sendUnoError(409,F("This page no longer owns the track session."));return;}
+    }
+    browserLease.stop();trackStopReason=server.hasArg("lease")?"Control page closed or reloaded.":"Power off requested.";bool ok=uno.query("BENCHSTOP") && uno.outputsDisabled();
     sendJson(ok?200:503,ok?F("{\"ok\":true}"):F("{\"error\":\"Stop not acknowledged; the local timeout still applies.\"}"));
   });
 }

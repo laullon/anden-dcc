@@ -80,7 +80,14 @@ with tempfile.TemporaryDirectory(prefix='anden-esp13-check-') as tmp:
 #include <string>
 #include "WifiValidation.h"
 #include "StatusLed.h"
+#include "BrowserLease.h"
 int main() {
+  BrowserLease lease;lease.seed(65535);auto token=lease.start(1000);assert(token==1);
+  assert(lease.accepts(token,6999)&&!lease.accepts(token,7000));assert(!lease.touch(token,7000));
+  assert(!lease.due(1499)&&lease.due(1500));lease.renewed(6500);assert(lease.expired(7000));
+  token=lease.start(10000);assert(!lease.accepts(token-1,10001));assert(lease.touch(token,15000));assert(!lease.expired(20999)&&lease.expired(21000));
+  lease.stop();assert(!lease.active()&&!lease.accepts(token,15001));
+  token=lease.start(UINT32_MAX-99);assert(!lease.expired(5899)&&lease.expired(5900));assert(!lease.touch(token,5900));
   StatusLed led;
   assert(led.on(0,false)); assert(led.on(499,false));
   assert(!led.on(500,false)); assert(!led.on(999,false)); assert(led.on(1000,false));
@@ -120,4 +127,4 @@ int main() {
     subprocess.run([os.environ.get('CXX','c++'), '-std=c++11', '-I', str(experiment),
                     str(source), '-o', str(binary)], check=True)
     subprocess.run([str(binary)], check=True)
-print('PASS: ESP13 LED heartbeat/request pulses/quiet polling/rollover, embedded page, credential boundaries, app/platform/layout/size OTA guards, wrong-target refusal and verified-reboot helper flow.')
+print('PASS: browser lease expiry/renewal/stale-token/rollover, ESP13 LED heartbeat/request pulses/quiet polling/rollover, embedded page, credential boundaries, app/platform/layout/size OTA guards, wrong-target refusal and verified-reboot helper flow.')

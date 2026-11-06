@@ -1,6 +1,6 @@
 # First locomotive test: lights, direction and address finder
 
-ESP and Uno **0.5.0** add stationary track operation to the Uno/ESP13/L298P stack.
+Uno **0.5.0** and ESP **0.5.4** provide stationary track operation to the Uno/ESP13/L298P stack.
 Speed is fixed at **zero**; the Uno rejects every nonzero speed request. No throttle,
 CV programming, extra functions or automatic power restoration are provided.
 
@@ -51,10 +51,14 @@ write decoder configuration.
 ## Local cutoff and connection loss
 
 - Output starts off and requires an explicit Power on after restart, timeout or trip.
-- Only the page that requested power renews its session, every 500 ms. Ordinary
-  status polling does not renew power. Hidden/closed pages request immediate off.
-- The Uno expires its control lease after **2 seconds** without a checked KEEP.
-  Renewal cannot restart an expired or stopped output.
+- Only the page that requested power renews its browser session, every 500 ms.
+  Ordinary status polling does not renew it. Changing tabs is allowed; closing
+  or reloading the owning page requests off. Stale page cleanup cannot stop a
+  newer session.
+- The ESP tolerates brief browser/network interruptions for **6 seconds**,
+  maintaining checked Uno KEEP messages every 500 ms while that session is alive.
+  After browser expiry it requests Stop. If the ESP fails, the Uno independently
+  expires after **2 seconds** without KEEP. Neither path restarts output.
 - An interrupt guard still disables A after 60,000 half-bits (3.48–6 seconds) if
   main-loop servicing stalls while interrupts continue. Timing faults disable A.
 - The existing raw A0 cutoff **100** remains unchanged. It is deliberately
@@ -105,9 +109,21 @@ capture's 2 µs resolution. This is logic-pin verification, not a loaded rail te
 
 The installed ESP/Uno pair also completed a 1–100 search with simulated answers
 for address 37, including settling, stale-step rejection, cleanup and restored
-roster. Observed web lost-heartbeat cutoff was 2.179 seconds including polling
-latency. The actual UI sustained power, changed direction/F0 and switched off on
+roster. In version 0.5.0, observed web lost-heartbeat cutoff was 2.179 seconds including
+polling latency; ESP 0.5.4 now uses the separate six-second browser grace above. The actual UI sustained power, changed direction/F0 and switched off on
 reload without restarting; no browser errors or timing faults were reported.
+
+On 2026-11-06, the installed ESP 0.5.4 / Uno 0.5.0 pair stayed enabled through a
+three-second browser-heartbeat gap. It disabled output after 6.129 seconds when
+heartbeats stopped (including polling latency). Late KEEP did not restart it;
+stale KEEP and page-cleanup requests did not stop a newer session. Manual off
+passed and the timing-fault counter remained zero. A locomotive was connected,
+but motor VIN and load current were not independently measured during this check.
+
+The installed UI also preserved a held mouse target through four real status
+polls, acknowledged the click, restored the original F0 request and kept output
+off. Browser simulations cover tab visibility, one failed heartbeat response and
+recovery, focus/target stability, legacy controls and search flows.
 
 Actual locomotive behavior, loaded timing and current protection remain unverified.
 

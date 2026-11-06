@@ -1,5 +1,17 @@
 # Changelog
 
+## ESP13 mouse interaction and connection handling 0.5.4 · 2026-11-06
+
+- Preserve unchanged loco cards through polling so hover, focus and held mouse
+  targets survive; add clear hover/pressed/disabled feedback.
+- Coalesce status requests and reduce active polling to once per second; release
+  HTTP connections after replies and disable TCP coalescing for control latency.
+- Remove visibility-triggered Stop, retry transient heartbeat failures and reject
+  stale page cleanup without stopping a newer track session.
+- Give browser reconnection six seconds while the ESP maintains the unchanged
+  independent two-second Uno lease. Surface stop reasons in the power card.
+- Test held clicks, page visibility, retries, session expiry, stale tokens and wrap.
+
 ## ESP13 editable finder range 0.5.3 · 2026-11-03
 
 - Allow First/Last address drafts while track power is off or the Uno is offline.

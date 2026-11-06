@@ -3,13 +3,13 @@ const root=path.resolve(__dirname,'../..');
 (async()=>{const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),headless:true});try{
  const page=await browser.newPage({viewport:{width:1180,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  const state={appId:'ANDEN_ESP13_OTA_V1',version:'0.5.0',connected:true,configured:true,ssid:'Workshop',ip:'192.168.1.43',apIp:'192.168.13.1',apReady:true,otaMaxBytes:458752,freeHeap:40000,storageReady:true,uno:{online:true,version:'0.5.0',trackSupported:true,trackActive:false,enableA:false,enableB:false,adcA:0,adcB:0,rxFrames:5,roundTripMs:8,bench:{supported:true,dccSupported:true,active:false,state:0,mode:0,remainingMs:0}},dcc:{ready:true,running:true,packets:100,timingFaults:0,locos:[{id:1,address:3,type:'electric',f0:false,forward:true,speed:0},{id:2,address:4,type:'diesel',f0:false,forward:true,speed:0}]}};
- let on=0,off=0,keeps=0,refuseKeep=false,lease=0,settleUntil=0;
+ let on=0,off=0,keeps=0,refuseKeep=false,lease=0,settleUntil=0,failNextKeep=false;
  await page.route('http://esptrack.test/**',async route=>{
   const req=route.request(),u=new URL(req.url()),data=new URLSearchParams(req.postData());
   if(u.pathname==='/api/status'){if(state.dcc.finder)state.dcc.finder.waitMs=Math.max(0,settleUntil-Date.now());return route.fulfill({json:state})}
   if(u.pathname==='/api/track/on'){await new Promise(r=>setTimeout(r,350));on++;lease++;state.uno.enableA=state.uno.trackActive=true;state.uno.bench={supported:true,dccSupported:true,active:true,state:1,mode:3,remainingMs:2000};return route.fulfill({json:{lease}})}
-  if(u.pathname==='/api/track/off'){await new Promise(r=>setTimeout(r,350));off++;state.uno.enableA=state.uno.trackActive=state.uno.bench.active=false;state.uno.bench.state=3;return route.fulfill({json:{ok:true}})}
-  if(u.pathname==='/api/track/keep'){keeps++;assert.equal(data.get('lease'),String(lease));return route.fulfill(refuseKeep?{status:409,json:{error:'Lease expired'}}:{json:{ok:true}})}
+  if(u.pathname==='/api/track/off'){if(data.has('lease')&&data.get('lease')!==String(lease))return route.fulfill({status:409,json:{error:'Stale session'}});await new Promise(r=>setTimeout(r,350));off++;state.uno.enableA=state.uno.trackActive=state.uno.bench.active=false;state.uno.bench.state=3;return route.fulfill({json:{ok:true}})}
+  if(u.pathname==='/api/track/keep'){keeps++;if(failNextKeep){failNextKeep=false;return route.abort('failed')}if(refuseKeep){state.uno.enableA=state.uno.trackActive=state.uno.bench.active=false;}assert.equal(data.get('lease'),String(lease));return route.fulfill(refuseKeep?{status:409,json:{error:'Lease expired'}}:{json:{ok:true}})}
   if(u.pathname==='/dcc/direction'){const l=state.dcc.locos.find(l=>l.address===Number(data.get('address')));l.forward=data.get('forward')==='1';assert.equal(l.speed,0);return route.fulfill({json:state.dcc})}
   if(u.pathname==='/dcc/f0'){state.dcc.locos.find(l=>l.address===Number(data.get('address'))).f0=data.get('on')==='1';return route.fulfill({json:state.dcc})}
   if(u.pathname==='/finder/start'){
@@ -36,6 +36,14 @@ const root=path.resolve(__dirname,'../..');
  await page.locator('.loco[data-id="1"] [data-forward="0"]').click();assert.equal(state.dcc.locos[0].forward,false);assert.equal(state.dcc.locos[1].forward,true);
  await page.locator('#track-on').click();await page.waitForFunction(()=>document.getElementById('track-label').textContent==='Track is ON');
  await page.waitForFunction(()=>document.getElementById('track-on').disabled);await page.waitForTimeout(1100);assert(keeps>=1);assert.equal(on,1);assert(await page.locator('#track-on').isHidden());assert(await page.locator('#track-off').isVisible());
+ // Polling must preserve a pressed mouse target until mouseup/click.
+ const mouseTarget=page.locator('.loco[data-id="1"] [data-on="1"]');const originalNode=await mouseTarget.elementHandle();const rect=await mouseTarget.boundingBox();
+ await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();
+ for(let i=0;i<4;i++){state.dcc.packets++;await page.evaluate(()=>refreshStatus());assert(await originalNode.evaluate(e=>e.isConnected));}
+ await page.mouse.up();await page.waitForFunction(()=>!rosterBusy&&document.querySelector('.loco[data-id="1"] [data-on="1"]').getAttribute('aria-pressed')==='true');
+ // Page visibility is not a stop command; one lost HTTP response is retried.
+ const beforeOff=off;await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'))});await page.waitForTimeout(700);assert.equal(off,beforeOff);assert(state.uno.trackActive);await page.evaluate(()=>delete document.hidden);
+ failNextKeep=true;await page.waitForFunction(()=>document.getElementById('track-message').textContent.includes('retrying'));await page.waitForFunction(()=>document.getElementById('track-message').textContent==='');assert.equal(off,beforeOff);assert(state.uno.trackActive);
  assert(await page.locator('.loco[data-id="1"] [data-forward="1"]').isEnabled());assert(await page.locator('.edit-loco').first().isDisabled());assert(await page.locator('#add-loco').isDisabled());
  await page.locator('.loco[data-id="1"] [data-forward="1"]').click();assert.equal(state.dcc.locos[0].forward,true);
  await page.locator('.loco[data-id="2"] [data-on="1"]').click();assert.equal(state.dcc.locos[1].f0,true);
@@ -51,11 +59,11 @@ const root=path.resolve(__dirname,'../..');
  fs.mkdirSync(path.join(root,'build/ui'),{recursive:true});
  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(root,'build/ui/esp13-power-lights.png'),fullPage:true});await page.screenshot({path:path.join(root,'build/ui/esp13-track.png')});
  await page.locator('#track-off').click();await page.waitForFunction(()=>document.getElementById('track-label').textContent==='Track is OFF');const stopped=keeps;await page.waitForTimeout(700);assert.equal(keeps,stopped);assert(off>=1);assert(await page.locator('#track-off').isHidden());const darkPower=await colors();assert.equal(darkPower.left,darkPower.right);
- await page.locator('#track-on').click();refuseKeep=true;await page.waitForFunction(()=>document.getElementById('track-message').textContent.includes('Connection lost'));
- await page.waitForTimeout(700);assert.equal(state.uno.trackActive,false);assert.equal(on,2);
+ await page.locator('#track-on').click();const offBeforeReject=off;refuseKeep=true;await page.waitForFunction(()=>document.getElementById('track-message').textContent.includes('Connection lost'));
+ await page.waitForTimeout(700);assert.equal(state.uno.trackActive,false);assert.equal(on,2);assert.equal(off,offBeforeReject);
  refuseKeep=false;state.uno.trackSupported=false;await page.evaluate(()=>refreshStatus());assert(await page.locator('#track-on').isDisabled());assert(await page.locator('[data-forward="1"]').first().isDisabled());
  state.uno.online=false;await page.evaluate(()=>refreshStatus());assert.equal(await page.locator('#track-label').innerText(),'Status unavailable');assert(await page.locator('#track-off').isVisible());assert(await page.locator('#track-on').isHidden());state.uno.online=true;
- state.uno.trackSupported=true;await page.evaluate(()=>refreshStatus());await page.locator('#track-on').click();await page.evaluate(()=>leaveTrack());await page.waitForTimeout(100);assert.equal(state.uno.trackActive,false);
+ state.uno.trackSupported=true;await page.evaluate(()=>refreshStatus());await page.locator('#track-on').click();await page.evaluate(()=>leaveTrack());await page.waitForTimeout(800);assert.equal(state.uno.trackActive,false);
  await page.setViewportSize({width:320,height:1100});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await page.evaluate(()=>refreshStatus());await page.locator('#track-on').click();await page.locator('#find-address').click();await page.locator('#finder-range button').click();
  await page.waitForFunction(()=>document.getElementById('finder-question').textContent.includes('turn the lights on'));
@@ -87,5 +95,5 @@ const root=path.resolve(__dirname,'../..');
    assert(Math.abs(value.locos[1]-before.locos[1])<1.1,JSON.stringify({width,before,value}));
   }
  }
- assert.deepEqual(errors,[]);console.log('PASS: editable range drafts with power off/offline, guarded Start search, stable off/pending/on/off layout at 1180/600/320px with delayed replies, clear power state/actions/unknown status, directional white/red lamps on all three locos, stationary track explicit-on/heartbeat/off/expiry/no-restart, per-loco direction/F0 while powered, metadata locks, old-firmware guards, leave-page off, mobile layout and guided search to 37 with settling/locks/result editor.');
+ assert.deepEqual(errors,[]);console.log('PASS: held mouse target across polling, hidden-page continuity, transient retry and no stale-session Stop, editable range drafts with power off/offline, guarded Start search, stable off/pending/on/off layout at 1180/600/320px with delayed replies, clear power state/actions/unknown status, directional white/red lamps on all three locos, stationary track explicit-on/heartbeat/off/expiry/no-restart, per-loco direction/F0 while powered, metadata locks, old-firmware guards, leave-page off, mobile layout and guided search to 37 with settling/locks/result editor.');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
