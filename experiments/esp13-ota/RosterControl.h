@@ -1,9 +1,13 @@
 #pragma once
 #include <LittleFS.h>
 #include <LocoRoster.h>
+#include "FavoriteFunctions.h"
+#include <memory>
+#include <new>
 
 #include <AddressFinder.h>
 LocoRoster roster;
+FavoriteFunctions favorites;
 AddressFinder finder;
 String finderStatus(){
   return "{\"stage\":"+jsonString(finder.name())+",\"active\":"+(finder.active()?"true":"false")+
@@ -39,24 +43,38 @@ void loadRoster(){
   // v0.1.x never used this reserved filesystem. Initialize it on first use.
   if(!rosterStorage && LittleFS.format())rosterStorage=LittleFS.begin();
   if(!rosterStorage || !LittleFS.exists("/locos.cfg"))return;
-  File file=LittleFS.open("/locos.cfg","r");if(!file || file.size()>1024)return;
-  if(file.readStringUntil('\n')!="anden-roster-2")return;
-  LocoRoster loaded;
-  while(file.available()){String line=file.readStringUntil('\n');if(!loaded.loadRecord(line.c_str(),false))return;}
-  roster=loaded;
+  File file=LittleFS.open("/locos.cfg","r");if(!file || file.size()>8192){rosterStorage=false;return;}
+  String header=file.readStringUntil('\n');bool current=header=="anden-roster-3";
+  if(!current && header!="anden-roster-2"){rosterStorage=false;return;}
+  LocoRoster loaded;std::unique_ptr<FavoriteFunctions> loadedFavorites(new(std::nothrow) FavoriteFunctions);if(!loadedFavorites){rosterStorage=false;return;}
+  while(file.available()){
+    String line=file.readStringUntil('\n');bool ok=false;
+    if(!current)ok=loaded.loadRecord(line.c_str(),false);
+    else if(line.startsWith("L\t"))ok=loaded.loadRecord(line.c_str()+2,false);
+    else if(line.startsWith("F\t"))ok=loadedFavorites->loadRecord(line.c_str()+2);
+    if(!ok){rosterStorage=false;return;}
+  }
+  for(uint8_t id=1;id<=8;++id)if(loadedFavorites->locos[id-1].count && loaded.findId(id)<0){rosterStorage=false;return;}
+  roster=loaded;favorites=*loadedFavorites;
 }
-bool saveRoster(const LocoRoster& value){
+bool saveRoster(const LocoRoster& value,const FavoriteFunctions* changed=nullptr){
   if(!rosterStorage)return false;
+  const auto& savedFavorites=changed?*changed:favorites;
   File file=LittleFS.open("/locos.tmp","w");if(!file)return false;
-  String data="anden-roster-2\n";
+  String data="anden-roster-3\n";
   for(uint8_t i=0;i<value.count;++i){const auto& l=value.entries[i];
-    data+=String(l.id)+"\t"+String(l.address)+"\t"+LocoRoster::typeName(l.type)+"\t"+l.name+"\n";}
+    data+="L\t"+String(l.id)+"\t"+String(l.address)+"\t"+LocoRoster::typeName(l.type)+"\t"+l.name+"\n";
+  }
+  for(uint8_t i=0;i<value.count;++i){uint8_t id=value.entries[i].id;const auto& set=savedFavorites.locos[id-1];
+    for(uint8_t j=0;j<set.count;++j)data+="F\t"+String(id)+"\t"+String(set.entries[j].number)+"\t"+set.entries[j].name+"\n";
+  }
   bool ok=file.print(data)==data.length();file.close();
   if(ok)ok=LittleFS.rename("/locos.tmp","/locos.cfg");
   if(!ok)LittleFS.remove("/locos.tmp");return ok;
 }
 String dccStatus(){
   String out="{\"ready\":";out+=uno.matches(roster)?"true":"false";
+  out+=",\"functionsSupported\":";out+=uno.functionsSupported()?"true":"false";out+=",\"maxFunction\":28,\"maxFavorites\":8";
   out+=",\"running\":";out+=uno.dccReady()?"true":"false";
   out+=",\"pin\":10,\"bridgePin\":12,\"halfOneUs\":58,\"halfZeroUs\":100,\"maxLocos\":8,\"trackPower\":";
   out+=uno.dccPowerActive()?"true":"false";out+=",\"packets\":"+String(uno.packetCount());
@@ -65,7 +83,10 @@ String dccStatus(){
     out+="{\"id\":"+String(l.id)+",\"address\":"+String(l.address)+",\"name\":"+jsonString(l.name)+",\"type\":"+jsonString(LocoRoster::typeName(l.type));
     out+=",\"forward\":";out+=l.forward?"true":"false";out+=",\"speed\":0";
     out+=",\"f0\":";out+=l.f0?"true":"false";
-    char bytes[32];snprintf(bytes,sizeof(bytes),",\"bytes\":[\"%02X\",\"%02X\",\"%02X\"]}",l.address,DccPacket::instruction(l.f0),DccPacket::checksum(l.address,l.f0));out+=bytes;
+    uint32_t flags=LocoRoster::functionMask(l);out+=",\"functions\":"+String(flags)+",\"favorites\":[";
+    const auto& set=favorites.locos[l.id-1];
+    for(uint8_t j=0;j<set.count;++j){if(j)out+=',';out+="{\"number\":"+String(set.entries[j].number)+",\"name\":"+jsonString(set.entries[j].name)+"}";}out+=']';
+    uint8_t instruction=DccFunctions::groupOne(flags);char bytes[32];snprintf(bytes,sizeof(bytes),",\"bytes\":[\"%02X\",\"%02X\",\"%02X\"]}",l.address,instruction,l.address^instruction);out+=bytes;
   }
   return out+"],\"finder\":"+finderStatus()+"}";
 }
@@ -133,6 +154,30 @@ void finderRoutes(){
     sendJson(200,dccStatus());
   });
 }
+void favoriteRoutes(){
+  server.on("/dcc/function",HTTP_POST,[]{
+    if(finder.active()){sendUnoError(409,F("Finish or cancel the address search first."));return;}
+    int address=rosterNumber(server.arg("address"),127);uint16_t fn;String on=server.arg("on");
+    if(address<0||!AndenLink::number(server.arg("function").c_str(),fn)||fn>28||(on!="0"&&on!="1")){sendUnoError(400,F("Choose F0 to F28 and On or Off."));return;}
+    if(fn && !uno.functionsSupported()){sendUnoError(501,F("Install Uno 0.6.0 to test F1-F28."));return;}
+    int index=roster.findAddress(address);if(index<0){sendUnoError(404,F("Locomotive not found."));return;}
+    LocoRoster changed=roster;LocoRoster::setFunction(changed.entries[index],fn,on=="1");
+    if(!uno.syncRoster(changed)){sendUnoError(503,F("Uno did not acknowledge the function."));return;}
+    roster=changed;sendJson(200,dccStatus());
+  });
+  auto favoriteAction=[](bool remove){
+    if(finder.active()){sendUnoError(409,F("Finish or cancel the address search first."));return;}
+    int id=rosterNumber(server.arg("id"),8);uint16_t fn;
+    if(id<0 || roster.findId(id)<0 || !AndenLink::number(server.arg("function").c_str(),fn)||fn>28){sendUnoError(400,F("Invalid locomotive or function."));return;}
+    std::unique_ptr<FavoriteFunctions> changed(new(std::nothrow) FavoriteFunctions(favorites));if(!changed){sendUnoError(500,F("Not enough memory to save favorites."));return;}String name=server.arg("name");name.trim();
+    bool ok=remove?changed->remove(id,fn):changed->save(id,fn,name.c_str());
+    if(!ok){sendUnoError(400,F("Use a name of 1-24 UTF-8 bytes, and at most eight favorites per loco."));return;}
+    if(!saveRoster(roster,changed.get())){sendUnoError(500,F("Could not save favorite functions."));return;}
+    favorites=*changed;sendJson(200,dccStatus());
+  };
+  server.on("/locos/favorite",HTTP_POST,[favoriteAction]{favoriteAction(false);});
+  server.on("/locos/favorite/remove",HTTP_POST,[favoriteAction]{favoriteAction(true);});
+}
 void rosterRoutes(){
   server.on("/dcc/direction",HTTP_POST,[]{
     if(finder.active()){sendUnoError(409,F("Finish or cancel the address search first."));return;}
@@ -171,7 +216,8 @@ void rosterRoutes(){
     int id=rosterNumber(server.arg("id"),8);LocoRoster changed=roster;
     if(id<0){sendJson(400,F("{\"error\":\"Invalid ID\"}"));return;}
     if(!changed.remove(id)){sendJson(404,F("{\"error\":\"Loco not found\"}"));return;}
-    if(!saveRoster(changed)){sendJson(500,F("{\"error\":\"Could not save roster\"}"));return;}
-    roster=changed;uno.invalidate();uno.syncRoster(roster);sendJson(200,dccStatus());
+    std::unique_ptr<FavoriteFunctions> changedFavorites(new(std::nothrow) FavoriteFunctions(favorites));if(!changedFavorites){sendUnoError(500,F("Not enough memory to save roster."));return;}changedFavorites->clear(id);
+    if(!saveRoster(changed,changedFavorites.get())){sendJson(500,F("{\"error\":\"Could not save roster\"}"));return;}
+    favorites=*changedFavorites;roster=changed;uno.invalidate();uno.syncRoster(roster);sendJson(200,dccStatus());
   });
 }

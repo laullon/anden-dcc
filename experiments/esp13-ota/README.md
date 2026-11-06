@@ -1,6 +1,8 @@
 # ESP13 · web setup + OTA experiment
 
-**New: ESP/Uno 0.5.0** adds [stationary track power, direction and guided address discovery](../uno-stack-test/FIRST-LOCO-TEST.md). Speed stays zero. The sections below describe the historical 0.4.0 bench release; use the linked guide for current track controls and protocol.
+**ESP/Uno 0.6.0** adds independent **F0–F28** and named favorite functions to the
+[stationary track controller](../uno-stack-test/FIRST-LOCO-TEST.md). Speed stays
+zero. Older bench-release notes below remain useful for wiring and first upload.
 
 This is our own ESP8266 firmware for the ESP-WROOM-02/ESP13 shield. It provides
 Wi-Fi setup, browser-based firmware updates and a locomotive roster. Version
@@ -204,7 +206,8 @@ The ESP owns the roster, using the same model, packet encoder and SVG illustrati
 as the Pico UI. New boards start with addresses **3 and 4**; these are placeholders,
 not detected decoder addresses. Names, types and addresses survive ordinary sketch
 OTA with this layout. All F0 states start OFF after an ESP restart. Changing an
-address also resets its F0; renaming keeps it. F1–F4 are OFF in these packets.
+address also resets all its requested functions; renaming keeps them. With both
+boards on 0.6.0, all five groups covering F0–F28 are refreshed.
 
 On first use, the app initializes the reserved 64 KB LittleFS partition if it
 cannot mount it; this does not overwrite SDK Wi-Fi settings. The roster uses
@@ -213,10 +216,54 @@ change can remove it. If storage fails, metadata saves report an error.
 
 The UI starts with two columns on desktop and one on small screens. F0 waits for
 the Uno to acknowledge the complete roster; offline controls stay disabled while
-saved metadata remains editable. The current build provides no continuous DCC track mode, speed,
-CV programming, extra functions or address finder. Quantitative physical pulse timing
-still needs measurement. See the [stack guide](../uno-stack-test/README.md)
+saved metadata remains editable. The historical bench-only behavior described here has been extended with
+stationary track power, direction, function favorites and the address finder.
+Speed control and CV programming remain unavailable. Quantitative physical pulse timing
+still needs measurement for each hardware revision. See the [stack guide](../uno-stack-test/README.md)
 for pins, the UART protocol and API endpoints.
+
+## Function explorer and favorites (0.6.0)
+
+Each loco card has a collapsed **Explore functions** panel. Open it, choose F0–F28
+and use On/Off to test that function while track power is on. Function meanings
+come from your decoder: F1 might be sound on one loco and something else on another.
+Selecting a function alone sends no command. These controls latch On/Off; there is
+no momentary horn button yet.
+
+Enter a short name and choose **Pin favorite**. Up to eight favorites per loco
+stay visible as quick toggle buttons above the collapsed panel. Select a pinned
+function to rename it or remove its pin. Pinning/removing does not change its
+current On/Off state. A named F0 changes the existing headlight label rather than
+adding a duplicate button. Naming/pinning works with track power off.
+
+Names are limited to 24 UTF-8 bytes. Pins/names live on the ESP, shared across
+browsers and preserved by normal OTA with the same filesystem layout. Unsaved
+name drafts, selection and expanded state stay in the current page through polling;
+they reset on reload. Active F0–F28 states live in RAM and start OFF after ESP
+restart. Address changes reset them; renaming preserves them. Removing a loco
+also removes its pins before its ID can be reused.
+
+Storage accepts old `anden-roster-2` files and upgrades on the next save to
+`anden-roster-3`: `L\tid\taddress\ttype\tname` records followed by
+`F\tid\tfunction\tname` records. The temporary-file/rename save contains both
+roster and pins. Invalid existing files disable saves rather than silently replacing
+them with defaults. Filesystem erase/layout changes can still remove this data.
+
+New endpoints (URL-encoded POST; success returns the `dcc` object):
+
+| Path | Fields | Effect |
+| --- | --- | --- |
+| `/dcc/function` | `address`, `function` (0–28), `on` (0/1) | Acknowledged requested state |
+| `/locos/favorite` | `id`, `function`, `name` | Pin or rename, without switching |
+| `/locos/favorite/remove` | `id`, `function` | Remove pin, without switching |
+
+`dcc.functionsSupported` gates F1–F28 using the Uno's capability reply. Each loco
+returns a numeric 29-bit `functions` mask and a `favorites` array of `{number,name}`.
+F0 remains compatible with `/dcc/f0`. Finder activity locks function changes and
+favorite edits. HTTP 400 means invalid fields or a full pin list; 409 means a search
+is active; 500 means persistence failed; 501 means the Uno needs upgrading; 503
+means the new snapshot was not acknowledged. A failed request leaves saved data
+and acknowledged state unchanged. Upgrade **both boards** for actual F1–F28 output.
 
 ## No-load motor shield test
 

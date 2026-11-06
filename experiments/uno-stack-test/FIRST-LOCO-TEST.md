@@ -68,11 +68,16 @@ write decoder configuration.
 
 ## Protocol and implementation
 
-The STATE reply adds an eighteenth field `1` for stationary-control capability.
+The STATE reply has an eighteenth capability field: `1` for stationary control,
+`2` for stationary control plus F0–F28 (Uno 0.6.0).
 Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
 8/14/16/17-field responses remain readable.
 
 - `CONTROL,count,f0Mask,directionMask,address,0,...`: atomic stationary roster.
+- `CONTROLX,count,directionMask,address,functionMask,...`: 0.6.0 atomic roster,
+  with one decimal 29-bit mask per address (bit 0 = F0, bit 28 = F28). Maximum
+  eight short addresses; the checked body limit is 144 bytes. All speed packets
+  remain zero. The ESP uses this only after seeing capability `2`.
 - `TRACKON`: explicit start, requiring a prepared control/search schedule.
 - `KEEP`: renew only an already-running stationary track lease.
 - `BENCHSTOP`: immediate output disable.
@@ -128,3 +133,37 @@ recovery, focus/target stability, legacy controls and search flows.
 Actual locomotive behavior, loaded timing and current protection remain unverified.
 
 Packet reference: [NMRA S-9.2.1, broadcast, 128-step control and function groups](https://www.nmra.org/sites/default/files/standards/sandrp/DCC/S/s-9.2.1_dcc_extended_packet_formats.pdf).
+
+
+## F0–F28 refresh (0.6.0)
+
+Each locomotive gets six packet slots: F0–F4, zero-speed/direction, F5–F8,
+F9–F12, F13–F20 and F21–F28. The entire schedule repeats while the generator is
+running; enabling the bridge still requires explicit track power. Instructions
+are `80`/F0–F4, `B0`/F5–F8, `A0`/F9–F12, `DE data`/F13–F20 and
+`DF data`/F21–F28, with XOR checksums. See
+[NMRA S-9.2.1](https://www.nmra.org/sites/default/files/standards/sandrp/DCC/S/s-9.2.1_dcc_extended_packet_formats.pdf).
+
+The Uno prepares two banks of compact packet bytes in the main loop and selects
+the next prebuilt packet at a packet boundary, avoiding a full 48-packet bitmap
+per bank and keeping function encoding out of the timing ISR. Publication remains
+atomic. Its signature covers every address, direction and function bit. Metadata
+names/pins stay on the ESP. Function refresh does not add speed or CV programming.
+
+Native tests decode every function bit, both directions, all publication phases,
+eight-loco refresh, startup stops and maximum UART frames. Browser tests cover
+pinning, drafts, independent cards and failed saves. These tests do not measure
+AVR execution time: validate the new ISR schedule on D10/D12 with motor VIN and
+track disconnected before using it with a locomotive.
+
+
+Installed 0.6.0 validation with motor VIN and track disconnected: Uno **12,812
+bytes flash / 1,018 bytes static RAM**, ESP image **412,688 bytes**. All 29 bits
+were acknowledged by snapshot CRC. Eight-loco full-mask traffic and 126 active
+updates/KEEP pairs over eight seconds produced zero timing faults; expiry shut
+A off and a late KEEP did not restart it. The complete HTTP/ESP/Uno path then
+switched every bit ON/OFF independently with zero timing faults. A temporary
+favorite survived actual OTA; requested functions restarted OFF, existing
+addresses/names/types survived, and the temporary pin was removed. Final output
+and all requested function bits were OFF. Physical pulse widths and locomotive
+function mapping were not measured in this validation.

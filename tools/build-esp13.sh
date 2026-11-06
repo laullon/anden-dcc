@@ -7,6 +7,7 @@ python3 experiments/esp13-ota/embed.py
 python3 tests/check_esp13.py
 python3 tests/check_stack_link.py
 python3 tests/check_uno_dcc.py
+python3 tests/check_functions.py
 "$cli" compile --libraries libraries --fqbn esp8266:esp8266:generic:eesz=1M64,FlashMode=dout,xtal=80,baud=115200 \
   --output-dir build/esp13-ota experiments/esp13-ota
 python3 - <<'PY'

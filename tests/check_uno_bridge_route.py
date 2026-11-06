@@ -90,6 +90,15 @@ int main(){
  assert(ones&&zeros);
  UnoDcc::disarmBridge();size_t count=directionEdges.size();
  for(unsigned i=0;i<100;++i)step();assert(directionEdges.size()==count && !(PORTD.value&_BV(PD3)));
+ // Exercise the new variable-length six-group refresh through the actual ISR.
+ uint8_t allAddresses[]={3,6,7,8,9,10,126,127};uint32_t flags[8];
+ for(unsigned i=0;i<8;++i)flags[i]=i%2?DccFunctions::MASK:0;
+ assert(UnoDcc::stream.prepareFunctions(8,allAddresses,0xA5,flags));UnoDcc::stream.commit();
+ directionEdges.clear();assert(UnoDcc::armBridge(true));
+ for(unsigned i=0;i<48*106*2;++i)step((i*7)%37);
+ assert(UnoDcc::running&&UnoDcc::deadlineFaults==0);
+ for(size_t i=1;i<directionEdges.size();++i){auto width=directionEdges[i].time-directionEdges[i-1].time;assert(width==116||width==200);}
+ UnoDcc::disarmBridge();
  // No main-loop servicing: the actual ISR's backup must still shut off A.
  enableEdges.clear();assert(UnoDcc::armBridge(true));
  for(unsigned i=0;i<BridgeGuard::HALVES+88 && !UnoDcc::bridgeGuard.expired;++i)step();
@@ -101,7 +110,7 @@ int main(){
  assert(UnoDcc::armBridge(true));while(UnoDcc::bridgePending)step();
  step(UnoDcc::BRIDGE_DELAY_TICKS+3);
  assert(!UnoDcc::running && !(PORTD.value&_BV(PD3)) && !(PORTB.value&_BV(PB4)) && UnoDcc::deadlineFaults==1);
- std::printf("PASS: actual Timer1 ISR, DC isolation, packet-boundary enable, D12 58/100 us phase model under ISR delays, stop, backup guard and late-edge fail-off.\n");
+ std::printf("PASS: actual Timer1 ISR, DC isolation, packet-boundary enable, D12 legacy/F0-F28 58/100 us phase model under ISR delays, stop, backup guard and late-edge fail-off.\n");
 }
 ''')
     exe=tmp/'test'

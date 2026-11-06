@@ -14,24 +14,28 @@ class UnoLink {
     if(uint32_t(millis()-lastPoll)>=(benchActive()?300:2000) && query("STATUS") && capable && desired && !finderHold && (outputsDisabled() || trackActive()) && !matches(*desired))syncRoster(*desired);
   }
   bool matches(const LocoRoster& value) const {
-    uint8_t addresses[8]={0},speeds[8]={0},mask=0,directions=0;
-    for(uint8_t i=0;i<value.count;++i){addresses[i]=value.entries[i].address;if(value.entries[i].f0)mask|=1<<i;if(value.entries[i].forward)directions|=1<<i;}
+    uint8_t addresses[8]={0},speeds[8]={0},mask=0,directions=0;uint32_t functions[8]={0};
+    for(uint8_t i=0;i<value.count;++i){addresses[i]=value.entries[i].address;functions[i]=LocoRoster::functionMask(value.entries[i]);if(value.entries[i].f0)mask|=1<<i;if(value.entries[i].forward)directions|=1<<i;}
     return !dirty && (outputsDisabled() || trackActive()) && online() && dccRunning && dccCount==value.count && dccMask==mask &&
-      dccSignature==(trackCapable?UnoDccStream::controlSignature(value.count,addresses,mask,directions,speeds):UnoDccStream::signature(value.count,addresses,mask));
+      dccSignature==(functionsCapable?UnoDccStream::functionSignature(value.count,addresses,directions,functions):trackCapable?UnoDccStream::controlSignature(value.count,addresses,mask,directions,speeds):UnoDccStream::signature(value.count,addresses,mask));
   }
   bool syncRoster(const LocoRoster& value){
     if(!capable || !online() || (!outputsDisabled() && !trackActive()))return false;
     String command="ROSTER,"+String(value.count);
-    uint8_t addresses[8]={0},speeds[8]={0},mask=0,directions=0;
-    for(uint8_t i=0;i<value.count;++i){const auto& l=value.entries[i];addresses[i]=l.address;if(l.f0)mask|=1<<i;if(l.forward)directions|=1<<i;
+    uint8_t addresses[8]={0},speeds[8]={0},mask=0,directions=0;uint32_t functions[8]={0};
+    for(uint8_t i=0;i<value.count;++i){const auto& l=value.entries[i];addresses[i]=l.address;functions[i]=LocoRoster::functionMask(l);if(l.f0)mask|=1<<i;if(l.forward)directions|=1<<i;
       command+=","+String(l.address)+","+String(l.f0?1:0);}
     if(trackCapable){command="CONTROL,"+String(value.count)+","+String(mask)+","+String(directions);
       for(uint8_t i=0;i<value.count;++i)command+=","+String(addresses[i])+",0";
     }
+    if(functionsCapable){command="CONTROLX,"+String(value.count)+","+String(directions);
+      for(uint8_t i=0;i<value.count;++i)command+=","+String(addresses[i])+","+String(functions[i]);
+    }
     if(!query(command.c_str()) || !dccRunning || dccCount!=value.count || dccMask!=mask ||
-       dccSignature!=(trackCapable?UnoDccStream::controlSignature(value.count,addresses,mask,directions,speeds):UnoDccStream::signature(value.count,addresses,mask))){dirty=true;return false;}
+       dccSignature!=(functionsCapable?UnoDccStream::functionSignature(value.count,addresses,directions,functions):trackCapable?UnoDccStream::controlSignature(value.count,addresses,mask,directions,speeds):UnoDccStream::signature(value.count,addresses,mask))){dirty=true;return false;}
     dirty=false;return true;
   }
+  bool functionsSupported() const {return online() && functionsCapable;}
   bool trackSupported() const {return trackCapable;}
   bool trackActive() const {return benchActive() && mode==3;}
   bool dccReady() const {return online() && capable && dccRunning;}
@@ -88,6 +92,7 @@ class UnoLink {
     out+=F(",\"dccMask\":");out+=dccMask;
     out+=F(",\"dccPackets\":");out+=packets;
     out+=F(",\"timingFaults\":");out+=faults;
+    out+=F(",\"functionsSupported\":");out+=functionsSupported()?"true":"false";
     out+=F(",\"trackSupported\":");out+=trackCapable?"true":"false";
     out+=F(",\"trackActive\":");out+=trackActive()?"true":"false";
     out+=F(",\"bench\":{\"supported\":");out+=benchCapable?"true":"false";
@@ -108,7 +113,7 @@ class UnoLink {
   bool dirty=true,capable=false,dccRunning=false;
   uint16_t dccCount=0,dccMask=0,dccSignature=0,faults=0;
   uint32_t packets=0;
-  bool benchCapable=false,dccBenchCapable=false,trackCapable=false;
+  bool benchCapable=false,dccBenchCapable=false,trackCapable=false,functionsCapable=false;
   uint16_t benchRemaining=0;
   uint8_t benchState=0,mode=0;
   bool accept(uint16_t expected) {
@@ -137,7 +142,7 @@ class UnoLink {
     if(n>=16 && (!AndenLink::number(parts[14],remaining)||remaining>3000 || !AndenLink::number(parts[15],testState)||testState>7))return false;
     uint16_t reportedMode=(f&16)?1:0;
     if(n>=17 && (!AndenLink::number(parts[16],reportedMode)||reportedMode>(n==18?3:2)))return false;
-    benchCapable=n>=16;dccBenchCapable=n>=17;trackCapable=n==18 && !strcmp(parts[17],"1");benchRemaining=remaining;benchState=testState;mode=reportedMode;
+    benchCapable=n>=16;dccBenchCapable=n>=17;functionsCapable=n==18 && !strcmp(parts[17],"2");trackCapable=n==18 && (!strcmp(parts[17],"1") || functionsCapable);benchRemaining=remaining;benchState=testState;mode=reportedMode;
     capable=n>=14;dccRunning=running;dccCount=count;dccSignature=sig;dccMask=mask;faults=misses;packets=total;
     memcpy(version,parts[3],length+1);adcA=a;adcB=b;flags=f;ledEdges=edges;return true;
   }

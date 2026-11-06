@@ -2,7 +2,7 @@
 #include <AndenStackLink.h>
 #include "UnoDcc.h"
 
-constexpr char VERSION[]="0.5.0";
+constexpr char VERSION[]="0.6.0";
 constexpr uint8_t ENABLE_A=3,ENABLE_B=11,BRAKE_A=9,BRAKE_B=8,DIR_A=12,DIR_B=13;
 AndenLink::Receiver receiver;
 BridgeBench bench;
@@ -50,7 +50,7 @@ void sendState(uint16_t sequence) {
       (digitalRead(DIR_A)?16:0)|(digitalRead(DIR_B)?32:0);
   char body[AndenLink::MAX_BODY+1],wire[AndenLink::MAX_BODY+8];
   auto dcc=UnoDcc::status();
-  snprintf(body,sizeof(body),"AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,1",sequence,VERSION,
+  snprintf(body,sizeof(body),"AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,2",sequence,VERSION,
       unsigned(rawA),unsigned(analogRead(A1)),unsigned(flags),unsigned(ledEdges),
       unsigned(dcc.running),unsigned(dcc.count),unsigned(dcc.signature),unsigned(dcc.mask),dcc.packets,unsigned(dcc.faults),
       unsigned(bench.remaining(millis())),unsigned(bench.state),unsigned(bench.mode));
@@ -72,6 +72,18 @@ void command() {
     if(bench.active() && bench.mode!=BridgeBench::Track)return;
     uint16_t values[4];for(uint8_t i=0;i<4;++i)if(!AndenLink::number(parts[3+i],values[i])||values[i]>127)return;
     if(!UnoDcc::find(values[0],values[1],values[2],values[3]))return;
+    controlReady=true;sendState(sequence);return;
+  }
+  if(!strcmp(parts[2],"CONTROLX")){
+    if(bench.active() && bench.mode!=BridgeBench::Track)return;
+    uint16_t count,directions;
+    if(n<5 || !AndenLink::number(parts[3],count)||count>8 || n!=5+count*2 || !AndenLink::number(parts[4],directions)||directions>255)return;
+    uint8_t addresses[8]={0};uint32_t flags[8]={0};
+    for(uint8_t i=0;i<count;++i){uint16_t a;
+      if(!AndenLink::number(parts[5+i*2],a)||!a||a>127 || !AndenLink::number32(parts[6+i*2],flags[i],DccFunctions::MASK))return;
+      addresses[i]=a;
+    }
+    if(!UnoDcc::functions(count,addresses,directions,flags))return;
     controlReady=true;sendState(sequence);return;
   }
   if(!strcmp(parts[2],"CONTROL")){

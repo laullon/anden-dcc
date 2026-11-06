@@ -5,6 +5,7 @@ cd "$root"
 cli=${ARDUINO_CLI:-arduino-cli}
 python3 tests/check_stack_link.py
 python3 tests/check_uno_dcc.py
+python3 tests/check_functions.py
 python3 tests/check_bridge_bench.py
 python3 tests/check_uno_bridge_route.py
 python3 tests/check_uno_track.py

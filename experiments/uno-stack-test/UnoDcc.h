@@ -59,6 +59,12 @@ bool control(uint8_t count,const uint8_t* addresses,uint8_t mask,uint8_t directi
   uint32_t started=millis();while(stream.pending!=255 && uint32_t(millis()-started)<20){}
   return stream.pending==255;
 }
+bool functions(uint8_t count,const uint8_t* addresses,uint8_t directions,const uint32_t* flags){
+  if(!running || !stream.prepareFunctions(count,addresses,directions,flags))return false;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){stream.commit();}
+  uint32_t started=millis();while(stream.pending!=255 && uint32_t(millis()-started)<20){}
+  return stream.pending==255;
+}
 bool find(uint8_t first,uint8_t last,uint8_t low,uint8_t high){
   if(!running || !stream.prepareFinder(first,last,low,high))return false;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE){stream.commit();}

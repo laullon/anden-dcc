@@ -1,5 +1,19 @@
 # Changelog
 
+## ESP13 / Uno function favorites 0.6.0 · 2026-11-06
+
+- Add independent F0–F28 for each locomotive, with continuous refresh of all five
+  function groups and zero-speed direction packets.
+- Add an expandable function explorer and eight named favorites per loco; quick
+  buttons stay visible when collapsed. Preserve typing, selection and focus during
+  polling, including a held mouse click.
+- Save favorite metadata alongside the roster, migrate existing files on save,
+  and start active functions OFF after ESP reboot.
+- Add capability-gated CONTROLX snapshots with 29-bit function masks; older Uno
+  firmware retains F0 controls and can save favorites before upgrading.
+- Test function packet encoding, atomic publication, full-size transport, favorite
+  validation, browser persistence, failed saves and narrow light/dark layouts.
+
 ## ESP13 mouse interaction and connection handling 0.5.4 · 2026-11-06
 
 - Preserve unchanged loco cards through polling so hover, focus and held mouse

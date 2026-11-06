@@ -1,5 +1,10 @@
 # Uno + ESP13 + L298P: bench firmware
 
+**Current: ESP/Uno 0.6.0** adds F0–F28 and named function favorites. See the
+[stationary controller guide](FIRST-LOCO-TEST.md) and
+[function explorer/API notes](../esp13-ota/README.md#function-explorer-and-favorites-060).
+Historical bench-only descriptions below predate track mode.
+
 **New: ESP/Uno 0.5.0** adds [stationary track power, direction and guided address discovery](FIRST-LOCO-TEST.md). Speed stays zero. The sections below describe the historical 0.4.0 bench release; use the linked guide for current track controls and protocol.
 
 Version **0.4.0** combines the eight-loco F0 generator on **D10 / OC1B** with
@@ -114,7 +119,7 @@ Timer reference: [Microchip ATmega328P datasheet](https://ww1.microchip.com/down
 ## Wire protocol and API
 
 The shared `AndenStackLink` library frames bounded ASCII messages as
-`@BODY*CRC16\n`, with a 96-character body limit, CRC16-CCITT (initial 0xFFFF), and
+`@BODY*CRC16\n`, with a 144-character body limit (96 before 0.6.0), CRC16-CCITT (initial 0xFFFF), and
 resynchronization at the next `@`. It rejects corrupt, overlong, empty-field and
 malformed messages. ROM startup noise is ignored. Responses must carry the
 current nonzero request ID; this is not a continuous echo bridge.

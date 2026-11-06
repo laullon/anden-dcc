@@ -226,9 +226,10 @@ tools/               web embedding, OTA, capture decoding and UI checks
 ## ESP13 / Uno experiment
 
 The separate [ESP13 firmware](experiments/esp13-ota/README.md) and
-[Uno firmware](experiments/uno-stack-test/README.md), both **0.5.0**, support the
+[Uno firmware](experiments/uno-stack-test/README.md), both **0.6.0**, support the
 stacked ESP13 / Uno / Deek-Robot controller. The panel has eight saved locomotive
-cards, independent F0 and forward/reverse controls, System / Light / Dark buttons,
+cards, independent **F0–F28**, named favorite functions, forward/reverse controls,
+System / Light / Dark buttons,
 Wi-Fi setup, OTA, blue-LED feedback and checked serial diagnostics.
 
 The [first-locomotive guide](experiments/uno-stack-test/FIRST-LOCO-TEST.md) covers
@@ -242,6 +243,12 @@ then confirms the result on/off. It does not read or write CVs. Setup retains th
 three-second no-load DC and [DCC scope tests](experiments/uno-stack-test/DCC-SCOPE.md).
 Use the [15 V supply and VIN isolation wiring](experiments/uno-stack-test/POWER-TEST.md).
 Bridge B remains disabled. The Pico controller remains separate.
+
+Expand **Explore functions** on a loco card, choose a function and test On/Off.
+Give it a name and pin it: up to eight favorites per locomotive stay accessible
+when the panel is collapsed. Names and pins survive ESP OTA/restarts; active
+functions start OFF after an ESP restart. Function mappings depend on the decoder.
+F1–F28 requires both ESP and Uno 0.6.0; this feature is not yet in the Pico UI.
 
 ## License
 

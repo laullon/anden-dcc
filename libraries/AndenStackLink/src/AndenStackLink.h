@@ -4,7 +4,7 @@
 #include <string.h>
 
 namespace AndenLink {
-constexpr size_t MAX_BODY = 96;
+constexpr size_t MAX_BODY = 144;
 
 inline uint16_t crc16(const char* data, size_t size) {
   uint16_t crc = 0xFFFF;
@@ -78,6 +78,11 @@ inline bool number(const char* text, uint16_t& value) {
   value=uint16_t(result);return true;
 }
 
+inline bool number32(const char* text,uint32_t& value,uint32_t maximum=0xFFFFFFFFUL){
+  if(!*text)return false;uint32_t result=0;
+  for(;*text;++text){if(*text<'0'||*text>'9')return false;uint8_t digit=*text-'0';if(digit>maximum || result>(maximum-digit)/10)return false;result=result*10+digit;}
+  value=result;return true;
+}
 inline size_t fields(char* text, char** parts, size_t capacity) {
   size_t count=0;
   while (true) {

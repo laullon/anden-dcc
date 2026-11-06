@@ -9,11 +9,16 @@ class LocoRoster {
   static constexpr uint8_t CAPACITY = 8;
   static constexpr uint8_t NAME_BYTES = 48;
   enum class Type : uint8_t { Electric, Diesel, Steam };
-  struct Loco { uint8_t id = 0, address = 0; bool f0 = false, forward = true; Type type = Type::Electric; char name[NAME_BYTES + 1] = {}; };
+  struct Loco { uint8_t id = 0, address = 0; bool f0 = false, forward = true; uint32_t functions = 0; Type type = Type::Electric; char name[NAME_BYTES + 1] = {}; };
   enum class Result { Ok, Invalid, Duplicate, Full, Missing };
   Loco entries[CAPACITY] = {};
   uint8_t count = 0;
 
+  static uint32_t functionMask(const Loco& loco){return (loco.functions&~uint32_t(1))|(loco.f0?1:0);}
+  static bool setFunction(Loco& loco,uint8_t number,bool on){
+    if(number>28)return false;if(!number){loco.f0=on;return true;}
+    if(on)loco.functions|=uint32_t(1)<<number;else loco.functions&=~(uint32_t(1)<<number);return true;
+  }
   int findId(uint8_t id) const {
     for (uint8_t i = 0; i < count; ++i) if (entries[i].id == id) return i;
     return -1;
@@ -51,7 +56,7 @@ class LocoRoster {
       entries[index].id = id;
     }
     // Changing decoder starts its requested lights off; renaming preserves F0.
-    if (entries[index].address != address) {entries[index].f0=false;entries[index].forward=true;}
+    if (entries[index].address != address) {entries[index].f0=false;entries[index].functions=0;entries[index].forward=true;}
     if(type || !entries[index].address) entries[index].type=selected;
     entries[index].address = address;
     strcpy(entries[index].name, name);
