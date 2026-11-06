@@ -65,5 +65,5 @@ int main() {
  std::puts("PASS: every short-address range (endpoints/midpoint), every target in 1-100 and 1-127; full-range ON/OFF coverage, excluded-address OFF, retry/stale tokens, settling, singletons, confirmation failures, cancellation, timeout and timer wrap.");
 }
 ''')
- subprocess.run(['c++','-std=c++17','-O2','-I',str(root/'firmware/anden-dcc'),str(p),'-o',str(exe)],check=True)
+ subprocess.run(['c++','-std=c++17','-O2','-I',str(root/'libraries/AndenStackLink/src'),str(p),'-o',str(exe)],check=True)
  subprocess.run([str(exe)],check=True)

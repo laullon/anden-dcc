@@ -21,7 +21,7 @@ const root=path.resolve(__dirname,'../..');
    else throw Error('Unexpected request '+url.pathname);
    return route.fulfill({json:state.dcc});
   }
-  return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'experiments/esp13-ota/web/index.html'),'utf8')});
+  return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.html'),'utf8')});
  });
  const card=id=>page.locator('.loco[data-id="'+id+'"]'),select=id=>card(id).locator('.function-select'),name=id=>card(id).locator('.function-name');
  const settled=()=>page.waitForFunction(()=>!rosterBusy&&!statusRefreshing);

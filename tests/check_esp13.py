@@ -11,7 +11,7 @@ import sys
 import tempfile
 
 root = Path(__file__).resolve().parents[1]
-experiment = root / 'experiments/esp13-ota'
+experiment = root / 'firmware/esp13-ota'
 subprocess.run([sys.executable, str(experiment / 'embed.py'), '--check'], check=True)
 sys.path.insert(0, str(experiment))
 import ota
@@ -35,7 +35,7 @@ else:
     raise AssertionError('Ignored target update capacity')
 
 # Exercise the real helper entry point: an old boot with the expected version
-# must not be mistaken for a successful restart, and a Pico must never get POST.
+# must not be mistaken for a successful restart, and another device must never get POST.
 with tempfile.TemporaryDirectory(prefix='anden-esp13-helper-') as tmp:
     image = Path(tmp) / 'esp13.bin'
     image.write_bytes(valid)
@@ -62,7 +62,7 @@ with tempfile.TemporaryDirectory(prefix='anden-esp13-helper-') as tmp:
         if not isinstance(url,str):
             calls.append(url)
             raise AssertionError('Uploaded to the wrong device')
-        return io.BytesIO(json.dumps(dict(target,name='anden-dcc',platform='rp2040')).encode())
+        return io.BytesIO(json.dumps(dict(target,name='another-device',platform='other')).encode())
     with patch.object(sys,'argv',argv), patch.object(ota.urllib.request,'urlopen',side_effect=wrong_target), \
          contextlib.redirect_stdout(io.StringIO()):
         try:
@@ -70,7 +70,7 @@ with tempfile.TemporaryDirectory(prefix='anden-esp13-helper-') as tmp:
         except ValueError:
             pass
         else:
-            raise AssertionError('Accepted the Pico as an ESP13 target')
+            raise AssertionError('Accepted an incompatible target')
     assert not calls
 
 with tempfile.TemporaryDirectory(prefix='anden-esp13-check-') as tmp:

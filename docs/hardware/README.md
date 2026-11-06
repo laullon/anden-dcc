@@ -1,48 +1,56 @@
-# Hardware: choose your build
+# Uno + motor shield + ESP13 wiring
 
-Both versions stay in this repository. Choose one interface; they share the
-Pico W, Deek-Robot L298P shield, USB-C PD supply, MP1584 buck and two-track layout.
+The supported assembly uses the three boards' normal Uno headers:
+**Uno R3 / ATmega328P 16 MHz, Deek-Robot L298P motor shield and DOIT ESP13**.
+The motor shield must use the Rev3-style pinout below. Check clone markings.
 
-| | Option A: keep the shield intact | Option B: modify the shield |
-| --- | --- | --- |
-| CD4077 on the shield | Leave installed | Remove |
-| External logic | SN74AHCT125N level shifter | None |
-| DCC signals from the Pico | GP2; shield creates the inverse | GP2 + GP3, complementary outputs |
-| Track enable | GP6 through the buffer | GP6 directly to D3 / ENA |
-| Board rework | None | Remove CD4077; wire GP3 to its former PCB pad 3 |
-| Build guide | [Buffered shield guide](buffered-shield.md) | [Modification guide](shield-modification.md) |
-| Printable document | [Rev C schematic](schematic.pdf) | [Illustrated modification guide](shield-modification.pdf) |
-| Detailed design files | [KiCad](../../hardware/kicad/anden-dcc.kicad_pro), [BOM](BOM.md), [CSV](bom.csv), [connections](connections.csv) | Wiring and changes to the buffered assembly are described in the modification guide; no separate KiCad schematic or BOM yet |
+![Stack connection diagram](schematic.svg)
 
-**Option A** suits builders who prefer to leave the shield untouched.
-**Option B** avoids the added buffer for builders comfortable with SMD rework.
-Both keep the shield's logic supply at **5 V**. Neither runs the entire shield
-from 3.3 V.
+## Power
 
-## Shared layout
+- Uno USB powers the Uno and both shields' 5 V logic.
+- A compatible USB-C PD charger/trigger supplies **verified 15 V DC** to the motor
+  shield VIN/GND screw terminals. Measure voltage and polarity before connection.
+- **Open VIN CONNECT on the motor shield.** With all power removed, verify its
+  VIN screw terminal is isolated from the Uno VIN header; GND remains common.
+- Leave CD4077 installed. Keep the shield's logic at 5 V; no external shifter is
+  needed with the Uno's 5 V outputs.
+- Feed A+ and A− to the two tracks in parallel. Neither rail is GND. Leave B+/B−
+  unconnected. Both locos share the signal and respond to their decoder addresses.
 
-Use bridge A to feed **both tracks in parallel**. Locomotives have independent
-DCC addresses; two locos do not require two bridge outputs. Bridge B stays
-disabled, with B+ and B- unconnected. Decoder programming is out of scope.
+The documented setup uses separate USB logic power and PD motor power. Do not
+feed motor VIN into the Uno's 5 V pin or use its onboard regulator for this stack.
+A one-cable power supply is not part of this validated connection plan.
 
-The supply plan is USB-C PD at 15 V for the motor stage, with the MP1584 set to
-5.00 V for logic and the protected Pico VSYS feed. Current sensing uses A0 through
-the existing divider/filter to GP26. Follow the chosen guide for the actual
-connections; neither rail is logic ground.
+## Header signals
 
-## Firmware and validation status
+| Uno pin | Connected function |
+| --- | --- |
+| D0 / RX | ESP13 UART through shield switches/level interface |
+| D1 / TX | ESP13 UART through shield switches/level interface |
+| D3 | Motor enable A |
+| D12 | Motor direction A / routed DCC |
+| D9 | Brake A, held LOW |
+| A0 | Motor shield current-sense A, raw uncalibrated ADC |
+| D11 | Motor enable B, held LOW |
+| D13 | Motor direction B / Uno L LED; blink only with outputs off |
+| D8 | Brake B, held LOW |
+| A1 | Current-sense B, telemetry only |
+| D10 | DCC hardware reference for analyzer; not a rail connection |
 
-These are **two documented hardware options, not two released firmware variants**.
-Firmware **0.5.3 is still a GP2-only logic-output prototype**. Option B needs the
-complementary GP3 output. Both need default-off track enable, calibrated current
-cutoff and startup speed-zero handling before powering a train. The assemblies
-are not built or electrically validated, and there is no hardware-option setting
-in the current firmware.
+## Upload and first test
 
-The existing **Revision C schematic, BOM, connections CSV and KiCad exports cover
-Option A only**. Do not combine its buffer wiring with Option B's direct wiring.
-Both guides remain available on the main branch so builders can choose without
-switching branches.
+Disconnect motor power and track before either serial upload. Both ESP13 blue
+switches OFF isolate its UART for Uno USB upload; ON connects Uno ↔ ESP for
+normal use. Do not connect a separate USB-UART transmitter while the stack UART
+is enabled. A raw ESP UART adapter must use **3.3 V logic**, not Uno logic levels.
 
-[Manufacturer references](sources.md) · [Schematic SVG, Option A](schematic.svg) ·
-[Offline print page, Option A](print.html)
+First verify USB-only Uno ping and LED, then use the
+[power test](../../firmware/uno-stack-test/POWER-TEST.md),
+[DCC scope guide](../../firmware/uno-stack-test/DCC-SCOPE.md) and
+[first-locomotive guide](../../firmware/uno-stack-test/FIRST-LOCO-TEST.md).
+The output timeout and uncalibrated current cutoff do not replace loaded fault
+and thermal validation.
+
+[BOM](BOM.md) · [CSV BOM](bom.csv) · [Connections](connections.csv) ·
+[Print diagram](print.html)

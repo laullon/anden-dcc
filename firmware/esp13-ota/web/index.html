@@ -55,9 +55,11 @@
 @media(max-width:560px){.header-tools{flex-basis:100%;justify-content:space-between}}
 .track-power{display:flex;align-items:center;justify-content:space-between;gap:24px;border-width:2px;transition:border-color .15s,background .15s}.track-power[data-power=on]{border-color:var(--green)}.track-power h2{margin-bottom:10px}.track-indicator{display:flex;align-items:center;gap:12px;font-size:28px;font-weight:750;letter-spacing:-.5px;margin:0}.power-dot{width:13px;height:13px;border-radius:50%;background:var(--muted);box-shadow:0 0 0 5px var(--line);flex-shrink:0}.track-power[data-power=on] .power-dot{background:var(--green);box-shadow:0 0 0 5px var(--online-glow)}.track-power[data-power=unknown] .power-dot,.track-power[data-power=bench] .power-dot{background:var(--amber)}.track-description{font-size:14px;color:var(--muted);margin:8px 0 0}.track-power>div:first-child{flex:1;min-width:0}.track-description{min-height:3.1em}.track-action{flex:0 0 188px}.track-action button{width:100%;min-width:0;font-size:15px}#track-off{background:#b62e29;border-color:#b62e29;color:#fff}#track-off:hover{background:#96231f}.track-power button[hidden]{display:none}.track-help{font-size:13px;color:var(--muted);margin:12px 0 24px}@media(max-width:560px){.track-power{align-items:stretch;flex-direction:column;gap:18px}.track-action{flex:none}.track-action button{width:100%}.track-indicator{font-size:25px}}
 .favorite-strip{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 16px}.favorite-strip[hidden]{display:none}.favorite-button{background:transparent;color:var(--soft-text);border-color:var(--control-line);padding:9px 12px;max-width:100%;overflow-wrap:anywhere}.favorite-button[aria-pressed=true]{background:var(--button-bg);border-color:var(--button-bg);color:var(--button-text)}.function-explorer{border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;overflow:visible}.function-explorer summary{padding:16px 20px;font-size:14px;color:var(--amber)}.function-editor{border-top:1px solid var(--line);padding:0 20px 20px}.function-editor select{display:block;width:100%;font:inherit;background:var(--field);color:var(--text);border:1px solid var(--control-line);border-radius:10px;padding:11px}.function-test{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0}.function-state{font-size:13px;color:var(--muted)}.function-save{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.function-save button{padding:10px 12px}.function-hint{font-size:12px;color:var(--muted);margin-bottom:0}.function-name{font-size:14px}.loco-bytes{padding-bottom:14px}.favorite-strip button:hover{border-color:var(--amber)}
+
+.floating-power{position:fixed;z-index:20;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;gap:12px;width:min(400px,calc(100% - 24px));padding:8px 10px 8px 16px;border:1px solid var(--control-line);border-radius:14px;background:var(--surface);box-shadow:0 8px 30px #0005}.floating-power[hidden]{display:none}.floating-power[data-power=on]{border-color:var(--green)}.floating-power span{font-size:14px;font-weight:700}.floating-power button{min-height:44px;min-width:140px;padding:9px 12px;font-size:14px}.floating-power button[hidden]{display:none}#floating-off{background:#b62e29;border-color:#b62e29;color:#fff}#floating-off:hover{background:#96231f}main{padding-bottom:100px}
 </style>
 </head>
-<body><main>
+<body><aside id="floating-power" class="floating-power" data-power="unknown" aria-label="Track power" hidden><span id="floating-label" role="status" aria-live="polite">Checking…</span><button id="floating-on" type="button" disabled hidden>⏻ Power on</button><button id="floating-off" type="button">⏻ Power off</button></aside><main>
 <header><div class="mark" aria-hidden="true">≋</div><div><div class="brand">anden<span style="color:var(--amber)">.</span></div><div class="eyebrow">ESP13 · Uno DCC</div></div><div class="header-tools"><div class="version" id="version">Connecting…</div><div id="theme" class="theme-picker" role="group" aria-label="Theme"><button type="button" data-theme-choice="system" aria-pressed="true">System</button><button type="button" data-theme-choice="light" aria-pressed="false">Light</button><button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button></div></div></header>
 <div class="eyebrow">Your diorama, connected</div>
 <h1>Give your scene<br>some light.</h1>
@@ -173,6 +175,10 @@ function renderTrack(){
  $('track-on').hidden=power!=='off'||trackBusy||trackTurningOff;$('track-off').hidden=power==='off'&&!trackBusy&&!trackTurningOff;
  $('track-on').disabled=!!state?.dcc?.finder?.active||!known||!u.trackSupported||!state?.dcc?.ready||u.enableA||u.enableB||trackBusy||trackTurningOff||uploading||changingWifi||stackBusy||rosterBusy;
  $('track-off').disabled=trackTurningOff;$('track-off').textContent=trackTurningOff?'Switching off…':bench?'■ Stop test output':'⏻ Turn power off';
+ $('floating-power').dataset.power=power;
+ $('floating-label').textContent=trackTurningOff?'Stopping…':trackBusy?'Starting…':({on:'Track ON',off:'Track OFF',unknown:'Unknown',bench:'Test ON'})[power];
+ for(const action of ['on','off']){const main=$('track-'+action),small=$('floating-'+action);small.hidden=main.hidden;small.disabled=main.disabled;}
+ $('floating-off').textContent=trackTurningOff?'Stopping…':bench?'■ Stop test':'⏻ Power off';
 }
 async function trackRequest(path,data={}){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),1200);
@@ -187,6 +193,10 @@ $('track-off').onclick=async()=>{
  ++trackRevision;++rosterRevision;trackLease=0;trackTurningOff=true;renderTrack();
  try{await trackRequest('off');message('track-message','');}catch(error){message('track-message',error.message,true)}finally{trackTurningOff=false;await refreshStatus()}
 };
+// Both panels use one command path and one browser-owned power lease.
+$('floating-on').onclick=()=>{if(!$('track-on').disabled&&!$('track-on').hidden)$('track-on').click()};
+$('floating-off').onclick=()=>{if(!$('track-off').disabled&&!$('track-off').hidden)$('track-off').click()};
+new IntersectionObserver(([entry])=>{$('floating-power').hidden=entry.isIntersecting||entry.boundingClientRect.bottom>0}).observe($('track-power'));
 setInterval(async()=>{
  if(!trackLease || keepBusy)return;keepBusy=true;const lease=trackLease;
  try{await trackRequest('keep',{lease});if(trackLease===lease){lastKeepAck=performance.now();if(trackRetrying){trackRetrying=false;message('track-message','');}}}
@@ -240,11 +250,17 @@ async function readStatus(){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
  try{const response=await fetch('/api/status',{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('Board did not return status');return await response.json()}finally{clearTimeout(timer)}
 }
-let statusRefreshing=false,statusAgain=false;
-async function refreshStatus(){
- if(uploading||stackBusy||rosterBusy)return;
- if(statusRefreshing){statusAgain=true;return;}
- statusRefreshing=true;const revision=rosterRevision;
+let statusRefreshing=false,statusAgain=false,statusPromise=null;
+function refreshStatus(){
+ if(uploading||stackBusy||rosterBusy)return Promise.resolve();
+ if(statusPromise){statusAgain=true;return statusPromise;}
+ statusRefreshing=true;
+ // Share the complete poll/queued-refresh promise so callers cannot observe stale state.
+ statusPromise=(async()=>{do{statusAgain=false;await refreshStatusOnce()}while(statusAgain&&!uploading&&!stackBusy&&!rosterBusy)})().finally(()=>{statusRefreshing=false;statusPromise=null});
+ return statusPromise;
+}
+async function refreshStatusOnce(){
+ const revision=rosterRevision;
  try{
   const current=await readStatus();if(uploading||revision!==rosterRevision)return;if(current.appId!=='ANDEN_ESP13_OTA_V1')throw Error('This is not the ESP13 OTA firmware');state=current;finderSeenAt=Date.now();
   $('version').textContent='v'+state.version;$('network-state').textContent=state.connected?'Connected':state.configured?'Connecting…':'Not configured';
@@ -257,7 +273,6 @@ async function refreshStatus(){
   if(!editing)$('ssid-input').value=state.ssid||'';
   if(!changingWifi&&!stackBusy&&!rosterBusy)$('upload-button').disabled=false;renderUno();renderRoster();
  }catch(error){if(revision!==rosterRevision)return;$('version').textContent='Offline';$('network-state').textContent='Board unreachable';$('network-dot').classList.remove('connected');$('network-hint').textContent='Check your connection, or join anden-esp13 and open 192.168.13.1.';state=null;$('upload-button').disabled=true;renderUno();renderRoster()}
- finally{statusRefreshing=false;if(statusAgain){statusAgain=false;refreshStatus();}}
 }
 $('ssid-input').addEventListener('input',()=>editing=true);
 async function wifiRequest(path,body){

@@ -1,5 +1,14 @@
 # Changelog
 
+## Uno / ESP13 project and scroll power control 0.6.1 · 2026-11-06
+
+- Keep compact track power status and On/Off controls visible after scrolling.
+- Await coalesced status refreshes consistently so overlapping requests cannot
+  leave callers reading stale UI state.
+- Promote both active sketches into firmware/ and make the stack the sole target.
+- Replace obsolete firmware, wiring, build jobs, previews and docs with the Uno,
+  L298P and ESP13 build. Preserve sketch names, UART protocol and ESP flash layout.
+
 ## ESP13 / Uno function favorites 0.6.0 · 2026-11-06
 
 - Add independent F0–F28 for each locomotive, with continuous refresh of all five
@@ -52,7 +61,7 @@
 
 - Add explicit track power, a browser-owned heartbeat and a two-second Uno lease.
 - Keep speed fixed at zero, send startup broadcast stops, and add per-loco direction.
-- Port the guided Pico address finder with range, binary questions and confirmation.
+- Add the guided address finder with range, binary questions and confirmation.
 - Generate search packets in the Uno without a large SRAM table; repeat zero-speed
   packets and use a ten-second settling interval for the full range.
 - Keep current/timing cutoff, default-off behavior and bench tests; add packet,
@@ -115,7 +124,6 @@
 - Verify live F0 commands, saved roster through another OTA, F0 reset-off, Uno
   recovery, desktop/mobile UI, and native packet/boundary tests.
 - Uno physical pulse widths and powered motor-shield operation remain pending.
-- Pico firmware remains at 0.6.2.
 
 ## ESP13 / Uno bench experiment · 2026-11-02
 
@@ -126,60 +134,3 @@
   OTA, and live web → ESP → Uno communication with the three boards stacked.
 - Add shared framing/CRC corruption tests, Uno compilation and browser checks.
 - Powered bridges, DCC output and current/overload calibration remain untested.
-
-## 0.5.3
-
-- Add a small train favicon, with SVG and 16/32px ICO formats.
-- Serve the standard favicon path with binary-safe responses and versioned links.
-
-## 0.5.2
-
-- Remove decoder-programming UI, API, packet helpers and tests; use another method for addresses.
-- Simplify hardware to one bridge output feeding both tracks, one AHCT level shifter and a current-sense divider.
-- Retire the programming/latch/comparator proposal; add a single-sheet native KiCad schematic, PDF, net list and matching BOM.
-- Native schematic ERC and key-net checks pass; track enable/current cutoff remain future firmware work.
-
-## 0.5.1
-
-- Programming preparation panel in English/Spanish; hardware-required state and disabled read/write controls.
-- Forgotten-address link from the editor, with a return path that preserves drafts.
-- Explicit unavailable capability/API: valid programming operations return 501 with no transmission or changes.
-- Host-tested direct CV byte/bit packets, primary short/extended address decoding and known-short-address plans.
-- Programming hardware/transport plan; no real decoder programming is enabled.
-
-## 0.5.0
-
-- Shared roster saved on the Pico: two default locomotives, up to eight.
-- Responsive two-column locomotive cards, names, addresses and independent F0.
-- Add/edit/remove dialog with duplicate prevention and English/Spanish labels.
-- Names/addresses persist across normal OTA and reboot; F0 resets off at boot.
-- Hardware DMA ring refreshes every roster address through the existing PIO.
-- Idle packets for an empty roster; DMA and PIO stop before OTA.
-- Host roster/multi-packet tests and expanded browser regression coverage.
-
-## 0.4.0
-
-- Responsive train-first UI, SVG app identity and GitHub banner.
-- English default; optional Spanish remembered by the browser.
-- Closed-by-default Setup: Wi-Fi and OTA with upload progress.
-- English API errors, icon route and legacy update redirect.
-- Editable web source, generated flash header and browser checks.
-- Wiring proposal, BOM, net list, source references and build/OTA helpers.
-- GitHub CI prepared. PIO waveform engine unchanged.
-
-## 0.3.0
-
-- PIO DCC on GP2; F0 and short addresses 1–127.
-- Packet-boundary updates and autonomous repetition.
-- Host timing check and real-capture CSV decoder.
-- Physical F0 off/on verification through Logic 2 MCP.
-
-## 0.2.0–0.2.7
-
-- Persistent Wi-Fi, setup AP, reconnection and station-only mDNS.
-- OTA verified without USB; connection and web-activity LED.
-- Background status polls excluded from activity pulses.
-
-## 0.1.0
-
-- Initial setup AP, status page and updater.

@@ -61,6 +61,6 @@ int main(){
  FavoriteFunctions loaded;assert(loaded.loadRecord("1\t2\tAir horn"));assert(loaded.loadRecord("2\t28\tSmoke"));assert(!loaded.loadRecord("1\t2\tDuplicate"));assert(!loaded.loadRecord("9\t2\tBad"));assert(!loaded.loadRecord("1\t29\tBad"));assert(!loaded.loadRecord("1\t1\tLine\nname"));
 }
 ''')
- subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'libraries/AndenStackLink/src'),'-I',str(root/'experiments/esp13-ota'),str(source),'-o',str(exe)],check=True)
+ subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'libraries/AndenStackLink/src'),'-I',str(root/'firmware/esp13-ota'),str(source),'-o',str(exe)],check=True)
  subprocess.run([str(exe)],check=True)
 print('PASS: F0-F28 group decoding/XOR/independence, 8-loco refresh, all publication phases, startup stops, full UART snapshot and favorite validation/limits/records.')

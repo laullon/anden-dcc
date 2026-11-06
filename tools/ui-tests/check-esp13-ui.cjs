@@ -35,7 +35,7 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
     uploadCount++;if(acceptUpload){current={...current,bootId:42,version:'0.1.2'};return route.fulfill({body:'Update Success! Rebooting...'});}
     return route.fulfill({body:'Update error: test rejection'});
    }
-   return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'experiments/esp13-ota/web/index.html'),'utf8')});
+   return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.html'),'utf8')});
   });
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://esp13.test/');await page.waitForFunction(()=>document.getElementById('version').textContent==='v0.1.1');

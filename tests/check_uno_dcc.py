@@ -3,8 +3,6 @@
 from pathlib import Path
 import os,subprocess,tempfile
 root=Path(__file__).resolve().parents[1]
-for name in ['LocoRoster.h','DccPacket.h']:
-    assert (root/'libraries/AndenStackLink/src'/name).read_bytes()==(root/'firmware/anden-dcc'/name).read_bytes(), 'Shared Pico model must stay identical'
 with tempfile.TemporaryDirectory(prefix='anden-uno-dcc-') as temp:
     file=Path(temp)/'test.cpp';exe=Path(temp)/'test'
     file.write_text(r'''

@@ -15,7 +15,7 @@ try{
  async function route(route){const request=route.request(),url=new URL(request.url());
   if(request.method()!=='GET')writes.push(url.pathname);
   if(url.pathname==='/api/status')return offline?route.abort():route.fulfill({json:state});
-  return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'experiments/esp13-ota/web/index.html'),'utf8')});
+  return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.html'),'utf8')});
  }
  await context.route('http://themes.test/**',route);
  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));

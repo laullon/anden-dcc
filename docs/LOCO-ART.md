@@ -13,7 +13,7 @@ or claims that the decoder identifies a particular model.
 | `steam` | Santa Fe 151 / 5001, tender, five coupled driving axles and rods | [steam.svg](../web/locos/steam.svg) |
 
 Choose the type in the loco editor. The preview changes locally, then Save stores
-the choice with the name and address on the Pico. Existing cards default to
+the choice with the name and address on the ESP. Existing cards default to
 electric. Selecting a type does not send speed/function commands or reset F0.
 Headlight fills continue to follow each card's requested F0 state. The editor
 preview shows illuminated lamps for illustration only.
@@ -23,19 +23,16 @@ preview shows illuminated lamps for illustration only.
 Edit the three assets under `web/locos/`, then run:
 
 ```sh
-python3 tools/embed_web.py
+python3 firmware/esp13-ota/embed.py
 ```
 
-The script refreshes the marked template block in `web/index.html` and the
-embedded `WebAssets.h`. CI checks both for freshness. Each SVG is embedded once
+The script refreshes the marked template block in `firmware/esp13-ota/web/index.html` and the
+embedded `SetupPage.h`. CI checks both for freshness. Each SVG is embedded once
 and cloned in the browser; it is not duplicated in firmware for every loco.
 No image downloads, external fonts or raster assets are needed at runtime.
 
-The initial 0.6.1 SVG source files totaled 7114 bytes. The complete 0.6.1 firmware uses
-501148 program bytes versus 491076 in 0.6.0: **10072 extra bytes**, including the
-selector, metadata storage, API changes and OTA staging cleanup. It remains below half the 1044480-byte
-application partition; global RAM increases by 8 bytes to 74712. The PNG preview
-in the GitHub README is documentation only and is not stored in firmware.
+SVGs are compressed with the complete page and included in the ESP application.
+The PNG preview is documentation only and is not stored in firmware.
 
 ## Visual references
 

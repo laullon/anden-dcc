@@ -1,8 +1,9 @@
 # First locomotive test: lights, direction and address finder
 
-Uno **0.5.0** and ESP **0.5.4** provide stationary track operation to the Uno/ESP13/L298P stack.
+Uno **0.6.0** and ESP **0.6.1** provide stationary track operation to the Uno/ESP13/L298P stack.
 Speed is fixed at **zero**; the Uno rejects every nonzero speed request. No throttle,
-CV programming, extra functions or automatic power restoration are provided.
+CV programming or automatic power restoration are provided. F0–F28 and named
+favorite functions are available in each locomotive card.
 
 ## Before the first run
 
@@ -19,7 +20,7 @@ keeps the new track/direction controls disabled.
 2. Reconnect the isolated 15 V motor supply and open the panel.
 3. Set the locomotive's short address (1–127) in its card, if known.
 4. Press **Power on**. Startup sends 32 broadcast emergency-stop packets before
-   repeating each roster entry's F0 and 128-step zero-speed/direction packets.
+   repeating each roster entry's function groups and 128-step zero-speed/direction packets.
 5. Switch F0 on and use **← Rev / Fwd →** to test directional headlights. These
    are requested directions; actual end/lamp behavior depends on decoder mapping
    and its normal-direction configuration. The decoder must support 128-step
@@ -35,7 +36,7 @@ based on your answers, then confirms a single address with on/off again.
 
 Every candidate receives repeated F0 and zero-speed packets. Each step waits
 **10 seconds**: the Uno must service up to 127 addresses with both packet types.
-This differs from the Pico's four-second F0-only schedule. Repeat a question if
+Repeat a question if
 unsure. Do not answer before the locomotive's lamps have settled.
 
 Normal loco controls, roster editing, Wi-Fi changes and OTA are locked during a
@@ -87,13 +88,12 @@ Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
 The ESP exposes `/api/track/on`, `/api/track/keep` (session lease),
 `/api/track/off`, `/dcc/direction`, `/finder/start`, `/finder/answer` and
 `/finder/cancel`. Search replies include a step token; stale answers are rejected.
-The search state machine is shared with the Pico; the Uno's transport and settling
-interval are different. Search and roster banks change only at packet boundaries.
+The search state machine and Uno packet generator are checked separately. Search and roster banks change only at packet boundaries.
 
 ## Verification
 
 Uno build: 10,752 bytes flash / 794 bytes static RAM. ESP image: 404,384 bytes.
-The original Pico build and all six browser suites also pass.
+The ESP build and browser suites also pass.
 
 Native tests decode stop/direction/F0 packets and XOR, every publication phase,
 every search range/target and all 127 generated splits. They cover lease expiry,

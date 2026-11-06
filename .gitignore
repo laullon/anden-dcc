@@ -1,7 +1,5 @@
 .DS_Store
-.pio/
 build/
-*.uf2
 *.bin
 secrets.h
 node_modules/
@@ -9,9 +7,3 @@ __pycache__/
 *.pyc
 *.sal
 captures/
-
-# KiCad local state
-*.kicad_prl
-*.lck
-*_autosave.kicad_sch
-hardware/kicad/anden-dcc-backups/

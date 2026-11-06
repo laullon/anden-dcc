@@ -7,7 +7,7 @@ class AddressFinder {
  public:
   static constexpr unsigned WORDS = 128;
   // 128 * 44 bits * 200 us < 1.13 s. Four seconds covers three full
-  // worst-case refreshes plus the PIO FIFO and decoder response margin.
+  // worst-case refreshes plus the decoder response margin.
   static constexpr uint32_t SETTLE_MS = 4000, TIMEOUT_MS = 180000;
   enum class Stage { Idle, VerifyOn, VerifyOff, Split, ConfirmOn, ConfirmOff, Cleanup, Found, Failed };
   Stage stage = Stage::Idle;

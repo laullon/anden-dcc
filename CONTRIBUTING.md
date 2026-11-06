@@ -1,17 +1,18 @@
 # Contributing
 
-Keep the firmware stage explicit: GP2 is a logic output, not powered track.
-Power-stage changes need default-off behavior, startup stop packets, trip
-handling and OTA disarm before a hardware release. Mark proposed versus
-measured wiring accurately.
+The supported hardware is an Arduino Uno R3, a Deek-Robot L298P motor shield and
+a DOIT ESP13 shield. Keep default-off output behavior, startup zero-speed packets,
+current/timing trips and independent control timeouts intact.
 
-Edit `web/`, run `tools/embed_web.py`, then the host and relevant browser checks.
-Packet/PIO changes also need external timing/byte captures. Use the core and
-flash layout documented in README.md.
+Edit `firmware/esp13-ota/web/index.html`, run
+`python3 firmware/esp13-ota/embed.py`, then the relevant native and browser checks.
+`tools/build.sh` builds both boards and checks the generated page. Use the core
+versions and flash layout in README.md. DCC changes also need live UART stress
+and external timing/byte captures; distinguish modeled from measured results.
 
-Keep credentials, keys, build files and local captures out of commits. Use a
-synthetic SSID in previews. Label measurements with instrument, sample rate
-and whether physical or simulated.
+Keep credentials, build files and private captures out of commits. Use synthetic
+Wi-Fi details in previews. Label measurements with instrument, sample rate and
+whether the motor supply was connected. Disconnect motor VIN and tracks for
+uploads and diagnostics.
 
-Project contributions are provided under the [MIT license](LICENSE).
-Third-party tools and referenced code retain their own licenses.
+Contributions use the [MIT license](LICENSE). Third-party tools retain their own licenses.

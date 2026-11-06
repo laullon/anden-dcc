@@ -25,7 +25,7 @@ const root=path.resolve(__dirname,'../..');
    f.middle=Math.floor((f.low+f.high)/2);f.step++;f.waitMs=100;settleUntil=Date.now()+100;return route.fulfill({json:state.dcc});
   }
   if(u.pathname==='/finder/cancel'){state.dcc.finder={stage:'idle',active:false,step:state.dcc.finder.step+1};state.dcc.ready=true;return route.fulfill({json:state.dcc})}
-  return route.fulfill({contentType:'text/html' ,body:fs.readFileSync(path.join(root,'experiments/esp13-ota/web/index.html'),'utf8')});
+  return route.fulfill({contentType:'text/html' ,body:fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.html'),'utf8')});
  });
  await page.goto('http://esptrack.test/');await page.waitForFunction(()=>document.querySelectorAll('.loco').length===2);
  await page.locator('#find-address').click();assert(await page.locator('#finder-first').isEditable());assert(await page.locator('#finder-last').isEditable());assert(await page.locator('#finder-range button').isDisabled());

@@ -3,7 +3,6 @@
 from pathlib import Path
 import os,subprocess,tempfile
 root=Path(__file__).resolve().parents[1]
-assert (root/"libraries/AndenStackLink/src/AddressFinder.h").read_bytes()==(root/"firmware/anden-dcc/AddressFinder.h").read_bytes()
 with tempfile.TemporaryDirectory(prefix='anden-track-') as folder:
     p=Path(folder);source=p/'test.cpp';exe=p/'test'
     source.write_text(r'''

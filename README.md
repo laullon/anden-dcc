@@ -1,188 +1,114 @@
-<p align="center"><img src="assets/banner.svg" alt="anden-dcc — a small controller for trains on display" width="100%"></p>
+<p align="center"><img src="assets/banner.png" alt="anden-dcc: a small controller for trains on display"></p>
+<p align="center"><strong>Arduino Uno · L298P motor shield · ESP13 Wi-Fi shield</strong></p>
 
-<p align="center"><strong>Pico W · hardware-timed DCC · Wi-Fi · OTA · English / Español</strong></p>
-
-## The magic smoke guarantee
-
-**Use at your own discretion and risk.** This is a hobby project, provided
-as-is, with no warranty. If it liberates the magic smoke from your Pico, motor
-shield, decoder, or prized locomotive, congratulations: you have discovered the
-least useful special effect in railway modelling. The authors accept no
-responsibility for damaged hardware, derailed afternoons, or smoke that refuses
-to go back inside the chip. Bring your own judgement; replacement electrons are
-not included.
+> **The magic-smoke clause**
+>
+> Use at your own discretion. This is a hobby project, supplied as-is, with no warranty.
+> If it liberates the magic smoke from your Uno, motor shield, decoder or favourite
+> locomotive, you get to keep all the pieces. The author accepts no responsibility
+> for the smoke, the smell, or explaining the new train budget to your family.
 
 ---
 
 **anden-dcc** is a small controller for an H0 railway diorama: give your trains
-some light, sound and, eventually, a little movement—without a full-size command
-station. A Raspberry Pi Pico W hosts the panel and generates DCC in its PIO
-hardware, independent of browser and Wi-Fi activity.
+light, sound and character from a web panel. An **Arduino Uno** generates DCC,
+a **Deek-Robot L298P motor shield** powers the rails, and a **DOIT ESP13 shield**
+hosts Wi-Fi, the panel and firmware updates. These three stacked boards are the
+supported build.
 
-**Current release: 0.6.2.** A shared locomotive roster, independent F0/headlights
-and a guided F0 address finder are implemented. This is a **logic-output prototype**. Track
-power, motor control and current protection are not enabled in firmware. The
-Deek-Robot power assembly is a documented proposal for the next stage.
+**Current firmware: ESP13 0.6.1 / Uno 0.6.0.** Speed stays at zero. This release
+controls functions and direction; it does not offer a throttle or CV programming.
+[Español](README.es.md) · [Wiring and BOM](docs/hardware/README.md) ·
+[API](docs/API.md) · [Validation](docs/VALIDATION.md)
 
-[Quick start](#quick-start) · [Hardware & BOM](docs/hardware/README.md) ·
-[Signal verification](DCC-ANALYZER.md) · [Release validation](docs/VALIDATION.md) · [API](docs/API.md) ·
-[Build](#build-the-firmware) · [Español](README.es.md)
+## The panel
 
-![English control panel preview](assets/ui-desktop.png)
+- Two loco cards to start, up to eight independent short addresses (1–127).
+- Electric, diesel and steam artwork, with directional white/red lights.
+- F0–F28 On/Off controls. Expand **Explore functions**, test a function, give it
+  a name and pin it. Up to eight named favorites per loco remain visible when collapsed.
+- Explicit track power with a compact control that stays visible after scrolling.
+- Guided address discovery: enter a range, watch the lights and answer the questions.
+- System / Light / Dark buttons. Wi-Fi and OTA live under the collapsed **Setup** menu.
+- Saved loco names, addresses, types and favorite labels, shared across browsers.
+- ESP blue LED: blinking while connecting, steady on Wi-Fi, a brief dip on user requests.
 
-## A place for your trains
+Function meanings depend on your decoder. Buttons latch On/Off; horns are not
+momentary controls yet. All requested function states start OFF after an ESP
+restart. Address changes also reset them; renaming preserves them. Pins/names
+survive ordinary ESP OTA with the same flash layout.
 
-- **A shared locomotive roster**: two cards to start, room for up to **eight**.
-- Name each train; edit its address and control **F0/headlights independently**.
-- Choose **Electric, Diesel or Steam** with a live preview. Original SVG drawings
-  take their cues from the **RENFE 269, 333 and Santa Fe 151**; the type is saved
-  on the controller and changes appearance only.
-- **Find an address**: choose a range, answer the headlights questions, confirm
-  the result and add it to the roster. Short addresses 1-127; no CV programming.
-  The finder produces logic now; headlight testing needs the future power stage.
-- Names and short addresses **1–127** are saved on the Pico, shared by browsers.
-- Every roster address keeps receiving its own F0 packet with the page closed.
-- **English by default**; an EN/ES switch is remembered by your browser.
-- **Setup, closed by default**, contains Wi-Fi and firmware updates.
-- Saved 2.4 GHz Wi-Fi settings, reconnection and a setup access point.
-- `http://anden-dcc.local`, with direct IP access as fallback.
-- OTA updates through the panel; first installation and recovery use USB.
-- LED connected/disconnected feedback, with a brief dip on user requests.
-  Automatic status polls do not trigger it.
-- Self-contained UI: no external fonts, CDN, cloud account or internet required.
+<img src="assets/ui-desktop.png" alt="The locomotive panel with function favorites" width="840">
 
-The waveform illustration is not a live oscilloscope. Diagnostics show each
-locomotive's requested packet and nominal timings. Measurements come from an external analyzer.
+## Hardware
 
-![RENFE-inspired locomotive illustrations](assets/loco-types.png)
-
-## Quick start
-
-1. Power the flashed Pico and connect to its open **`anden-dcc`** Wi-Fi.
-2. Open **`http://192.168.42.1`**, expand **Setup**, and enter your 2.4 GHz network.
-3. Return to your usual Wi-Fi when the Pico's setup network disappears.
-4. Open **`http://anden-dcc.local`** or the address assigned by your router.
-5. Use **Edit** on each locomotive to set its name and decoder address.
-6. Switch its **Headlights / F0** independently; **Add locomotive** expands the roster.
-
-A new controller starts with **two slots at addresses 3 and 4**; change them to
-match your decoders. Names and addresses survive restarts and normal OTA updates.
-**All F0 states start off after reboot**; changing a card to a different address
-also starts its F0 off. Renaming keeps its current F0 state. Removing a card or
-changing its address stops refreshing the previous decoder; it keeps its last
-state, so turn its lights off first if desired. Each function-group packet also
-sets F1–F4 off. An empty roster sends DCC idle packets.
-
-The network and updater are intentionally open for this local prototype. Your
-router password is entered in Setup and stored on the Pico, not in source.
-
-### Find a forgotten address
-
-Open **Find an address** and enter a possible range (default 1-100). Watch the
-same locomotive throughout. First confirm lights ON and OFF across the whole
-range, then answer the split tests. Each pattern repeats for four seconds before
-answers are accepted. A 100-address range takes at most seven split questions,
-plus the initial and final checks. **Not sure / Retry** repeats the current test.
-
-The result must turn the lights ON and OFF before **Add this loco** becomes
-available; an address already in the roster opens its existing editor instead.
-Normal roster controls pause during the search. Cancel or three minutes without
-an answer sends lights OFF across the original range, then restores the roster's
-requested F0 states. Refreshing or opening another tab resumes the shared search.
-F1-F4 are off in these packets. No long addresses, address 0, 14-step lighting or
-CV reads/writes. **Track power is still not enabled by the firmware.**
-
-### Logic analyzer hookup
-
-| Analyzer lead | Pico W |
+| Part | Role |
 | --- | --- |
-| D0 / CH0 | **GP2 — physical pin 4** |
-| GND | **GND — physical pin 3** |
+| Arduino Uno R3 / ATmega328P, 16 MHz, 5 V | Timer1 DCC, checked serial commands, output timeout |
+| Deek-Robot L298P motor shield, Uno Rev3-style pinout | Bridge A powers the track; bridge B stays disabled |
+| DOIT ESP13 / ESP-WROOM-02 Wi-Fi shield | Web UI, Wi-Fi, saved roster, OTA |
+| USB power for Uno | Supplies the boards' 5 V logic |
+| USB-C PD trigger + compatible charger/cable, verified 15 V output | Separate motor VIN supply |
 
-Capture at **8 MS/s** for **100 ms**. Connect only to GPIO for this stage;
-powered DCC rails require a different measurement interface.
+**Open the motor shield's VIN CONNECT link** before using separate motor power.
+Verify VIN terminal → Arduino VIN header is isolated and GND remains connected.
+Leave the CD4077 installed; the Uno uses the shield's normal 5 V signals. No added
+level shifter is required for this stack. A+ and A− feed both tracks in parallel;
+neither rail is ground. See the [wiring guide](docs/hardware/README.md),
+[BOM](docs/hardware/BOM.md) and [connection diagram](docs/hardware/schematic.svg).
 
-| Address 3 | Packet | Nominal half-bit widths |
-| --- | --- | --- |
-| F0 off | `03 80 83` | 58 µs for 1, 100 µs for 0 |
-| F0 on | `03 90 93` | 58 µs for 1, 100 µs for 0 |
+## Build and first upload
 
-Earlier single-loco Logic 2 captures decoded 14 complete packets per state
-with no XOR errors. The new multi-loco DMA scheduler still needs a physical capture.
-Half-bits measured 58.000–58.125 µs and 100.000–100.125 µs at 8 MS/s.
-[Full signal guide](DCC-ANALYZER.md).
-
-## Hardware & BOM
-
-**One DCC output feeds both tracks in parallel.** Each loco is still controlled
-independently by its address. The simple design keeps the **Pico W**, selected
-**Deek-Robot L298P**, **15 V USB-C PD trigger**, and **MP1584 set to 5.00 V**.
-There are two documented interfaces: **Option A** keeps the shield intact and
-adds an SN74AHCT125N buffer; **Option B** removes the shield's CD4077 and uses
-complementary Pico outputs directly. Power, sensing and default-off enable
-components are still required. Bridge B is unused.
-
-Decoder addresses are identified/set by another method.
-
-| Document | Contents |
-| --- | --- |
-| [Choose a hardware version](docs/hardware/README.md) | Both build options and firmware status |
-| [Option A: unmodified shield](docs/hardware/buffered-shield.md) | External AHCT buffer; no shield rework |
-| [Option B: modified shield](docs/hardware/shield-modification.md) / [PDF guide](docs/hardware/shield-modification.pdf) | Remove CD4077; direct complementary Pico signals |
-| [Schematic PDF](docs/hardware/schematic.pdf) / [SVG](docs/hardware/schematic.svg) | Option A: one electrical sheet, Rev C proposal |
-| [Editable KiCad project](hardware/kicad/README.md) | Native schematic, ERC report and exported netlist |
-| [BOM](docs/hardware/BOM.md) / [CSV](docs/hardware/bom.csv) | Option A: modules and additional parts |
-| [Connections](docs/hardware/connections.csv) | Option A: exact circuit nets and pins |
-| [Sources](docs/hardware/sources.md) | Manufacturer references |
-
-**The power assembly is not built or electrically validated.** Track enable,
-software current cutoff and startup stop packets still need implementation and
-bench tests before powering trains. Current firmware only emits GP2 logic.
-
-## Build the firmware
-
-Use Arduino CLI 1.x and the **Earle Philhower Arduino-Pico core 6.3.1**.
-Select **Raspberry Pi Pico W**, **1 MB sketch + 1 MB LittleFS**. OTA stages the
-image in LittleFS; changing the layout can break updates.
+Use Arduino CLI and the tested cores:
 
 ```sh
-arduino-cli core update-index --additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
-arduino-cli core install rp2040:rp2040@6.3.1 --additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
-python3 tools/embed_web.py
-arduino-cli compile --fqbn rp2040:rp2040:rpipicow:flash=2097152_1048576 --output-dir build firmware/anden-dcc
+arduino-cli core install arduino:avr@1.8.7
+arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
+arduino-cli core install esp8266:esp8266@3.1.2 --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
+tools/build.sh
 ```
 
-Or run `sh tools/build.sh`. `ARDUINO_CLI` can point to a bundled executable.
-First USB install: hold BOOTSEL while connecting, then copy
-`build/anden-dcc.ino.uf2` to RPI-RP2, or use picotool.
+The build compiles both sketches and runs native checks. For Arduino IDE, open
+`firmware/uno-stack-test/uno-stack-test.ino` or
+`firmware/esp13-ota/esp13-ota.ino` and install the local `libraries/AndenStackLink`
+library. Generated web assets are checked in.
 
-Next updates: **Setup → Firmware update**, choose **`build/anden-dcc.ino.bin`**.
-The server stops GP2 before installing; the panel shows progress and reloads
-after restart. **Do not upload UF2 over OTA.**
-
-The CLI helper verifies success and the running version:
+For the Uno upload, disconnect motor VIN and the track, leave USB connected and
+turn both ESP13 UART switches OFF:
 
 ```sh
-python3 tools/ota.py --host anden-dcc.local --file build/anden-dcc.ino.bin --expect-version 0.5.3
+arduino-cli upload --fqbn arduino:avr:uno --port UNO_PORT --input-dir build/uno-stack-test
 ```
 
-Use the Pico IP for `--host` if mDNS is slow. Normal firmware OTA preserves saved
-Wi-Fi settings. BOOTSEL remains the recovery path.
+The ESP needs one serial installation before OTA is possible. Use a 3.3 V logic
+USB-UART adapter with both shield switches OFF; identify and back up its flash
+before replacing firmware. The [ESP installation guide](firmware/esp13-ota/README.md)
+covers the flash layout and bootloader sequence. After uploading, remove the
+adapter, stack the boards and turn both UART switches ON for normal operation.
 
-## Tests & development
+## Wi-Fi and updates
+
+1. Join the open **anden-esp13** network and open **http://192.168.13.1/**.
+2. Expand Setup and save your 2.4 GHz Wi-Fi details.
+3. Return to your network and open **http://anden-esp13.local/** or the router IP.
+4. Edit the locomotive addresses, or use **Find address** with one loco on the track.
+5. Turn power on explicitly, then test headlights, direction and functions.
+
+The setup network remains available for recovery. The panel and OTA intentionally
+have no login. Router credentials are stored on the ESP, not in source control.
+
+Turn track power off before an ESP update. Use Setup → firmware, or:
 
 ```sh
-python3 tools/embed_web.py --check
-python3 tests/check_dcc.py
-python3 tests/check_hardware.py
-python3 tools/decode_dcc_csv.py path/to/digital.csv --expected '03 80 83'
+python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.1
 ```
 
-The host check executes the C++ encoder and roster, and models **assembled PIO
-opcodes** for all 254 address/F0 combinations, pulse lengths, repeated frames,
-complete packet updates, 2/3/8-loco schedules and empty-roster idle packets. The CSV decoder independently checks real analyzer exports.
+OTA updates **only the ESP**. Uno updates still use USB with both ESP switches OFF
+and motor power disconnected. The ESP layout stays **1 MB / 64 KB LittleFS**,
+DOUT, for compatibility with the installed application.
 
-Browser checks use a mocked controller, never your Wi-Fi settings or trains:
+## Checks and limits
 
 ```sh
 npm ci --prefix tools/ui-tests
@@ -190,72 +116,34 @@ npx --prefix tools/ui-tests playwright install chromium
 npm test --prefix tools/ui-tests
 ```
 
-Set `CHROME_PATH` to an installed Chrome to skip the browser download.
-Screenshots go to `build/ui/` or `UI_ARTIFACTS`. Checks cover language, collapsed
-Setup, independent commands, roster edits, duplicates, capacity, stale status
-responses, mobile layout, offline state and failed save/upload recovery. GitHub Actions runs host checks, compilation and UI checks when hosted.
+CI compiles both boards and exercises packet bytes, UART framing, function masks,
+atomic publication, address search, output leases, mouse interaction, themes and
+phone layouts. The [logic-analyzer guide](DCC-ANALYZER.md) explains measurements.
 
-Edit `web/index.html` and `web/icon.svg`, then run `tools/embed_web.py`.
-The browser tab uses `web/favicon.svg` plus a conventional ICO fallback. After
-changing that SVG, run `node tools/build_favicon.cjs` with the UI dependencies
-and Chromium installed, then embed the updated assets. `CHROME_PATH` is supported.
-Generated `WebAssets.h` is checked in for direct Arduino IDE builds. If PIO
-changes, regenerate its header with the core's `pioasm`, then run the timing
-checks. `tools/export_hardware.py` exports and checks the current KiCad schematic;
-`tools/draw_hardware.py` refreshes its offline print page.
+Power defaults OFF and requires explicit activation. The Uno has a two-second
+control lease; the ESP allows six seconds for browser reconnection. A lost session
+does not restart itself. The raw A0 cutoff is **uncalibrated**: short-circuit,
+thermal and loaded fault protection are not yet proven. See the
+[first-locomotive guide](firmware/uno-stack-test/FIRST-LOCO-TEST.md) for measured
+results and remaining limits. Keep motor VIN disconnected during uploads and
+firmware diagnostics.
+
+## Repository
 
 ```text
-firmware/anden-dcc/   Pico sketch, packet encoder and PIO generator
-web/                 self-contained bilingual UI and app icon
-assets/              GitHub banner, icon and UI previews
-docs/hardware/       wiring proposal, BOM, connections and sources
-tests/               host packet/timing check
-tools/               web embedding, OTA, capture decoding and UI checks
+firmware/esp13-ota/       ESP web app, Wi-Fi, storage and OTA
+firmware/uno-stack-test/  Uno DCC and output control
+libraries/AndenStackLink/ Shared packet models and checked UART protocol
+web/locos/               Original SVG locomotive artwork
+assets/                  GitHub artwork and screenshots
+docs/                    API, wiring, BOM and validation
+tests/                   Native checks
+tools/                   Builds, rendering and browser tests
 ```
 
-## Next stops
-
-- [x] Wi-Fi, web control and OTA without a USB connection.
-- [x] PIO DCC timing and F0 packets measured on hardware.
-- [x] English/Spanish UI with hidden-by-default Setup.
-- [ ] Build and validate the simple, single-output Deek-Robot wiring.
-- [ ] Implement default-off track enable, software current cutoff and startup stop packets.
-- [x] Shared multi-locomotive roster and automatic F0 refresh.
-- [ ] Add sound functions and restricted movement.
-
-## ESP13 / Uno experiment
-
-The separate [ESP13 firmware](experiments/esp13-ota/README.md) and
-[Uno firmware](experiments/uno-stack-test/README.md), both **0.6.0**, support the
-stacked ESP13 / Uno / Deek-Robot controller. The panel has eight saved locomotive
-cards, independent **F0–F28**, named favorite functions, forward/reverse controls,
-System / Light / Dark buttons,
-Wi-Fi setup, OTA, blue-LED feedback and checked serial diagnostics.
-
-The [first-locomotive guide](experiments/uno-stack-test/FIRST-LOCO-TEST.md) covers
-stationary track power and the guided address finder. **Speed stays zero.** Power
-requires an explicit start, sends startup stop packets, and expires locally if the
-browser heartbeat disappears. The existing raw cutoff is uncalibrated; loaded
-protection and actual locomotive behavior still need hardware verification.
-
-The search narrows a user-selected short-address range by asking about headlights,
-then confirms the result on/off. It does not read or write CVs. Setup retains the
-three-second no-load DC and [DCC scope tests](experiments/uno-stack-test/DCC-SCOPE.md).
-Use the [15 V supply and VIN isolation wiring](experiments/uno-stack-test/POWER-TEST.md).
-Bridge B remains disabled. The Pico controller remains separate.
-
-Expand **Explore functions** on a loco card, choose a function and test On/Off.
-Give it a name and pin it: up to eight favorites per locomotive stay accessible
-when the panel is collapsed. Names and pins survive ESP OTA/restarts; active
-functions start OFF after an ESP restart. Function mappings depend on the decoder.
-F1–F28 requires both ESP and Uno 0.6.0; this feature is not yet in the Pico UI.
+[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 
 ## License
 
-[MIT licensed](LICENSE). Build it, change it, share it, sell it, or teach your
-model railway to run a tiny empire. Keep the license notice with your copies.
-
-The formal warranty and liability terms are in the [MIT license](LICENSE).
-This smoke-themed explanation adds no extra license restrictions.
-
-[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [License](LICENSE)
+[MIT](LICENSE). Use it, modify it, share it, sell it, build your own tiny railway
+empire. Just bring your own replacement smoke.

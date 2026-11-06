@@ -10,7 +10,7 @@ const make=(id,address,name='',type='electric',f0=false)=>({id,address,name,type
   if(u.pathname==='/dcc/f0'){let i=state.dcc.locos.findIndex(l=>l.address===Number(data.get('address'))),l=state.dcc.locos[i];state.dcc.locos[i]=make(l.id,l.address,l.name,l.type,data.get('on')==='1');return route.fulfill({json:state.dcc})}
   if(u.pathname==='/locos/save'){saves++;const id=Number(data.get('id')),address=Number(data.get('address'));let i=state.dcc.locos.findIndex(l=>l.id===id),old=state.dcc.locos[i];if(i<0)i=state.dcc.locos.length;state.dcc.locos[i]=make(id||i+1,address,data.get('name'),data.get('type'),old?.address===address?old.f0:false);return route.fulfill({json:state.dcc})}
   if(u.pathname==='/locos/remove'){state.dcc.locos=state.dcc.locos.filter(l=>l.id!==Number(data.get('id')));return route.fulfill({json:state.dcc})}
-  return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'experiments/esp13-ota/web/index.html'),'utf8')});
+  return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.html'),'utf8')});
  });
  await page.goto('http://espdcc.test/');await page.waitForFunction(()=>document.querySelectorAll('.loco').length===2);
  const card=id=>page.locator('.loco[data-id="'+id+'"]');

@@ -114,5 +114,5 @@ int main(){
 }
 ''')
     exe=tmp/'test'
-    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(tmp),'-I',str(root/'experiments/uno-stack-test'),'-I',str(root/'libraries/AndenStackLink/src'),str(tmp/'test.cpp'),'-o',str(exe)],check=True)
+    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(tmp),'-I',str(root/'firmware/uno-stack-test'),'-I',str(root/'libraries/AndenStackLink/src'),str(tmp/'test.cpp'),'-o',str(exe)],check=True)
     subprocess.run([str(exe)],check=True)

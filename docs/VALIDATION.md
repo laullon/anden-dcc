@@ -1,172 +1,55 @@
-# Release 0.6.2 · generic locomotive illustrations
+# Validation
 
-Removed painted model numbers and prototype-specific labels from the live UI.
-Electric / Diesel / Steam and their Spanish translations identify the types;
-DCC addresses, user-entered names, silhouettes and saved type values are kept.
-Build, browser and DCC checks pass; no power-stage changes.
-Pico W build: 500676 program bytes (47%), 74712 global RAM bytes (28%).
+The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
+shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
-## Previous release evidence
+## Software checks
 
-## Release 0.6.1 · RENFE-inspired locomotive artwork
+- Build both boards with `tools/build.sh`; generated ESP assets are checked.
+- Native tests cover checked UART frames, corruption/noise, maximum masks,
+  F0–F28 packet groups/XOR, zero speed, independent loco state, atomic publication,
+  address search, favorite records, LED feedback and browser/output leases.
+- Timer1 register modeling checks D12 phase, delayed interrupt entry,
+  packet-boundary enable, default-off, backup timeout and late-edge fail-off.
+  Modeling does not measure execution time on the AVR.
+- Browser checks cover power transitions, scroll-visible power controls, held
+  mouse targets during polling, function favorites/drafts, direction, finder,
+  themes, setup/OTA, offline behavior and 320 px layouts.
 
-- Three original inline SVG illustrations: electric based on RENFE 269, diesel
-  on the original RENFE 333, steam on Santa Fe 151/5001. Live editor preview,
-  English/Spanish labels, responsive radio selector and per-card F0 lamps.
-- Host checks cover all types, omitted/invalid type handling, legacy and v2
-  records, duplicate/invalid records, empty names and unchanged DCC/F0 on type-only
-  edits. Existing packet timing, roster and exhaustive address-search checks pass.
-- Browser checks cover type preview/save/reload, draft preservation across polls,
-  F0 retention, localized labels, 320px editor layout and normal roster/finder
-  regressions. Reference photos are not bundled; SVGs are embedded once each.
-- Pico W build: 501148 program bytes, 74712 global RAM bytes. Artwork and its
-  selector/storage changes add 10072 program bytes and 8 RAM bytes over 0.6.0.
-- The core leaves `firmware.bin` in LittleFS after OTA. Its HTTP updater measures
-  free space before truncating that file, so repeated images around 519 kB could
-  hit a false staging-space ceiling. The sketch now removes only that reserved
-  file after boot and before a new upload, including failed-upload retries.
-- Live OTA 0.6.0 -> 0.6.1 kept the legacy roster. On-device checks passed for all
-  types, invalid/empty type rejection, omitted-type compatibility and unchanged
-  F0 on appearance-only saves. Nondefault types survived restarts in the v2 file.
-- After recovering the older updater with the core's supported gzip format,
-  two consecutive normal raw-binary OTA uploads passed with staging cleanup.
-  Original card settings and requested F0 states were restored after testing.
-- Physical DCC and decoder validation remains pending; this release adds no
-  power-stage control.
+## UI/project release 0.6.1, 6 November 2026
 
-## Previous release evidence
+Both supported sketches compile from firmware/. All six browser suites pass.
+ESP image: 413,280 bytes. Live OTA verified 0.6.1; the original loco metadata and
+favorite survived. On the installed page, compact power remains visible through
+scrolling/polling and hands back to the main panel at the top, with no JavaScript
+or timing faults. Output was left OFF. Uno 0.6.0 did not need a reflash.
 
-## Release 0.6.0 · guided address finder
+## Hardware observations, 6 November 2026
 
-- Host checks exercise every short-address range (endpoints/midpoints), every
-  target in 1-100 and 1-127, singleton/uneven ranges, complete transmit coverage,
-  excluded-address OFF, XOR bytes, retries, stale tokens, four-second settling,
-  initial/final failures, cancellation, inactivity timeout and timer wrap.
-- Existing PIO opcode-model checks still pass for all 254 address/F0 combinations.
-- Browser checks cover the entire search-to-roster flow, shared session across
-  tabs, locks, request failure recovery, offline/cancel, drafts, existing-address
-  handoff, English/Spanish and 320px layout; normal roster regressions pass.
-- The DMA ring is now 128 words / 512 bytes, aligned and wrapped accordingly.
-  Normal mode repeats the existing eight-word roster schedule; search mode
-  refreshes the entire original address range without CPU refill callbacks.
-- Pico W compilation: 491076 bytes program (47%), 74704 bytes globals (28%).
-- Physical waveform validation of the new 128-word DMA schedule and decoder
-  headlight behavior remain pending. No track-enable, current cutoff or powered
-  locomotive test is claimed.
-- OTA 0.6.0 verified on the Pico. Live HTTP checks passed for range/answer
-  validation, settling, stale tokens, roster/update/Wi-Fi conflicts (including
-  query URLs), a simulated search to address 37, cancellation and result dismissal.
-  Saved loco configuration and prior requested F0 states were restored. No
-  decoder response was measured; the answers in that check were simulated.
+With motor VIN and track disconnected, installed Uno 0.6.0 passed all 29 function
+bits by snapshot CRC, full eight-loco masks and 126 active update/KEEP pairs over
+eight seconds with zero timing faults. The expiry test disabled A; a late KEEP
+did not restart it. The complete HTTP → ESP → Uno path switched every bit ON and
+OFF without changing the other loco, with zero timing faults. B stayed disabled.
 
-## Previous release evidence
+A temporary named favorite survived actual ESP OTA; requested functions restarted
+OFF and original names/addresses/types survived. The temporary favorite was
+removed. The final output and all function bits were OFF.
 
-## Release 0.5.3 · favicon validation
+Uno 0.6.0: 12,812 bytes flash and 1,018 bytes static RAM. ESP 0.6.0 image:
+412,688 bytes. See build output for the current UI release's size.
 
-30 October 2026. SVG train favicon plus a classic 16/32px ICO fallback.
+Earlier no-load bridge tests measured +15 V and −15 V in the DC polarity tests.
+DCC was observed on an oscilloscope around 30 V peak-to-peak with a 15 V supply.
+Logic captures at 500 kS/s decoded zero-speed/direction/search packets with valid
+XOR. That sample rate has 2 µs resolution; it does not establish sub-microsecond
+pulse accuracy. New function-group physical pulse widths were not measured in
+the 0.6.0 validation.
 
-- Pico W build: 475636 bytes program (45%), 74192 bytes globals (28%).
-- Existing DCC/roster and browser regression checks pass; web assets match their generated header.
-- ICO headers/dimensions checked; macOS and Chrome decode it successfully.
-- Live Pico SVG/ICO responses match the source bytes, including MIME types and version-query URLs.
-- OTA 0.5.3 verified; existing locomotive settings retained and prior F0 states restored.
-- No changes to the DCC waveform, hardware design or track-power behavior.
+## Remaining limits
 
-## Historical release 0.5.2 · simple controller validation
-
-29 October 2026. Decoder programming has been removed. The current hardware
-proposal uses one bridge output for both tracks and one AHCT buffer IC.
-
-| Check | Result |
-| --- | --- |
-| Pico W / unchanged 1 MB sketch + 1 MB filesystem | Compiles: 469196 bytes program (44%), 74192 bytes globals (28%) |
-| Existing encoder / PIO / roster checks | Pass |
-| Mocked UI | Two-loco controls and all previous non-programming regressions pass; programming controls absent |
-| OTA / real browser | 0.5.2 deployed; both loco cards and saved settings retained; no JS errors |
-| Removed API | No programming status object; all former programming endpoints return 404 |
-| Native KiCad ERC | Zero violations on the single-sheet Rev C schematic |
-| Exported electrical connectivity | 21 circuit components; both tracks share A, B disabled, buffer input/output enables and pull-downs checked, ADC divider and VSYS diode polarity checked |
-| Documentation | BOM and pin list updated to Rev C; single-sheet SVG/PDF and editable native project provided |
-| Physical power / current cutoff | Not built or validated; enable/current cutoff firmware still required before track power |
-| Analyzer | User deferred troubleshooting; no new physical signal pass claimed |
-
-KiCad rules/netlist checks establish drawing consistency, not electrical or
-thermal performance. Firmware still drives only GP2 logic and reports
-`trackPower=false`. The GPIO waveform/roster engine was not changed by this
-release. Pre-OTA F0 states were restored after deployment.
-
-## Historical release 0.5.1 · programming preparation validation
-
-29 October 2026. This release prepares the UI and packet/address helpers;
-**physical decoder reading/writing is not implemented or tested**.
-
-| Check | Result |
-| --- | --- |
-| Pico W / Arduino-Pico 6.3.1 / unchanged flash layout | Compiles: 480164 bytes program (45%), 74192 bytes globals (28%) |
-| Existing encoder, PIO model and multi-loco roster checks | Pass unchanged |
-| Service helpers | All CV1–1024 byte values / byte and bit operations, packet XOR, known vectors, short-address plans, short/extended address interpretation, explicit missing/ambiguous ACK outcomes pass on host |
-| Mocked browser | Programming collapsed initially, hardware-needed badge, disabled read/write, forgotten-address navigation with editor draft preserved, EN/ES and mobile layouts pass; existing F0/roster/OTA/offline regressions pass |
-| OTA / real browser | 0.5.1 deployed and verified; both locos retained; Programming panel and 320px layout pass; no JavaScript errors |
-| Real programming API refusal | 6 valid requests return 501 and 8 invalid requests return 400; DCC running state and full roster unchanged |
-| Saved settings | Wi-Fi and roster retained; pre-OTA F0 states restored after verification |
-| Actual CV I/O | Not attempted: no programming transport, powered isolated output or calibrated ACK acquisition exists |
-| Analyzer | Deferred at the user's request; no new waveform pass claimed |
-
-The ordinary GP2 packet generator, DMA roster schedule and power-pin behavior
-are unchanged. Programming POST handlers only validate input and report
-unavailability. The service helpers cannot be passed into the current fixed
-three-byte transmitter. See the historical programming preparation (removed in 0.5.2).
-
-## Historical release 0.5.0 validation
-
-29 October 2026. Local tests and real Pico OTA/HTTP/browser checks.
-
-| Check | Result |
-| --- | --- |
-| Arduino-Pico 6.3.1, Pico W, unchanged 1 MB application / 1 MB FS layout | Compiles: 469196 bytes program (44%), 74192 bytes globals (28%) |
-| Production C++ roster | Independent F0, rename preservation, address-change reset, duplicate/invalid/full rejection, removal and ID reuse pass |
-| Assembled PIO model | All 254 address/F0 cases and 2/3/8-loco schedules repeat complete frames at exact nominal 58/100 µs half-bit timing |
-| Empty roster | Host test emits valid `FF 00 FF` idle frames; UI empty/add flow passes |
-| Mocked browser | Two desktop cards / stacked mobile, independent F0, add/edit/remove up to eight, duplicate prevention, failed saves, draft preservation and stale-poll protection pass |
-| UI regression | EN/ES persistence, collapsed Setup, failed OTA recovery, offline disabled controls, dismissible offline editor, 320/390px layouts and safe text rendering pass; no JS errors |
-| Live Pico API and two browser contexts | Naming, independent F0, add/remove, input rejection, cross-browser state, Spanish and mobile pass |
-| Actual OTA restart | Shared roster IDs/names/addresses and Wi-Fi survive; all F0 reset off; original test state restored |
-| Final firmware | 0.5.0 deployed over Wi-Fi; GP2 logic only; track power remains false |
-| Physical multi-address waveform | Pending: Logic 2 MCP reports no connected devices; earlier 0.3.0 captures validate the original single-address pulses, not the new DMA scheduler |
-| Powered track | Still a proposed assembly; no bridge, track power or movement enabled |
-
-The PIO program/encoder are unchanged. Two claimed DMA channels now feed an
-eight-word aligned read ring and reload it without CPU callbacks. Host schedule
-checks exercise packet selection and timing; they do not prove the physical DMA
-transfer loop or voltage. Capture both addresses on GP2 at the bench next.
-
-Screenshots in `assets/` use synthetic names and network details. No router
-configuration or credentials were changed. Live tests restored the initial two
-slots (addresses 3 and 4, empty names, F0 off).
-
-## Historical release 0.4.0 validation
-
-29 October 2026. Tests were performed locally; the GitHub workflow is prepared
-but has not run on a hosted repository.
-
-| Check | Result |
-| --- | --- |
-| Arduino-Pico 6.3.1, Pico W, 1 MB application + 1 MB FS | Compiles: 452796 bytes program (43%), 73744 bytes globals (28%) |
-| C++ encoder / assembled PIO model | 254 address/F0 combinations pass; complete-frame updates and exact nominal timing |
-| Generated web header | Matches web source |
-| Chrome mocked UI | English/Spanish, persisted language, closed Setup, F0 actions, address editing, rejected OTA recovery, offline state, 320/390px layouts pass |
-| Live Chrome on Pico | English default, ES toggle, closed Setup, icon, F0 on/off and update redirect pass; no JS errors |
-| OTA without USB | 0.4.0 accepted and confirmed after reboot, saved Wi-Fi retained |
-| SVG and local document links | Parsed/checked; diagrams visually reviewed |
-| Physical DCC capture for this release | Inconclusive: current input flat on all channels; old 0.3.0 baseline also flat; 0.4.0 restored |
-| Existing physical reference | Earlier 0.3.0 off/on captures: 14 full packets each, correct bytes/XOR, 58.000–58.125 and 100.000–100.125 µs half-bits |
-| Powered track assembly | Proposal only; not built, calibrated or measured |
-
-The unchanged signal engine is documented separately from the proposed power
-stage. The UI waveform is illustrative, not a hardware measurement. No track
-power or motor movement was enabled. Network configuration was not altered by
-UI tests. DCC test actions restored their initial state; firmware startup
-retains the documented address-3/F0-off default.
-
-The new helper scripts and CI workflow were syntax-checked or exercised locally
-as appropriate. No remote repository was created and no code was pushed.
+Actual decoder function mappings, current-sense calibration, loaded short-circuit
+handling, thermal limits and long-running powered operation remain unverified.
+The raw A0 cutoff is not proven protection. Do not describe successful software
+checks as proof of electrical safety or loaded performance. Keep motor VIN and
+track disconnected during uploads and firmware diagnostics.

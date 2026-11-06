@@ -3,7 +3,7 @@
 This guide starts with a **no-load DC test**. The separate
 [timed DCC scope test](DCC-SCOPE.md) is available in firmware 0.4.0. Leave trains, rails and loads
 disconnected from both bridges. The firmware can pulse **bridge A for 3 seconds**
-in either direction; B stays disabled. There is no continuous track mode.
+in either direction; B stays disabled. Keep normal track mode OFF for this check.
 
 ## Power wiring
 

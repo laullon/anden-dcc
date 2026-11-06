@@ -1,106 +1,53 @@
-<p align="center"><img src="assets/banner.svg" alt="anden-dcc — control de trenes para un diorama" width="100%"></p>
-
 # anden-dcc
 
-## Garantía de humo mágico
+**Arduino Uno + motor shield L298P + shield Wi-Fi ESP13.**
 
-**Úsalo bajo tu propio criterio y riesgo.** Es un proyecto de aficionado,
-ofrecido tal cual y sin garantía. Si libera el humo mágico de tu Pico, puente H,
-decóder o locomotora favorita, enhorabuena: has descubierto el efecto especial
-menos útil del modelismo ferroviario. Los autores no se hacen responsables del
-hardware dañado, las tardes descarriladas ni del humo que se niegue a volver al
-chip. El sentido común y los electrones de repuesto los pones tú.
+> **La cláusula del humo mágico:** úsalo bajo tu propio criterio y riesgo.
+> Se ofrece tal cual y sin garantía. Si tu Uno, puente H, decodificador o locomotora
+> liberan humo mágico, te quedas con todas las piezas. El autor no se responsabiliza
+> del humo, del olor ni de justificar el siguiente presupuesto ferroviario.
 
 ---
 
-Una pequeña central para un diorama H0, con **Raspberry Pi Pico W**, control web,
-Wi-Fi y OTA. La interfaz arranca en inglés; **ES** cambia al español y recuerda
-la preferencia en ese navegador.
+Una pequeña central para un diorama H0: luces, sonido y funciones desde el navegador.
+El Uno genera DCC, el motor shield alimenta las vías y el ESP13 ofrece Wi-Fi,
+panel web, almacenamiento y OTA. **ESP 0.6.1 / Uno 0.6.0. La velocidad sigue en cero.**
 
-**Versión 0.5.3:** F0/luces y direcciones cortas 1–127. Los pulsos DCC de 3,3 V
-en GP2 se midieron en la versión de una locomotora; la nueva planificación DMA
-para varias locomotoras está pendiente de captura física.
-**Todavía no se habilita la potencia ni el movimiento**.
-El circuito de potencia está documentado como propuesta, pendiente de montaje,
-pruebas y firmware de protección.
+- Hasta ocho locomotoras, direcciones cortas 1–127, con nombre e ilustración.
+- F0–F28 y sentido de marcha independientes.
+- Abre **Explore functions**, prueba una función, ponle nombre y fíjala con
+  **Pin favorite**. Hasta ocho favoritas por locomotora siguen visibles al plegar.
+- Encendido/apagado explícito, con un control compacto visible al desplazarte.
+- Buscador de dirección mediante preguntas sobre las luces; sin escribir CV.
+- Temas claro/oscuro/sistema; Wi-Fi y actualizaciones dentro de Setup.
 
-1. Conecta a `anden-dcc` y abre `http://192.168.42.1`.
-2. Abre **Configuración**, introduce tu Wi-Fi de 2,4 GHz y guarda.
-3. Vuelve a tu red y abre `http://anden-dcc.local` o la IP de la Pico.
-4. Usa **Editar** para dar nombre y dirección a cada locomotora; controla sus luces F0 por separado.
-5. **Añadir locomotora** amplía la lista hasta ocho tarjetas.
-6. Los archivos `.bin` se instalan en **Configuración → Actualizar firmware**.
+Los nombres, direcciones y favoritas sobreviven a un reinicio y a OTA normal.
+Las funciones activas arrancan apagadas. Los botones son interruptores, no
+pulsadores momentáneos. El significado de cada función depende del decodificador.
 
-**Ilustraciones de locomotoras:** en **Editar**, elige Eléctrica, Diésel o Vapor
-con vista previa. Los dibujos SVG se inspiran en RENFE 269, 333 y Santa Fe 151.
-El tipo se guarda en la central; cambiarlo no altera la dirección ni las luces.
+## Montaje y uso
 
-**Buscar una dirección:** elige un rango de 1 a 127 (por defecto 1-100) y
-responde observando las luces de la misma locomotora. La central verifica primero
-el rango, lo divide y confirma el resultado antes de añadirlo a las tarjetas.
-Cada prueba espera cuatro segundos; puedes repetir o cancelar. Tras tres minutos
-sin respuesta se apaga el rango y se restauran las luces solicitadas en las tarjetas.
-No programa CV ni admite direcciones largas o luces en modo de 14 pasos.
-La búsqueda ya produce señal lógica; la prueba con luces espera la etapa de potencia.
+Apila un Uno R3 de 5 V / 16 MHz, un Deek-Robot L298P con conexiones tipo Rev3 y un
+DOIT ESP13. Mantén instalado el CD4077. Abre y verifica el enlace **VIN CONNECT**
+del motor shield para separar sus 15 V de la entrada VIN del Uno. Alimenta la
+lógica por USB y el motor shield mediante una fuente USB-C PD verificada a 15 V.
+A+ y A− alimentan las dos vías en paralelo; ninguna vía es GND.
 
-**Montaje simplificado:** una salida del L298P alimenta ambas vías en paralelo;
-cada locomotora mantiene sus controles independientes por dirección. Conservamos
-dos opciones: **A**, shield sin modificar con adaptador 74AHCT125; y **B**,
-retirar el CD4077 y usar dos señales complementarias de la Pico directamente.
-La programación de decóderes se ha retirado: las direcciones se obtendrán por otro método.
-[Esquema de una hoja](docs/hardware/schematic.pdf) · [Materiales](docs/hardware/BOM.md).
-La habilitación de potencia y el corte por corriente en firmware aún están
-pendientes de implementación y pruebas.
+Para cargar el Uno: fuente del motor y vía desconectadas, USB conectado y ambos
+interruptores del ESP13 en OFF. Para uso normal, ambos en ON. El ESP necesita una
+primera carga serie; después se actualiza por OTA. OTA no actualiza el Uno.
 
-La lista empieza con dos tarjetas (direcciones 3 y 4): ajústalas a tus decóderes.
-Los nombres y direcciones se guardan en la Pico y se comparten entre navegadores.
-Todas las locomotoras reciben sus paquetes F0 aunque cierres la página. Al
-reiniciar, las luces empiezan apagadas. Al cambiar de dirección también; renombrar
-conserva F0. Al eliminar o cambiar de dirección, el decodificador anterior
-conserva su último estado: apaga sus luces antes si lo deseas.
+Conecta a la Wi-Fi abierta **anden-esp13**, abre **http://192.168.13.1/** y configura
+tu red de 2,4 GHz dentro de Setup. Vuelve a tu red y abre
+**http://anden-esp13.local/** o la IP del router. El panel está en inglés.
 
-Configuración está cerrada por defecto. El LED queda fijo conectado, parpadea
-sin conexión y hace un pulso por peticiones de usuario; el sondeo automático de
-estado no provoca ese pulso.
+La protección por corriente aún no está calibrada. El sistema apaga la salida
+al perder la conexión de control y no la reactiva automáticamente. Mantén la
+alimentación del motor desconectada durante cargas y diagnósticos.
 
-Para medir: **D0 → GP2/pin físico 4**, **GND → pin físico 3**. No conectes el
-analizador directamente a una vía alimentada. Dirección 3: F0 apagado `03 80 83`;
-encendido `03 90 93`.
-
-- [README y compilación](README.md)
-- [Elegir entre las dos versiones de hardware](docs/hardware/README.md)
-- [Opción A: shield sin modificar y adaptador de nivel](docs/hardware/buffered-shield.md)
-- [Opción B: retirar CD4077 y conectar la Pico directamente](docs/hardware/shield-modification.md) · [Guía PDF](docs/hardware/shield-modification.pdf)
-- [Materiales](docs/hardware/BOM.md)
-- [Analizador](DCC-ANALYZER.md)
-- [API](docs/API.md)
-
-La documentación técnica está en inglés. Los datos Wi-Fi se guardan en la Pico,
-no en el código. La red de configuración y OTA siguen abiertos por decisión del
-proyecto para este prototipo local.
-
-## Experimento ESP13 / Uno
-
-Los firmwares [ESP13](experiments/esp13-ota/README.md) y
-[Uno](experiments/uno-stack-test/README.md), ambos **0.5.0**, añaden alimentación
-DCC para una primera prueba estacionaria, luces F0 y dirección independiente por
-locomotora. **La velocidad permanece en cero.** La vía requiere un encendido
-explícito y se apaga si pierde los mensajes de mantenimiento del navegador.
-
-También incluyen el buscador guiado de dirección de la Pico: indica un intervalo
-entre 1 y 127 y responde si ves las luces encendidas o apagadas. No lee ni escribe
-CVs. Sigue la [guía de primera prueba](experiments/uno-stack-test/FIRST-LOCO-TEST.md)
-y la [alimentación de 15 V con aislamiento de VIN](experiments/uno-stack-test/POWER-TEST.md).
-El límite de corriente sigue sin calibrar; la protección bajo carga y el
-comportamiento de las locomotoras necesitan verificación física. El puente B
-permanece apagado y las pruebas de banco de tres segundos siguen disponibles.
-La versión de la Pico es independiente.
+[Guía completa y compilación](README.md) · [Cableado y BOM](docs/hardware/README.md) ·
+[API](docs/API.md) · [Validación](docs/VALIDATION.md)
 
 ## Licencia
 
-[Licencia MIT](LICENSE). Úsalo, modifícalo, compártelo, véndelo o monta tu propio
-imperio ferroviario en miniatura. Conserva el aviso de licencia en las copias.
-
-Las condiciones formales de garantía y responsabilidad están en la
-[licencia MIT](LICENSE). Esta explicación con humo no añade restricciones a la
-licencia.
+[MIT](LICENSE). Úsalo, modifícalo, compártelo o véndelo. El humo de repuesto va por tu cuenta.

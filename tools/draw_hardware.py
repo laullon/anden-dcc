@@ -1,11 +1,33 @@
 #!/usr/bin/env python3
-"""Build the offline print page from the checked-in, KiCad-exported SVG."""
+"""Generate the documented Uno/shield connection overview (not a board schematic)."""
 from pathlib import Path
-root=Path(__file__).resolve().parents[1]
-folder=root/'docs/hardware'
-assert (folder/'schematic.svg').exists()
-html='''<!doctype html><html lang="en"><meta charset="utf-8">
-<title>anden-dcc · simple wiring · Rev C proposal</title>
-<style>body{margin:0;background:#e8e8e1}.sheet{max-width:1600px;margin:20px auto;background:white}.sheet img{display:block;width:100%;height:auto}@media print{@page{size:A3 landscape;margin:5mm}body{background:white}.sheet{margin:0;width:410mm;height:287mm}.sheet img{width:100%;height:100%}}</style><body><article class="sheet">'''+'<img src="schematic.svg" alt="anden-dcc simple circuit - Rev C proposal"></article></body></html>'
-(folder/'print.html').write_text(html)
-print('Generated the single-sheet Rev C print page from schematic.svg.')
+import argparse
+p=argparse.ArgumentParser();p.add_argument('--check',action='store_true');args=p.parse_args()
+r=Path(__file__).resolve().parents[1];folder=r/'docs/hardware'
+svg='''<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="740" viewBox="0 0 1100 740" role="img" aria-labelledby="title desc">
+<title id="title">anden-dcc Uno, motor shield and ESP13 connections</title>
+<desc id="desc">USB powers logic. Verified 15 volt PD powers isolated motor VIN. The Uno connects the ESP UART and motor shield through stacking headers. Bridge A feeds both tracks.</desc>
+<defs><style>text{font-family:Arial,sans-serif;fill:#193b3c} .title{font-size:29px;font-weight:bold}.heading{font-size:21px;font-weight:bold}.body{font-size:17px}.small{font-size:15px}.box{fill:#fff;stroke:#91a89b;stroke-width:2}.wire{fill:none;stroke:#3f7864;stroke-width:3}.power{fill:none;stroke:#b15e23;stroke-width:3}</style><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#3f7864" stroke-width="1.5"/></marker></defs>
+<rect width="1100" height="740" rx="18" fill="#f5f2eb"/>
+<text x="35" y="49" class="title">anden-dcc · three-board stack</text>
+<text x="35" y="79" class="body">Connection overview · Uno R3 / Deek-Robot L298P / DOIT ESP13</text>
+<rect x="35" y="120" width="240" height="95" rx="12" class="box"/><text x="53" y="152" class="heading">USB logic power</text><text x="53" y="181" class="body">Uno + both shields</text>
+<rect x="340" y="120" width="345" height="170" rx="12" class="box"/><text x="359" y="153" class="heading">Arduino Uno · 5 V / 16 MHz</text><text x="359" y="183" class="body">Timer1: D10 reference</text><text x="359" y="212" class="body">D12: routed DCC · D3: enable A</text><text x="359" y="241" class="body">D9 brake LOW · A0 current sense</text><text x="359" y="270" class="small">Bridge B disabled: D11 LOW</text>
+<rect x="750" y="120" width="315" height="170" rx="12" class="box"/><text x="770" y="153" class="heading">DOIT ESP13 shield</text><text x="770" y="184" class="body">Wi-Fi · web panel · OTA</text><text x="770" y="214" class="body">D0 / D1 UART via shield</text><text x="770" y="244" class="small">Switches ON: run · OFF: Uno upload</text><text x="770" y="272" class="small">ESP raw UART uses 3.3 V logic</text>
+<path d="M275 165H340" class="wire" marker-end="url(#arrow)"/><path d="M685 205H750" class="wire"/><text x="690" y="193" class="small">UART</text>
+<rect x="35" y="350" width="240" height="140" rx="12" class="box"/><text x="53" y="383" class="heading">USB-C PD supply</text><text x="53" y="414" class="body">Verify +15 V / GND</text><text x="53" y="444" class="small">Separate motor supply</text><text x="53" y="472" class="small">Check voltage and polarity</text>
+<rect x="340" y="350" width="345" height="190" rx="12" class="box"/><text x="359" y="383" class="heading">L298P motor shield</text><text x="359" y="414" class="body">VIN CONNECT: OPEN / verified</text><text x="359" y="444" class="body">CD4077 installed · logic at 5 V</text><text x="359" y="474" class="body">Bridge A: A+ / A−</text><text x="359" y="503" class="small">B+ / B− unused · grounds common</text><text x="359" y="528" class="small">Motor VIN isolated from Uno VIN</text>
+<path d="M275 414H340" class="power"/><text x="282" y="401" class="small">VIN</text><path d="M510 290V350" class="wire"/><text x="528" y="323" class="small">Stacking headers</text>
+<rect x="750" y="350" width="315" height="190" rx="12" class="box"/><text x="770" y="383" class="heading">Two tracks in parallel</text><path d="M785 421H1030M785 476H1030" fill="none" stroke="#b15e23" stroke-width="3"/><path d="M785 441H1030M785 496H1030" fill="none" stroke="#3665a0" stroke-width="3"/><text x="770" y="525" class="small">Neither rail is GND</text><path d="M685 440H745" fill="none" stroke="#b15e23" stroke-width="3"/><path d="M685 480H745" fill="none" stroke="#3665a0" stroke-width="3"/><text x="694" y="429" class="small">A+</text><text x="694" y="505" class="small">A−</text><text x="770" y="425" class="small">A+</text><text x="770" y="451" class="small">A−</text><text x="770" y="480" class="small">A+</text><text x="770" y="506" class="small">A−</text>
+<rect x="35" y="580" width="1030" height="125" rx="12" fill="#fbe7cc"/>
+<text x="54" y="612" class="heading">Uploads and bench diagnostics: motor VIN and tracks disconnected</text>
+<text x="54" y="643" class="body">Both ESP switches OFF for Uno USB upload; ON for normal checked UART control.</text>
+<text x="54" y="674" class="body">Speed stays zero. Raw current cutoff is uncalibrated; loaded fault protection is not proven.</text>
+</svg>'''
+html='''<!doctype html><html lang="en"><meta charset="utf-8"><title>anden-dcc stack wiring</title><style>body{margin:24px;background:#eee}img{width:100%;max-width:1100px;display:block;margin:auto}@media print{@page{size:A4 landscape;margin:8mm}body{margin:0;background:white}img{width:100%;max-height:180mm}}</style><img src="schematic.svg" alt="Uno, motor shield and ESP13 connection overview">'''
+for name,data in [('schematic.svg',svg),('print.html',html)]:
+ path=folder/name
+ if args.check:
+  if path.read_text()!=data:raise SystemExit('Stale '+str(path))
+ else:path.write_text(data)
+print('PASS: Uno/shield connection overview and print page are current.')
