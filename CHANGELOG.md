@@ -1,5 +1,15 @@
 # Changelog
 
+## Web UI reliability review 0.6.2 · 2026-11-06
+
+- Bound ordinary command requests and recover controls after a lost response.
+- Serialize finder/roster/setup operations and invalidate stale polls/replies.
+- Reflect checked power acknowledgments without flashing back to cached state.
+- Preserve new favorite-name drafts while saves or status polls finish.
+- Guard an open loco editor when connection, storage or output state changes.
+- Wrap long F0 labels and keep keyboard-focused inputs above the floating bar.
+- Add deterministic regressions that failed on the previous release.
+
 ## Uno / ESP13 project and scroll power control 0.6.1 · 2026-11-06
 
 - Keep compact track power status and On/Off controls visible after scrolling.

@@ -2,7 +2,7 @@
   "name": "anden-dcc-ui-checks",
   "private": true,
   "scripts": {
-    "test": "node check-esp13-ui.cjs && node check-esp13-roster.cjs && node check-esp13-theme.cjs && node check-esp13-track.cjs && node check-esp13-functions.cjs && node check-floating-power.cjs"
+    "test": "node check-esp13-ui.cjs && node check-esp13-roster.cjs && node check-esp13-theme.cjs && node check-esp13-track.cjs && node check-esp13-functions.cjs && node check-floating-power.cjs && node check-ui-reliability.cjs && node check-ui-layout.cjs"
   },
   "devDependencies": {
     "playwright": "1.61.1"

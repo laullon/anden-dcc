@@ -16,6 +16,21 @@ shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
   mouse targets during polling, function favorites/drafts, direction, finder,
   themes, setup/OTA, offline behavior and 320 px layouts.
 
+## UI reliability review 0.6.2, 6 November 2026
+
+Eight browser suites pass, including new regressions for timeouts, conflicting
+requests, stale power snapshots, delayed save completion, clipped mobile buttons,
+keyboard focus clearance and an editor whose connection/output/storage state
+changes while open. These reproduced failures in the earlier page.
+
+ESP image: 414,000 bytes. Live OTA verified 0.6.2; saved loco/favorite metadata
+survived. A fresh live page preserved drafts/focus through polling, guarded the
+open editor during a simulated lost connection and recovered without losing the
+draft. Compact power stayed OFF; the live browser check sent no POSTs and found
+no JavaScript/timing faults. The Uno firmware/DCC generator is unchanged. See the
+[review findings and test mapping](UI-REVIEW.md). Mocked delay/failure tests do
+not activate hardware.
+
 ## UI/project release 0.6.1, 6 November 2026
 
 Both supported sketches compile from firmware/. All six browser suites pass.

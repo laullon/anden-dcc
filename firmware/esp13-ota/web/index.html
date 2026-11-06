@@ -57,6 +57,7 @@
 .favorite-strip{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 16px}.favorite-strip[hidden]{display:none}.favorite-button{background:transparent;color:var(--soft-text);border-color:var(--control-line);padding:9px 12px;max-width:100%;overflow-wrap:anywhere}.favorite-button[aria-pressed=true]{background:var(--button-bg);border-color:var(--button-bg);color:var(--button-text)}.function-explorer{border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;overflow:visible}.function-explorer summary{padding:16px 20px;font-size:14px;color:var(--amber)}.function-editor{border-top:1px solid var(--line);padding:0 20px 20px}.function-editor select{display:block;width:100%;font:inherit;background:var(--field);color:var(--text);border:1px solid var(--control-line);border-radius:10px;padding:11px}.function-test{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0}.function-state{font-size:13px;color:var(--muted)}.function-save{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.function-save button{padding:10px 12px}.function-hint{font-size:12px;color:var(--muted);margin-bottom:0}.function-name{font-size:14px}.loco-bytes{padding-bottom:14px}.favorite-strip button:hover{border-color:var(--amber)}
 
 .floating-power{position:fixed;z-index:20;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:space-between;gap:12px;width:min(400px,calc(100% - 24px));padding:8px 10px 8px 16px;border:1px solid var(--control-line);border-radius:14px;background:var(--surface);box-shadow:0 8px 30px #0005}.floating-power[hidden]{display:none}.floating-power[data-power=on]{border-color:var(--green)}.floating-power span{font-size:14px;font-weight:700}.floating-power button{min-height:44px;min-width:140px;padding:9px 12px;font-size:14px}.floating-power button[hidden]{display:none}#floating-off{background:#b62e29;border-color:#b62e29;color:#fff}#floating-off:hover{background:#96231f}main{padding-bottom:100px}
+html{scroll-padding-bottom:90px}.loco-bottom>span{min-width:0;overflow-wrap:anywhere}.loco-bottom .light-pair{flex-shrink:0}
 </style>
 </head>
 <body><aside id="floating-power" class="floating-power" data-power="unknown" aria-label="Track power" hidden><span id="floating-label" role="status" aria-live="polite">Checking…</span><button id="floating-on" type="button" disabled hidden>⏻ Power on</button><button id="floating-off" type="button">⏻ Power off</button></aside><main>
@@ -67,7 +68,7 @@
 <section id="track-power" class="card track-power" data-power="unknown" aria-labelledby="track-title"><div><h2 id="track-title">Track power</h2><p class="track-indicator" id="track-state" role="status" aria-live="polite"><span class="power-dot" aria-hidden="true"></span><span id="track-label">Checking status…</span></p><p id="track-detail" class="track-description">Waiting for the controller.</p></div><div class="track-action"><button id="track-on" type="button" disabled hidden>⏻ Turn power on</button><button id="track-off" type="button">⏻ Turn power off</button></div></section><p class="message" id="track-message" role="status"></p><p class="track-help">Stationary test · speed stays at zero. Changing tabs is OK. Losing the page connection for 6 seconds turns track power off.</p>
 <section id="finder-panel" class="card" hidden aria-labelledby="finder-title" style="margin-top:18px"><h2 id="finder-title">Find a locomotive address</h2><p class="muted">Use one locomotive on the test track. We switch its headlights in groups and ask what you see—no CV programming. Choose the range, then turn power on above to start. Address 0 is broadcast and is excluded.</p><form id="finder-range"><div class="form-row"><div><label for="finder-first">First address</label><input id="finder-first" type="number" min="1" max="127" value="1" required></div><div><label for="finder-last">Last address</label><input id="finder-last" type="number" min="1" max="127" value="100" required></div></div><div class="actions"><button type="submit">Start search</button></div><p id="finder-range-hint" class="muted">Turn track power on from this page to start the search.</p></form><div id="finder-current" hidden><h3 id="finder-question"></h3><p class="muted" id="finder-detail"></p><p id="finder-wait"></p><div id="finder-answers" class="actions"><button data-finder-answer="on" type="button">Lights are on</button><button data-finder-answer="off" type="button">Lights are off</button><button data-finder-answer="retry" type="button" class="secondary">Repeat</button></div></div><div class="actions"><button id="finder-add" type="button" hidden>Use this address</button><button id="finder-again" type="button" class="secondary" hidden>New search</button><button id="finder-cancel" type="button" class="secondary" hidden>Cancel search</button><button id="finder-close" type="button" class="secondary">Close</button></div><p class="message" id="finder-message" role="status"></p></section>
 <section aria-labelledby="roster-title"><div class="roster-heading"><h2 id="roster-title">Your locomotives</h2><div class="light-pair"><button id="find-address" type="button">Find address</button><button id="add-loco" class="secondary" type="button">+ Add loco</button></div></div><p id="dcc-info">Waiting for the Uno DCC generator…</p><div id="loco-list" class="roster-grid"></div><p id="empty-roster" class="muted" hidden>No locomotives yet. Add one to start.</p><p id="roster-message" class="message" role="status" aria-live="polite"></p></section>
-<dialog id="loco-dialog" class="loco-dialog"><form id="loco-form"><h2 id="editor-title">Edit locomotive</h2><input type="hidden" id="loco-id" name="id"><label for="loco-name">Name</label><input id="loco-name" name="name" maxlength="48" placeholder="Optional name"><label for="loco-address">Short DCC address</label><input id="loco-address" name="address" type="number" min="1" max="127" required><label for="loco-type">Locomotive type</label><select id="loco-type" name="type"><option value="electric">Electric</option><option value="diesel">Diesel</option><option value="steam">Steam</option></select><div id="loco-preview" class="loco-preview"></div><p id="editor-message" class="message" role="status"></p><div class="actions"><button id="save-loco" type="submit">Save loco</button><button id="cancel-loco" class="secondary" type="button">Cancel</button><button id="remove-loco" class="secondary" type="button">Remove</button></div></form></dialog>
+<dialog id="loco-dialog" class="loco-dialog"><form id="loco-form"><h2 id="editor-title">Edit locomotive</h2><input type="hidden" id="loco-id" name="id"><label for="loco-name">Name</label><input id="loco-name" name="name" maxlength="48" placeholder="Optional name"><label for="loco-address">Short DCC address</label><input id="loco-address" name="address" type="number" min="1" max="127" required><label for="loco-type">Locomotive type</label><select id="loco-type" name="type"><option value="electric">Electric</option><option value="diesel">Diesel</option><option value="steam">Steam</option></select><div id="loco-preview" class="loco-preview"></div><p id="editor-guard" class="message" role="status" hidden></p><p id="editor-message" class="message" role="status"></p><div class="actions"><button id="save-loco" type="submit">Save loco</button><button id="cancel-loco" class="secondary" type="button">Cancel</button><button id="remove-loco" class="secondary" type="button">Remove</button></div></form></dialog>
 <!-- LOCO_ART_START -->
 <template id="art-electric"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" data-model="269">
 <ellipse cx="191" cy="130" rx="153" ry="5" fill="#091f24" opacity=".45"/>
@@ -163,9 +164,22 @@ $('theme').addEventListener('click',event=>{
  const button=event.target.closest('[data-theme-choice]');if(button)andenTheme.set(button.dataset.themeChoice);
 });
 let state=null, uploading=false, editing=false, changingWifi=false, stackBusy=false, rosterBusy=false, rosterRevision=0, lastRoster=[], benchPollTimer=0;
+let statusController=null;
+function controlsBusy(){return uploading||changingWifi||stackBusy||rosterBusy||finderBusy||trackBusy||trackTurningOff}
+function invalidateStatus(){++rosterRevision;statusController?.abort();return rosterRevision}
+// Commands are never retried automatically: a lost reply may still have applied.
+async function requestJson(path,options={},timeoutMs=5000){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+ try{
+  const response=await fetch(path,{...options,signal:controller.signal}),result=await response.json();
+  if(!response.ok){const error=Error(result.error||'Request refused (HTTP '+response.status+').');error.status=response.status;error.result=result;throw error;}
+  return result;
+ }catch(error){if(controller.signal.aborted)throw Error('Request timed out. Check status before trying again.');throw error}
+ finally{clearTimeout(timer)}
+}
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function message(id,text,error=false){if($(id).textContent!==text)$(id).textContent=text;$(id).classList.toggle('error',error)}
-function lock(value){for(const control of document.querySelectorAll('form input,form button,form select'))control.disabled=value;$('upload-button').disabled=value||!state;renderUno();renderRoster()}
+function lock(){const value=controlsBusy();for(const control of document.querySelectorAll('form input,form button,form select'))control.disabled=value;$('upload-button').disabled=value||!state;renderUno();renderRoster()}
 let trackLease=0,trackBusy=false,keepBusy=false,trackRevision=0,trackTurningOff=false,lastKeepAck=0,trackRetrying=false;
 function renderTrack(){
  const u=state&&state.uno,known=!!u?.online&&typeof u.enableA==='boolean'&&typeof u.enableB==='boolean',active=known&&!!u.trackActive,bench=known&&!active&&(u.enableA||u.enableB);
@@ -173,7 +187,7 @@ function renderTrack(){
  $('track-label').textContent=trackTurningOff?'Switching off…':trackBusy?'Switching on…':({on:'Track is ON',off:'Track is OFF',unknown:'Status unavailable',bench:'Bench test is ON'})[power];
  $('track-detail').textContent=({on:'Track A enabled · speed locked at zero.',off:({4:'Current cutoff tripped (raw A0).',5:'DCC timing fault.',6:'Backup cutoff tripped.',7:'Uno control link timed out.'})[u?.bench?.state]||state?.trackStopReason||'Track A output is disabled.',unknown:'Reconnect to check the output. You can still request power off.',bench:'A test output is enabled. Turn it off before using the track.'})[power];
  $('track-on').hidden=power!=='off'||trackBusy||trackTurningOff;$('track-off').hidden=power==='off'&&!trackBusy&&!trackTurningOff;
- $('track-on').disabled=!!state?.dcc?.finder?.active||!known||!u.trackSupported||!state?.dcc?.ready||u.enableA||u.enableB||trackBusy||trackTurningOff||uploading||changingWifi||stackBusy||rosterBusy;
+ $('track-on').disabled=!!state?.dcc?.finder?.active||!known||!u.trackSupported||!state?.dcc?.ready||u.enableA||u.enableB||trackBusy||trackTurningOff||controlsBusy();
  $('track-off').disabled=trackTurningOff;$('track-off').textContent=trackTurningOff?'Switching off…':bench?'■ Stop test output':'⏻ Turn power off';
  $('floating-power').dataset.power=power;
  $('floating-label').textContent=trackTurningOff?'Stopping…':trackBusy?'Starting…':({on:'Track ON',off:'Track OFF',unknown:'Unknown',bench:'Test ON'})[power];
@@ -185,14 +199,21 @@ async function trackRequest(path,data={}){
  try{const response=await fetch('/api/track/'+path,{method:'POST',body:new URLSearchParams(data),signal:controller.signal});const result=await response.json();if(!response.ok){const error=Error(result.error||'Track command failed.');error.status=response.status;throw error;}return result}finally{clearTimeout(timer)}
 }
 $('track-on').onclick=async()=>{
- if(trackBusy||trackTurningOff)return;trackBusy=true;const revision=++trackRevision;++rosterRevision;renderTrack();
- try{const result=await trackRequest('on');if(revision!==trackRevision){await trackRequest('off',{lease:result.lease});return}trackLease=result.lease;lastKeepAck=performance.now();trackRetrying=false;message('track-message','');}
- catch(error){message('track-message',error.message,true)}finally{trackBusy=false;await refreshStatus()}
+ if(controlsBusy())return;trackBusy=true;const revision=++trackRevision;invalidateStatus();lock();
+ try{const result=await trackRequest('on');if(!Number.isInteger(result.lease)||result.lease<1||result.lease>65535)throw Error('Power start was not confirmed. Check status before trying again.');if(revision!==trackRevision){await trackRequest('off',{lease:result.lease});return}trackLease=result.lease;acknowledgePower(true);lastKeepAck=performance.now();trackRetrying=false;message('track-message','');}
+ catch(error){if(revision===trackRevision)message('track-message',error.message,true)}finally{trackBusy=false;lock();refreshStatus()}
 };
 $('track-off').onclick=async()=>{
- ++trackRevision;++rosterRevision;trackLease=0;trackTurningOff=true;renderTrack();
- try{await trackRequest('off');message('track-message','');}catch(error){message('track-message',error.message,true)}finally{trackTurningOff=false;await refreshStatus()}
+ if(trackTurningOff)return;const revision=++trackRevision;invalidateStatus();trackLease=0;trackTurningOff=true;lock();
+ try{const result=await trackRequest('off');if(!result.ok)throw Error('Power off was not confirmed. Check status before trying again.');if(revision===trackRevision){acknowledgePower(false);message('track-message','');}}catch(error){if(revision===trackRevision)message('track-message',error.message,true)}finally{trackTurningOff=false;lock();refreshStatus()}
 };
+// These flags follow checked server acknowledgments, never an optimistic click.
+function acknowledgePower(on){
+ if(!state?.uno)return;
+ Object.assign(state.uno,{trackActive:on,enableA:on,enableB:false});
+ if(state.uno.bench)Object.assign(state.uno.bench,on?{active:true,mode:3,state:1}:{active:false,state:3});
+ if(!on)state.trackStopReason='Power off requested.';
+}
 // Both panels use one command path and one browser-owned power lease.
 $('floating-on').onclick=()=>{if(!$('track-on').disabled&&!$('track-on').hidden)$('track-on').click()};
 $('floating-off').onclick=()=>{if(!$('track-off').disabled&&!$('track-off').hidden)$('track-off').click()};
@@ -216,9 +237,9 @@ function renderUno(){
  $('uno-detail').textContent=online?'v'+u.version+' · '+u.roundTripMs+' ms round trip · '+u.rxFrames+' checked replies':'Check the Uno test sketch and both ESP13 switches. No motor commands are sent.';
  $('uno-outputs').textContent=online?(disabled?'D3 LOW · D11 LOW':active?'D3 HIGH · '+(b.mode>=2?'DCC':'DC')+' bench test · D11 LOW':'Enable input HIGH — LED test blocked'):'Enable pins: unknown';
  $('uno-adc').textContent=online?'A0 / A1: '+u.adcA+' / '+u.adcB+' raw ADC':'A0 / A1: —';
- $('ping-uno').disabled=!state||uploading||changingWifi||stackBusy||rosterBusy;
- $('blink-uno').disabled=!disabled||uploading||changingWifi||stackBusy||rosterBusy;
- const busy=uploading||changingWifi||stackBusy||rosterBusy,supported=!!(b&&b.supported);
+ $('ping-uno').disabled=!state||controlsBusy();
+ $('blink-uno').disabled=!disabled||controlsBusy();
+ const busy=controlsBusy(),supported=!!(b&&b.supported);
  $('bridge-positive').disabled=$('bridge-negative').disabled=!online||!supported||!disabled||busy;
  $('bridge-dcc').disabled=!online||!supported||!b.dccSupported||!disabled||busy||!(state.dcc&&state.dcc.ready);
  $('bridge-stop').disabled=!state||!supported||busy;
@@ -230,15 +251,15 @@ function renderUno(){
  if(active&&!busy)benchPollTimer=setTimeout(()=>{benchPollTimer=0;refreshStatus()},1000);
 }
 async function stackAction(action,data=null){
- if(uploading||changingWifi||stackBusy||rosterBusy||!state)return;
- ++rosterRevision;stackBusy=true;lock(true);message('uno-message','Waiting for the Uno…');
+ if(controlsBusy()||!state)return;
+ const revision=invalidateStatus();stackBusy=true;lock();message('uno-message','Waiting for the Uno…');
  try{
-  const response=await fetch('/api/uno/'+action,{method:'POST',...(data?{body:new URLSearchParams(data)}:{})}),result=await response.json();
+  const result=await requestJson('/api/uno/'+action,{method:'POST',...(data?{body:new URLSearchParams(data)}:{})});
+  if(revision!==rosterRevision||!state)return;
   if(result.online!==undefined)state.uno=result;
-  if(!response.ok)throw Error(result.error||'The Uno did not return a checked reply. Check the sketch and switches.');
   message('uno-message',action==='led'?'Blink acknowledged — watch the Uno L LED. Both bridge enables remain LOW.':action==='bridge'?'Bridge A DC test started. It switches off locally after 3 seconds.':action==='dcc-test'?'DCC scope test started. It switches off locally after 3 seconds.':action==='bench-stop'?'Bench test stopped. Both enables are LOW.':'Uno replied. Serial link is working.');
- }catch(error){message('uno-message',error.message,true)}
- finally{stackBusy=false;lock(false);await refreshStatus()}
+ }catch(error){if(revision===rosterRevision){if(state&&error.result?.online!==undefined)state.uno=error.result;message('uno-message',error.message,true)}}
+ finally{stackBusy=false;lock();refreshStatus()}
 }
 $('ping-uno').addEventListener('click',()=>stackAction('ping'));
 $('blink-uno').addEventListener('click',()=>stackAction('led'));
@@ -247,16 +268,16 @@ $('bridge-negative').onclick=()=>stackAction('bridge',{direction:0});
 $('bridge-stop').onclick=()=>stackAction('bench-stop');
 $('bridge-dcc').onclick=()=>stackAction('dcc-test');
 async function readStatus(){
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
- try{const response=await fetch('/api/status',{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('Board did not return status');return await response.json()}finally{clearTimeout(timer)}
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);statusController=controller;
+ try{const response=await fetch('/api/status',{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('Board did not return status');return await response.json()}finally{clearTimeout(timer);if(statusController===controller)statusController=null}
 }
 let statusRefreshing=false,statusAgain=false,statusPromise=null;
 function refreshStatus(){
- if(uploading||stackBusy||rosterBusy)return Promise.resolve();
+ if(controlsBusy())return Promise.resolve();
  if(statusPromise){statusAgain=true;return statusPromise;}
  statusRefreshing=true;
  // Share the complete poll/queued-refresh promise so callers cannot observe stale state.
- statusPromise=(async()=>{do{statusAgain=false;await refreshStatusOnce()}while(statusAgain&&!uploading&&!stackBusy&&!rosterBusy)})().finally(()=>{statusRefreshing=false;statusPromise=null});
+ statusPromise=(async()=>{do{statusAgain=false;await refreshStatusOnce()}while(statusAgain&&!controlsBusy())})().finally(()=>{statusRefreshing=false;statusPromise=null});
  return statusPromise;
 }
 async function refreshStatusOnce(){
@@ -276,10 +297,10 @@ async function refreshStatusOnce(){
 }
 $('ssid-input').addEventListener('input',()=>editing=true);
 async function wifiRequest(path,body){
- if(uploading||changingWifi||stackBusy||rosterBusy)return;
- changingWifi=true;lock(true);message('wifi-message','Sending settings…');
- try{const response=await fetch(path,{method:'POST',body});const result=await response.json();if(!response.ok)throw Error(result.error||'Could not save Wi-Fi');message('wifi-message',result.message);$('password').value='';editing=false}
- catch(error){message('wifi-message',error.message,true)}finally{changingWifi=false;lock(false);await refreshStatus()}
+ if(controlsBusy())return;
+ invalidateStatus();changingWifi=true;lock();message('wifi-message','Sending settings…');
+ try{const result=await requestJson(path,{method:'POST',body});message('wifi-message',result.message);$('password').value='';editing=false}
+ catch(error){message('wifi-message',error.message,true)}finally{changingWifi=false;lock();refreshStatus()}
 }
 $('wifi-form').addEventListener('submit',event=>{event.preventDefault();wifiRequest('/setup/wifi',new FormData(event.target))});
 $('forget-wifi').addEventListener('click',()=>wifiRequest('/setup/wifi/forget',null));
@@ -300,8 +321,8 @@ async function waitForRestart(oldBoot){
  throw Error('Upload accepted, but restart was not confirmed. Reconnect to anden-esp13 or check the board IP.');
 }
 $('update-form').addEventListener('submit',async event=>{
- event.preventDefault();if(uploading||changingWifi||stackBusy||rosterBusy)return;
- const file=$('firmware').files[0];if(!file)return;uploading=true;lock(true);
+ event.preventDefault();if(controlsBusy())return;
+ const file=$('firmware').files[0];if(!file)return;invalidateStatus();uploading=true;lock();
  try{
   if(!state)throw Error('Wait for the board to return its status.');
   if(!file.name.toLowerCase().endsWith('.bin')||file.size<4)throw Error('Choose the ESP13 .bin file.');
@@ -313,7 +334,7 @@ $('update-form').addEventListener('submit',async event=>{
   await postFirmware(file);message('update-message','Upload accepted. Waiting for the ESP13 to restart…');
   const updated=await waitForRestart(oldBoot);message('update-message','Back online — firmware v'+updated.version+'.');$('update-form').reset();
  }catch(error){message('update-message',error.message,true)}
- finally{uploading=false;lock(false);$('progress').hidden=true;await refreshStatus()}
+ finally{uploading=false;lock();$('progress').hidden=true;refreshStatus()}
 });
 function kindName(kind){return ({electric:'Electric',diesel:'Diesel',steam:'Steam'})[kind]||'Electric'}
 function art(target,kind){target.replaceChildren();const template=$('art-'+kind);if(template)target.append(template.content.cloneNode(true))}
@@ -322,7 +343,7 @@ function functionOn(loco,number){return number===0?!!loco.f0:!!((Number(loco.fun
 function favoriteList(loco){return Array.isArray(loco.favorites)?loco.favorites:[]}
 function functionCommand(view,number,on){return rosterCommand(number===0?'/dcc/f0':'/dcc/function',number===0?{address:view.loco.address,on:Number(on)}:{address:view.loco.address,function:number,on:Number(on)})}
 function createLocoCard(id){
- const v={id,loco:null,quick:new Map(),nameDirty:false,artType:null};
+ const v={id,loco:null,quick:new Map(),nameDirty:false,draftRevision:0,artType:null};
  const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node};
  const button=(cls,text)=>{const node=el('button',cls,text);node.type='button';return node};
  v.card=el('article','loco');v.card.dataset.id=id;
@@ -337,13 +358,13 @@ function createLocoCard(id){
  v.details=el('details','function-explorer');v.summary=el('summary','functions-summary','Explore functions · F0–F28');v.editor=el('div','function-editor');
  const selectLabel=el('label',null,'Choose a function');v.select=el('select','function-select');v.select.id='function-select-'+id;selectLabel.htmlFor=v.select.id;
  for(let n=0;n<=28;n++){const option=el('option',null,'F'+n+(n===0?' · Headlights':''));option.value=n;v.select.append(option)}v.select.value=1;
- v.select.onchange=()=>{v.nameDirty=false;updateFunctionEditor(v,true)};
+ v.select.onchange=()=>{++v.draftRevision;v.nameDirty=false;updateFunctionEditor(v,true)};
  const test=el('div','function-test'),tp=el('div','light-pair');v.fnState=el('span','function-state');v.fnButtons=[];
  for(const [text,on] of [['Off',false],['On',true]]){const b=button(on?'function-on':'function-off',text);b.onclick=()=>functionCommand(v,Number(v.select.value),on);v.fnButtons.push(b);tp.append(b)}test.append(v.fnState,tp);
- const nameLabel=el('label',null,'Favorite name');v.name=el('input','function-name');v.name.id='function-name-'+id;nameLabel.htmlFor=v.name.id;v.name.maxLength=24;v.name.placeholder='e.g. Engine sound';v.name.autocomplete='off';v.name.oninput=()=>{v.nameDirty=true;updateFunctionEditor(v)};
+ const nameLabel=el('label',null,'Favorite name');v.name=el('input','function-name');v.name.id='function-name-'+id;nameLabel.htmlFor=v.name.id;v.name.maxLength=24;v.name.placeholder='e.g. Engine sound';v.name.autocomplete='off';v.name.oninput=()=>{++v.draftRevision;v.nameDirty=true;updateFunctionEditor(v)};
  const save=el('div','function-save');v.pin=button('pin-function','☆ Pin favorite');v.unpin=button('secondary unpin-function','Remove favorite');
- v.pin.onclick=async()=>{if(!v.name.value.trim()||new TextEncoder().encode(v.name.value.trim()).length>24){v.hint.textContent='Give the function a short name first.';return}if(await rosterCommand('/locos/favorite',{id:v.id,function:v.select.value,name:v.name.value.trim()})){v.nameDirty=false;updateFunctionEditor(v,true)}};
- v.unpin.onclick=async()=>{if(await rosterCommand('/locos/favorite/remove',{id:v.id,function:v.select.value})){v.nameDirty=false;updateFunctionEditor(v,true)}};
+ v.pin.onclick=async()=>{const draft=v.draftRevision;if(!v.name.value.trim()||new TextEncoder().encode(v.name.value.trim()).length>24){v.hint.textContent='Give the function a short name first.';return}if(await rosterCommand('/locos/favorite',{id:v.id,function:v.select.value,name:v.name.value.trim()})&&v.draftRevision===draft){v.nameDirty=false;updateFunctionEditor(v,true)}};
+ v.unpin.onclick=async()=>{const draft=v.draftRevision;if(await rosterCommand('/locos/favorite/remove',{id:v.id,function:v.select.value})&&v.draftRevision===draft){v.nameDirty=false;updateFunctionEditor(v,true)}};
  save.append(v.pin,v.unpin);v.hint=el('p','function-hint');v.editor.append(selectLabel,v.select,test,nameLabel,v.name,save,v.hint);v.details.append(v.summary,v.editor);
  v.card.append(top,v.picture,lights,direction,v.favorites,v.bytes,v.details);return v;
 }
@@ -352,7 +373,7 @@ function updateFunctionEditor(v,selectionChanged=false){
  for(const option of v.select.options){const number=Number(option.value),known=favoriteList(v.loco).find(f=>f.number===number),label='F'+number+(known?' · '+known.name:number===0?' · Headlights':'');if(option.textContent!==label)option.textContent=label;}
  v.fnState.textContent='F'+n+' · '+(functionOn(v.loco,n)?'On':'Off');
  v.fnButtons.forEach((b,i)=>{b.disabled=!v.ready||v.locked||!supported||!state?.uno?.trackActive;b.setAttribute('aria-pressed',String(functionOn(v.loco,n)===Boolean(i)))});
- v.select.disabled=v.locked;v.name.disabled=v.locked;
+ const editingLocked=uploading||changingWifi||finderBusy||!!state?.dcc?.finder?.active;v.select.disabled=editingLocked;v.name.disabled=editingLocked;
  if(selectionChanged||(!v.nameDirty&&document.activeElement!==v.name))v.name.value=favorite?.name||'';
  const validName=!!v.name.value.trim()&&new TextEncoder().encode(v.name.value.trim()).length<=24;
  v.pin.disabled=v.locked||!state||state.storageReady===false||!validName||(!favorite&&favoriteList(v.loco).length>=8);
@@ -361,7 +382,7 @@ function updateFunctionEditor(v,selectionChanged=false){
 }
 function renderRoster(){
  if(state&&state.dcc&&Array.isArray(state.dcc.locos))lastRoster=state.dcc.locos;
- const d=state?.dcc,motorActive=!!(state?.uno&&(state.uno.enableA||state.uno.enableB)),trackActive=!!state?.uno?.trackActive,ready=!!d?.ready&&(!motorActive||trackActive),locked=uploading||changingWifi||stackBusy||rosterBusy||(motorActive&&!trackActive)||!!d?.finder?.active||finderBusy;
+ const d=state?.dcc,motorActive=!!(state?.uno&&(state.uno.enableA||state.uno.enableB)),trackActive=!!state?.uno?.trackActive,ready=!!d?.ready&&(!motorActive||trackActive),locked=controlsBusy()||(motorActive&&!trackActive)||!!d?.finder?.active;
  $('dcc-info').textContent=d?.running?'DCC signal · '+d.packets+' packets · '+d.timingFaults+' timing faults':'Waiting for the Uno DCC generator.';
  $('add-loco').disabled=!state||locked||motorActive||lastRoster.length>=8||state.storageReady===false;$('empty-roster').hidden=lastRoster.length!==0;
  const ids=new Set(lastRoster.map(l=>l.id));for(const [id,v] of locoCards)if(!ids.has(id)){v.card.remove();locoCards.delete(id)}
@@ -380,25 +401,32 @@ function renderRoster(){
   v.favorites.hidden=quick.length===0;v.summary.textContent='Explore functions · '+favorites.length+' / 8 pinned';
   v.bytes.textContent=(loco.bytes||[]).join(' ')+' · requested F0 '+(loco.f0?'ON':'OFF');updateFunctionEditor(v);
  }
+ renderLocoEditorGuard();
 }
 async function rosterCommand(path,data){
- if(uploading||changingWifi||stackBusy||rosterBusy||!state)return false;
- ++rosterRevision;rosterBusy=true;lock(true);message('roster-message','Sending…');
- try{const response=await fetch(path,{method:'POST',body:new URLSearchParams(data)}),result=await response.json();if(!response.ok)throw Error(result.error||'Could not update loco');state.dcc=result;message('roster-message',path==='/dcc/f0'?'Headlights acknowledged.':path==='/dcc/function'?'Function acknowledged.':path==='/locos/favorite'?'Favorite saved.':path==='/locos/favorite/remove'?'Favorite removed.':path==='/dcc/direction'?'Direction acknowledged · speed zero.':'Locomotive settings saved.');return true}
- catch(error){message('roster-message',error.message,true);message('editor-message',error.message,true);return false}
- finally{rosterBusy=false;lock(false);await refreshStatus()}
+ if(controlsBusy()||!state)return false;
+ const revision=invalidateStatus();rosterBusy=true;lock();message('roster-message','Sending…');
+ try{const result=await requestJson(path,{method:'POST',body:new URLSearchParams(data)});if(revision!==rosterRevision||!state)return false;state.dcc=result;message('roster-message',path==='/dcc/f0'?'Headlights acknowledged.':path==='/dcc/function'?'Function acknowledged.':path==='/locos/favorite'?'Favorite saved.':path==='/locos/favorite/remove'?'Favorite removed.':path==='/dcc/direction'?'Direction acknowledged · speed zero.':'Locomotive settings saved.');return true}
+ catch(error){if(revision===rosterRevision){message('roster-message',error.message,true);message('editor-message',error.message,true)}return false}
+ finally{rosterBusy=false;lock();refreshStatus()}
+}
+function renderLocoEditorGuard(){
+ if(!$('loco-dialog').open)return;
+ const reason=!state||!state.uno?.online?'Controller unavailable. Reconnect before saving.':state.storageReady===false?'Storage unavailable. Your draft has not been saved.':state.uno.enableA||state.uno.enableB?'Turn track power off before editing the locomotive.':state.dcc?.finder?.active||finderBusy?'Finish or cancel the address search before saving.':controlsBusy()?'Waiting for the current request…':'';
+ $('save-loco').disabled=$('remove-loco').disabled=!!reason;
+ $('editor-guard').hidden=!reason;message('editor-guard',reason);
 }
 function openLoco(loco=null){
- if(!state||uploading||changingWifi||stackBusy||rosterBusy)return;
+ if(!state||controlsBusy())return;
  $('loco-id').value=loco?loco.id:'';$('loco-name').value=loco?loco.name:'';
  let address=3;while(lastRoster.some(l=>l.address===address)&&address<127)address++;
- $('loco-address').value=loco?loco.address:address;$('loco-type').value=loco?loco.type:'electric';$('editor-title').textContent=loco?'Edit locomotive':'Add locomotive';$('remove-loco').hidden=!loco;message('editor-message','');art($('loco-preview'),$('loco-type').value);$('loco-dialog').showModal();$('loco-name').focus();
+ $('loco-address').value=loco?loco.address:address;$('loco-type').value=loco?loco.type:'electric';$('editor-title').textContent=loco?'Edit locomotive':'Add locomotive';$('remove-loco').hidden=!loco;message('editor-message','');art($('loco-preview'),$('loco-type').value);$('loco-dialog').showModal();renderLocoEditorGuard();$('loco-name').focus();
 }
 $('add-loco').onclick=()=>openLoco();$('loco-type').onchange=()=>art($('loco-preview'),$('loco-type').value);
 $('cancel-loco').onclick=()=>{if(!rosterBusy)$('loco-dialog').close()};
 $('loco-dialog').addEventListener('cancel',event=>{if(rosterBusy)event.preventDefault()});
 $('loco-form').onsubmit=async event=>{
- event.preventDefault();const address=Number($('loco-address').value),id=$('loco-id').value,name=$('loco-name').value.trim();
+ event.preventDefault();renderLocoEditorGuard();if($('save-loco').disabled)return;const address=Number($('loco-address').value),id=$('loco-id').value,name=$('loco-name').value.trim();
  if(!Number.isInteger(address)||address<1||address>127||new TextEncoder().encode(name).length>48){message('editor-message','Use address 1–127 and a name of at most 48 UTF-8 bytes.',true);return}
  if(lastRoster.some(l=>l.address===address&&String(l.id)!==id)){message('editor-message','That address is already in the roster.',true);return}
  if(await rosterCommand('/locos/save',{id,address,name,type:$('loco-type').value}))$('loco-dialog').close();
@@ -409,13 +437,13 @@ let finderSeenAt=Date.now(),finderBusy=false;
 function renderFinder(){
  const f=state?.dcc?.finder||{stage:'idle',active:false},online=!!state?.uno?.online;
  if(f.active)$('finder-panel').hidden=false;
- $('find-address').disabled=!state?.uno?.trackSupported||uploading||changingWifi||stackBusy||rosterBusy;
+ $('find-address').disabled=!state?.uno?.trackSupported||controlsBusy();
  $('finder-range').hidden=f.stage!=='idle';$('finder-current').hidden=f.stage==='idle';
  const question=['verifyOn','verifyOff','split','confirmOn','confirmOff'].includes(f.stage);
  $('finder-answers').hidden=!question;
  const remaining=Math.max(0,(f.waitMs||0)-(Date.now()-finderSeenAt));
- for(const b of $('finder-answers').querySelectorAll('button'))b.disabled=!online||finderBusy||remaining>0||!state?.uno?.trackActive;
- const rangeBusy=finderBusy||f.active||uploading||changingWifi||stackBusy||rosterBusy;
+ for(const b of $('finder-answers').querySelectorAll('button'))b.disabled=!online||controlsBusy()||remaining>0||!state?.uno?.trackActive;
+ const rangeBusy=controlsBusy()||f.active;
  for(const input of $('finder-range').querySelectorAll('input'))input.disabled=rangeBusy;
  $('finder-range').querySelector('button').disabled=rangeBusy||!online||!state?.uno?.trackActive||!trackLease;
  $('finder-range-hint').textContent=!online?'Choose a range now; connect the controller and turn track power on to start.':!state?.uno?.trackActive||!trackLease?'Turn track power on from this page to start the search.':'Ready to search this range. Keep one decoder on the test track.';
@@ -423,14 +451,14 @@ function renderFinder(){
  $('finder-question').textContent=titles[f.stage]||'Find an address';
  $('finder-detail').textContent=f.stage==='split'?'Candidates '+f.low+'–'+f.high+'. Lights ON for '+f.low+'–'+f.middle+'; OFF for the other addresses.':f.stage==='found'?'The on/off confirmation passed. You can add or edit this locomotive after switching power off.':f.stage==='failed'?'Check the range, F0 headlights and track contact, then try again.':f.stage==='cleanup'?'Please wait while the searched range is cleared and the saved roster is restored.':'Watch the locomotive’s headlights. Speed remains zero.';
  $('finder-wait').textContent=question?(remaining?'Let the lights settle · '+Math.ceil(remaining/1000)+' s':'Answer what you see on the locomotive.') : '';
- $('finder-cancel').hidden=!f.active;$('finder-cancel').disabled=finderBusy||!online||f.stage==='cleanup';
- $('finder-close').hidden=f.active;$('finder-again').hidden=!['found','failed'].includes(f.stage);
- $('finder-add').hidden=f.stage!=='found';$('finder-add').disabled=finderBusy||state?.uno?.enableA!==false;
+ $('finder-cancel').hidden=!f.active;$('finder-cancel').disabled=controlsBusy()||!online||f.stage==='cleanup';
+ $('finder-close').hidden=f.active;$('finder-again').hidden=!['found','failed'].includes(f.stage);$('finder-again').disabled=controlsBusy()||!online;
+ $('finder-add').hidden=f.stage!=='found';$('finder-add').disabled=controlsBusy()||state?.uno?.enableA!==false;
 }
 async function finderCommand(path,data){
- if(finderBusy)return;finderBusy=true;++rosterRevision;renderFinder();
- try{const response=await fetch(path,{method:'POST',body:new URLSearchParams(data)}),result=await response.json();if(!response.ok)throw Error(result.error||'Search command failed.');state.dcc=result;finderSeenAt=Date.now();message('finder-message','');}
- catch(error){message('finder-message',error.message,true)}finally{finderBusy=false;renderFinder();await refreshStatus()}
+ if(controlsBusy()||!state)return;const revision=invalidateStatus();finderBusy=true;lock();
+ try{const result=await requestJson(path,{method:'POST',body:new URLSearchParams(data)});if(revision!==rosterRevision||!state)return;state.dcc=result;finderSeenAt=Date.now();message('finder-message','');}
+ catch(error){if(revision===rosterRevision)message('finder-message',error.message,true)}finally{finderBusy=false;lock();refreshStatus()}
 }
 $('find-address').onclick=()=>{$('finder-panel').hidden=!$('finder-panel').hidden;renderFinder()};
 $('finder-range').onsubmit=event=>{event.preventDefault();const first=Number($('finder-first').value),last=Number($('finder-last').value);if(!Number.isInteger(first)||!Number.isInteger(last)||first<1||last>127||first>last){message('finder-message','Use an ordered range from 1 to 127.',true);return}finderCommand('/finder/start',{first,last})};
