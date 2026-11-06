@@ -1,5 +1,12 @@
 # Changelog
 
+## Human-readable controller status 0.6.3 · 2026-11-06
+
+- Describe track power, DCC operation and the second output in plain language.
+- Keep pin levels and uncalibrated sensor counts in collapsed Technical readings.
+- Distinguish normal track operation from timed bench tests; remove the misleading
+  automatic-stop countdown during normal operation.
+
 ## Web UI reliability review 0.6.2 · 2026-11-06
 
 - Bound ordinary command requests and recover controls after a lost response.

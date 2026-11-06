@@ -53,7 +53,7 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
   current.uno.bench={supported:true,active:false,state:0,remainingMs:0};await page.evaluate(()=>refreshStatus());
   await page.locator('#bridge-positive').click();await page.waitForFunction(()=>document.getElementById('uno-message').textContent.includes('DC test started'));
   assert.equal(await page.locator('#bridge-negative').isDisabled(),true);assert.equal(await page.locator('#blink-uno').isDisabled(),true);
-  assert((await page.locator('#uno-outputs').innerText()).includes('D3 HIGH'));
+  assert((await page.locator('#uno-outputs').innerText()).includes('DC test running'));assert((await page.locator('#uno-pins').textContent()).includes('D3 HIGH'));
   await page.locator('#bridge-stop').click();await page.waitForFunction(()=>document.getElementById('bench-status').textContent.includes('Test stopped'));
   assert.equal(current.uno.enableA,false);await page.locator('#bridge-negative').click();await page.waitForFunction(()=>document.getElementById('uno-message').textContent.includes('DC test started'));
   current.uno.enableA=false;current.uno.bench={supported:true,active:false,state:2,remainingMs:0};await page.evaluate(()=>refreshStatus());
@@ -67,6 +67,10 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
   await page.waitForFunction(()=>document.getElementById('uno-message').textContent.includes('DCC scope test started'));
   assert((await page.locator('#bench-status').innerText()).includes('DCC burst active'));assert(await page.locator('#bridge-dcc').isDisabled());assert.equal(dccCalls,1);
   await page.locator('#bridge-stop').click();await page.waitForFunction(()=>document.getElementById('bench-status').textContent.includes('Test stopped'));assert.equal(current.dcc.trackPower,false);assert.equal(current.uno.enableA,false);
+  current.uno.trackActive=true;current.uno.enableA=true;current.uno.adcA=13;current.uno.bench={supported:true,active:true,state:1,mode:3,remainingMs:2000};await page.evaluate(()=>refreshStatus());
+  assert.equal(await page.locator('#uno-outputs').innerText(),'Track power: on · DCC active · Second output: off');assert.equal(await page.locator('#uno-current').innerText(),'Current measurement: not calibrated');
+  assert.equal(await page.locator('.technical-readings').getAttribute('open'),null);assert((await page.locator('#uno-adc').textContent()).includes('13 / 1'));assert(!(await page.locator('#bench-status').textContent()).includes('auto-off'));
+  current.uno.trackActive=false;current.uno.enableA=false;current.uno.bench.active=false;current.uno.bench.state=3;await page.evaluate(()=>refreshStatus());assert.equal(await page.locator('#uno-outputs').innerText(),'Track power: off · Second output: off');
   await page.locator('#ssid-input').fill('A draft network');await page.evaluate(()=>refreshStatus());
   assert.equal(await page.locator('#ssid-input').inputValue(),'A draft network');
   await page.locator('#password').fill('prototype-password');await page.locator('#save-wifi').click();
