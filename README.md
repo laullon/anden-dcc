@@ -16,10 +16,10 @@ a **Deek-Robot L298P motor shield** powers the rails, and a **DOIT ESP13 shield*
 hosts Wi-Fi, the panel and firmware updates. These three stacked boards are the
 supported build.
 
-**Current firmware: ESP13 0.6.4 / Uno 0.6.0.** Speed stays at zero. This release
+**Current firmware: ESP13 0.6.5 / Uno 0.6.1.** Speed stays at zero. This release
 controls functions and direction; it does not offer a throttle or CV programming.
 [Español](README.es.md) · [Wiring and BOM](docs/hardware/README.md) ·
-[API](docs/API.md) · [Validation](docs/VALIDATION.md) · [UI review](docs/UI-REVIEW.md) · [Code structure](docs/CODE-STRUCTURE.md)
+[API](docs/API.md) · [Validation](docs/VALIDATION.md) · [UI review](docs/UI-REVIEW.md) · [Code structure](docs/CODE-STRUCTURE.md) · [Full review](docs/CODE-REVIEW.md)
 
 ## The panel
 
@@ -103,7 +103,7 @@ Turn track power off before an ESP update. Use Setup → firmware, or:
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.4
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.5
 ```
 
 OTA updates **only the ESP**. Uno updates still use USB with both ESP switches OFF

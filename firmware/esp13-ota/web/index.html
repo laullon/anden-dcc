@@ -286,7 +286,7 @@ function refreshStatus(){
 async function refreshStatusOnce(){
  const revision=rosterRevision;
  try{
-  const current=await readStatus();if(uploading||revision!==rosterRevision)return;if(current.appId!=='ANDEN_ESP13_OTA_V1')throw Error('This is not the ESP13 OTA firmware');state=current;finderSeenAt=Date.now();
+  const current=await readStatus();if(uploading||revision!==rosterRevision)return;if(current.appId!=='ANDEN_ESP13_OTA_V1')throw Error('This is not the ESP13 OTA firmware');state=current;finderSeenAt=performance.now();
   $('version').textContent='v'+state.version;$('network-state').textContent=state.connected?'Connected':state.configured?'Connecting…':'Not configured';
   $('network-dot').classList.toggle('connected',state.connected);$('ssid').textContent=state.ssid||'Choose your network in Setup';
   $('network-hint').textContent=state.connected?(state.mdnsReady?'Also available as anden-esp13.local on your network.':'Use the router IP above to open this board.'):state.configured?'If this persists, check the network name, password and 2.4 GHz availability.':'The open setup network is ready to use.';
@@ -307,6 +307,22 @@ async function wifiRequest(path,body){
 }
 $('wifi-form').addEventListener('submit',event=>{event.preventDefault();wifiRequest('/setup/wifi',new FormData(event.target))});
 $('forget-wifi').addEventListener('click',()=>wifiRequest('/setup/wifi/forget',null));
+// ESP8266 Arduino core 3.1.2 embeds image length/CRC after the 4 KiB loader.
+const firmwareCrcTable=Uint32Array.from({length:256},(_,byte)=>{
+ let crc=byte<<24;for(let bit=0;bit<8;bit++)crc=crc&0x80000000?(crc<<1)^0x04c11db7:crc<<1;return crc>>>0;
+});
+function firmwareCrc(bytes){
+ let crc=0xffffffff;
+ for(let i=0;i<bytes.length;i++){const byte=i>=4112&&i<4120?0:bytes[i];crc=((crc<<8)^firmwareCrcTable[((crc>>>24)^byte)&255])>>>0;}
+ return crc;
+}
+function validateFirmwareImage(bytes){
+ if(bytes.length<4120||bytes[0]!==0xe9||bytes[4096]!==0xe9||(bytes[3]>>4)!==2||(bytes[4099]>>4)!==2)throw Error('Choose a complete ESP8266 firmware image with the 1 MB flash profile.');
+ const metadata=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+ if(metadata.getUint32(4112,true)!==bytes.length)throw Error('Firmware image is truncated or contains extra data.');
+ if(metadata.getUint32(4116,true)!==firmwareCrc(bytes))throw Error('Firmware integrity check failed. Rebuild or download the image again.');
+ if(!new TextDecoder('latin1').decode(bytes).includes('ANDEN_ESP13_OTA_V1'))throw Error('This image is not the anden ESP13 OTA firmware.');
+}
 function postFirmware(file){return new Promise((resolve,reject)=>{
  const request=new XMLHttpRequest();request.open('POST','/update');request.timeout=120000;
  request.upload.onprogress=event=>{if(event.lengthComputable)$('progress').value=Math.round(event.loaded/event.total*100)};
@@ -331,8 +347,7 @@ $('update-form').addEventListener('submit',async event=>{
   if(!file.name.toLowerCase().endsWith('.bin')||file.size<4)throw Error('Choose the ESP13 .bin file.');
   if(file.size>state.otaMaxBytes)throw Error('This image exceeds the available update space.');
   const bytes=new Uint8Array(await file.arrayBuffer());
-  if(bytes[0]!==0xe9||(bytes[3]>>4)!==2)throw Error('This image does not use the ESP8266 1 MB flash profile.');
-  if(!new TextDecoder('latin1').decode(bytes).includes('ANDEN_ESP13_OTA_V1'))throw Error('This image is not the anden ESP13 OTA firmware.');
+  validateFirmwareImage(bytes);
   const oldBoot=state.bootId;$('progress').hidden=false;$('progress').value=0;message('update-message','Uploading. Keep the ESP13 powered…');
   await postFirmware(file);message('update-message','Upload accepted. Waiting for the ESP13 to restart…');
   const updated=await waitForRestart(oldBoot);message('update-message','Back online — firmware v'+updated.version+'.');$('update-form').reset();
@@ -438,7 +453,7 @@ $('loco-form').onsubmit=async event=>{
 };
 $('remove-loco').onclick=async()=>{if(confirm('Remove this locomotive?')&&await rosterCommand('/locos/remove',{id:$('loco-id').value}))$('loco-dialog').close()};
 
-let finderSeenAt=Date.now(),finderBusy=false;
+let finderSeenAt=performance.now(),finderBusy=false;
 function renderFinder(){
  const f=state?.dcc?.finder||{stage:'idle',active:false},online=!!state?.uno?.online;
  if(f.active)$('finder-panel').hidden=false;
@@ -446,7 +461,7 @@ function renderFinder(){
  $('finder-range').hidden=f.stage!=='idle';$('finder-current').hidden=f.stage==='idle';
  const question=['verifyOn','verifyOff','split','confirmOn','confirmOff'].includes(f.stage);
  $('finder-answers').hidden=!question;
- const remaining=Math.max(0,(f.waitMs||0)-(Date.now()-finderSeenAt));
+ const remaining=Math.max(0,(f.waitMs||0)-(performance.now()-finderSeenAt));
  for(const b of $('finder-answers').querySelectorAll('button'))b.disabled=!online||controlsBusy()||remaining>0||!state?.uno?.trackActive;
  const rangeBusy=controlsBusy()||f.active;
  for(const input of $('finder-range').querySelectorAll('input'))input.disabled=rangeBusy;
@@ -462,7 +477,7 @@ function renderFinder(){
 }
 async function finderCommand(path,data){
  if(controlsBusy()||!state)return;const revision=invalidateStatus();finderBusy=true;lock();
- try{const result=await requestJson(path,{method:'POST',body:new URLSearchParams(data)});if(revision!==rosterRevision||!state)return;state.dcc=result;finderSeenAt=Date.now();message('finder-message','');}
+ try{const result=await requestJson(path,{method:'POST',body:new URLSearchParams(data)});if(revision!==rosterRevision||!state)return;state.dcc=result;finderSeenAt=performance.now();message('finder-message','');}
  catch(error){if(revision===rosterRevision)message('finder-message',error.message,true)}finally{finderBusy=false;lock();refreshStatus()}
 }
 $('find-address').onclick=()=>{$('finder-panel').hidden=!$('finder-panel').hidden;renderFinder()};

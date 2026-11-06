@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import re
+import struct
 import time
 import urllib.error
 import urllib.request
@@ -11,15 +12,49 @@ import uuid
 
 APP_ID = b'ANDEN_ESP13_OTA_V1'
 IMAGE_LIMIT = 448 * 1024
+# Arduino ESP8266 core 3.1.2 elf2bin.py embeds these two little-endian words
+# immediately after the sketch header and first section header.
+IMAGE_SIZE_OFFSET = 4096 + 16
+IMAGE_CRC_OFFSET = IMAGE_SIZE_OFFSET + 4
+
+
+def _crc_table():
+    table = []
+    for value in range(256):
+        crc = value << 24
+        for _ in range(8):
+            crc = ((crc << 1) ^ (0x04C11DB7 if crc & 0x80000000 else 0)) & 0xFFFFFFFF
+        table.append(crc)
+    return table
+
+
+_CRC_TABLE = _crc_table()
+
+
+def image_crc(data):
+    """CRC-32/MPEG-2 used by elf2bin, with its size/CRC fields zeroed."""
+    crc = 0xFFFFFFFF
+    for offset, value in enumerate(data):
+        if IMAGE_SIZE_OFFSET <= offset < IMAGE_CRC_OFFSET + 4:
+            value = 0
+        crc = ((crc << 8) ^ _CRC_TABLE[((crc >> 24) ^ value) & 0xFF]) & 0xFFFFFFFF
+    return crc
 
 
 def validate_image(data, capacity=IMAGE_LIMIT):
-    if len(data) < 4 or data[0] != 0xE9 or data[3] >> 4 != 2:
-        raise ValueError('Expected an ESP8266 .bin with the 1 MB flash profile')
+    if (len(data) < IMAGE_CRC_OFFSET + 4 or
+            data[0] != 0xE9 or data[3] >> 4 != 2 or
+            data[4096] != 0xE9 or data[4099] >> 4 != 2):
+        raise ValueError('Expected an Arduino ESP8266 .bin with the 1 MB flash profile')
     if APP_ID not in data:
         raise ValueError('Image does not identify as anden ESP13 OTA firmware')
     if len(data) > min(IMAGE_LIMIT, capacity):
         raise ValueError('Image exceeds the ESP13 OTA image limit')
+    stored_size, stored_crc = struct.unpack_from('<II', data, IMAGE_SIZE_OFFSET)
+    if stored_size != len(data):
+        raise ValueError('Firmware image is truncated or has trailing data')
+    if stored_crc != image_crc(data):
+        raise ValueError('Firmware image checksum is invalid')
 
 
 def status(base):

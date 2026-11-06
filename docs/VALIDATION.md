@@ -16,6 +16,20 @@ shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
   mouse targets during polling, function favorites/drafts, direction, finder,
   themes, setup/OTA, offline behavior and 320 px layouts.
 
+## Full review · ESP13 0.6.5 / Uno 0.6.1, 6 November 2026
+
+Both firmware targets compile and all eight browser suites pass. New regressions
+exercise the actual Uno command parser, scheduler/ISR, streaming image validator,
+HTTP update lifecycle and filesystem initialization policy. Buffer-bound and
+filesystem tests also run with AddressSanitizer/UndefinedBehaviorSanitizer.
+Tests reproduce the original buffer overflow, signature collision, command
+readiness mutation, finder clock jumps and corrupt-image upload acceptance.
+
+Uno: 12,588 bytes flash / 1,018 bytes static RAM. ESP: 411,360-byte image /
+34,204 bytes static RAM. The validated image remains below the 448 KiB OTA limit.
+The review does not install firmware or perform new loaded or timing measurements.
+See [confirmed findings and regression mapping](CODE-REVIEW.md).
+
 ## Uniform function controls 0.6.4, 6 November 2026
 
 All eight browser suites pass with a permanent single F0 toggle and the same

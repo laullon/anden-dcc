@@ -3,9 +3,14 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$root"
 cli=${ARDUINO_CLI:-arduino-cli}
+python3 tools/check_core.py --cli "$cli" esp8266:esp8266@3.1.2
 python3 firmware/esp13-ota/embed.py
 python3 tests/check_cpp_interfaces.py
 python3 tests/check_esp13.py
+python3 tests/check_embed.py
+python3 tests/check_firmware_image.py
+python3 tests/check_firmware_update.py
+python3 tests/check_roster_storage.py
 python3 tests/check_stack_link.py
 python3 tests/check_uno_dcc.py
 python3 tests/check_functions.py

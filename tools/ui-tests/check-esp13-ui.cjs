@@ -2,6 +2,7 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'../..');
+const firmwareImage=require('./firmware-fixture.cjs');
 const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,{recursive:true});
 (async()=>{
  const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),headless:true});
@@ -81,15 +82,23 @@ const out=process.env.UI_ARTIFACTS||path.join(root,'build/ui');fs.mkdirSync(out,
   assert.equal(wifiCalls[1].pathname,'/setup/wifi/forget');
   async function upload(buffer,name='esp13.bin'){
    await page.locator('#firmware').setInputFiles({name,mimeType:'application/octet-stream',buffer});
-   await page.locator('#upload-button').click();
+   await page.locator('#upload-button').click();await page.waitForFunction(()=>!uploading);
   }
   await upload(Buffer.from('not ESP firmware'));
   await page.waitForFunction(()=>document.getElementById('update-message').classList.contains('error'));
   assert.equal(uploadCount,0);
-  const valid=Buffer.concat([Buffer.from([0xe9,1,3,0x20]),Buffer.from('ANDEN_ESP13_OTA_V1')]);
+  const valid=firmwareImage();
   const wrongProfile=Buffer.from(valid);wrongProfile[3]=0x40;await upload(wrongProfile);
   assert.equal(uploadCount,0);
   await upload(Buffer.concat([valid,Buffer.alloc(448*1024)]));assert.equal(uploadCount,0);
+  const badSecondHeader=Buffer.from(valid);badSecondHeader[4096]=0;
+  const damaged=Buffer.from(valid);damaged[4130]^=1;
+  const wrongSize=Buffer.from(valid);wrongSize.writeUInt32LE(valid.length+16,4112);
+  const wrongCrc=Buffer.from(valid);wrongCrc[4116]^=1;
+  for(const corrupt of [valid.subarray(0,valid.length-1),Buffer.concat([valid,Buffer.from([0])]),badSecondHeader,damaged,wrongSize,wrongCrc]){
+   await upload(corrupt);assert.equal(uploadCount,0,'Corrupted or incomplete firmware must be rejected before uploading');
+  }
+  assert.equal(await page.evaluate(()=>firmwareCrc(new TextEncoder().encode('123456789'))),0x0376e6e7);
   await upload(valid);await page.waitForFunction(()=>document.getElementById('update-message').textContent.includes('test rejection'));
   assert.equal(uploadCount,1);assert.equal(await page.locator('#upload-button').isDisabled(),false);
   acceptUpload=true;await upload(valid);

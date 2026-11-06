@@ -28,7 +28,7 @@ POST fields are URL-encoded unless noted. Commands wait for checked Uno replies.
 | POST | `/api/uno/bench-stop` | Stop bench/track output |
 | POST | `/setup/wifi` | `ssid`, `password`; accepted changes apply asynchronously |
 | POST | `/setup/wifi/forget` | Forget router credentials; keep setup network |
-| POST | `/update` | Multipart firmware `.bin`; ESP only |
+| POST | `/update` | Exactly one multipart `firmware` `.bin`; checked size/profile/identity/CRC; ESP only |
 
 ## Status and persistence
 
@@ -57,7 +57,7 @@ A stale lease cannot stop a newer session or restart an expired one. Power alway
 needs explicit activation. Manual off without a lease is a global Stop.
 
 Metadata address edits require output OFF. Finder activity locks function, roster
-and favorite edits; Wi-Fi/OTA require track power off and no active search. Search
+and favorite edits; Wi-Fi/OTA require all track/bench output off and no active search. Search
 uses headlights plus repeated zero-speed packets; it does not program CVs.
 
 Typical errors: 400 invalid input/full favorite list, 404 missing loco, 409 active

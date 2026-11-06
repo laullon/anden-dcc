@@ -1,6 +1,6 @@
 # ESP13 web controller
 
-**ESP13 0.6.4 / Uno 0.6.0.** This application hosts the panel, Wi-Fi setup,
+**ESP13 0.6.5 / Uno 0.6.1.** This application hosts the panel, Wi-Fi setup,
 persistent roster and ESP OTA updates. The Uno owns DCC and output timing.
 See the [main guide](../../README.md), [wiring](../../docs/hardware/README.md),
 [HTTP API](../../docs/API.md) and [stationary test](../uno-stack-test/FIRST-LOCO-TEST.md).
@@ -18,7 +18,8 @@ tools/build-esp13.sh
 The build embeds `web/index.html` and the original SVGs from `../../web/locos/`
 into `SetupPage.cpp` with declarations in `SetupPage.h`, runs host checks,
 compiles with the local AndenStackLink library, and validates `build/esp13-ota/esp13-ota.ino.bin`. The manifest records
-version, board profile, size and SHA-256. Maximum OTA image: **448 KiB**.
+version, board profile, size and SHA-256. Builds require the tested installed core
+version, so the manifest matches the compiler platform. Maximum OTA image: **448 KiB**.
 
 ## First serial installation
 
@@ -51,14 +52,17 @@ saves your 2.4 GHz router details. Return to your network and browse
 There is deliberately no app login or AP password. The SDK stores router
 credentials outside the sketch; do not commit them or full flash backups.
 
-Turn track power off and finish any address search before an update. The browser
-checks image identity and size, shows upload progress and verifies the reboot.
-The command-line helper checks the app identity, flash layout, expected version
-and a new boot ID:
+Stop track/bench output and finish any address search before an update. The
+browser, helper and ESP upload endpoint validate both image headers, embedded
+length, application identity and the ESP8266 core checksum. The endpoint accepts
+exactly one firmware file, stages it without activating it, and commits only
+after the entire request is valid. Filesystem uploads are unsupported. The
+browser shows progress; the browser and helper verify a new boot ID and the
+expected version:
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.4
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.5
 ```
 
 OTA replaces the **ESP application only**; it cannot update the Uno. Keep OTA
@@ -106,7 +110,9 @@ Storage accepts old `anden-roster-2` files and upgrades on the next save to
 `anden-roster-3`: `L\tid\taddress\ttype\tname` records followed by
 `F\tid\tfunction\tname` records. The temporary-file/rename save contains both
 roster and pins. Invalid existing files disable saves rather than silently replacing
-them with defaults. Filesystem erase/layout changes can still remove this data.
+them with defaults. A failed filesystem mount also preserves nonblank or unreadable
+flash; only a verified entirely erased region is initialized automatically.
+Filesystem erase/layout changes can still remove this data.
 
 New endpoints (URL-encoded POST; success returns the `dcc` object):
 

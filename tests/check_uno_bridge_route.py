@@ -56,6 +56,7 @@ uint32_t millis();
 #include "Arduino.h"
 uint32_t clockTicks=0;
 std::vector<Edge> directionEdges,enableEdges;
+std::vector<uint16_t> dccHalves;
 Port PORTB,PORTD;
 uint8_t PINB=0,TCCR1A=0,TCCR1B=0,TIMSK1=0,TIFR1=0;
 uint16_t OCR1B=0;Counter TCNT1;
@@ -71,14 +72,19 @@ void step(unsigned delay=0){
  clockTicks=hardwareEdge+delay;PINB^=_BV(PB2);
  bool wasEnabled=PORTD.value&_BV(PD3);
  TIMER1_COMPB_vect();
- if(!wasEnabled && (PORTD.value&_BV(PD3))){boundaryEnableSeen=true;}
+ if(!wasEnabled && (PORTD.value&_BV(PD3))){boundaryEnableSeen=true;dccHalves.clear();}
+ dccHalves.push_back(uint16_t(OCR1B-next));
  if(UnoDcc::bridgeIsActive() && !UnoDcc::bridgeStartPending())assert(bool(PORTB.value&_BV(PB4))==bool(PINB&_BV(PB2)));
 }
 bool pumpTimer=false;
 uint32_t millis(){if(pumpTimer)step();return clockTicks/2000;}
 int main(){
  PORTB.watched=_BV(PB4);PORTB.direction=true;PORTD.watched=_BV(PD3);
- UnoDcc::begin();digitalWrite(12,HIGH);assert(UnoDcc::armBridge(false));
+ UnoDcc::begin();
+ // Invalid counts must be rejected before signature buffers/addresses are read.
+ uint8_t invalidAddresses[]={1,2,3,4,5,6,7,8,9};
+ assert(!UnoDcc::set(9,invalidAddresses,0));assert(!UnoDcc::set(1,nullptr,0));
+ digitalWrite(12,HIGH);assert(UnoDcc::armBridge(false));
  // DC mode is not touched by the waveform ISR.
  for(unsigned i=0;i<64;++i){step();assert(PORTB.value&_BV(PB4));}
  UnoDcc::disarmBridge();assert(!(PORTD.value&_BV(PD3))&&!(PORTB.value&_BV(PB4)));
@@ -114,6 +120,20 @@ int main(){
  assert(UnoDcc::isRunning()&&UnoDcc::status().faults==0);
  for(std::size_t i=1;i<directionEdges.size();++i){auto width=directionEdges[i].time-directionEdges[i-1].time;assert(width==116||width==200);}
  UnoDcc::disarmBridge();
+ // A CRC collision across schedule modes must not skip a real legacy update.
+ const uint8_t oneAddress[]={3};const uint32_t collidingFunctions[]={122242};
+ assert(UnoDccStream::signature(1,oneAddress,0)==UnoDccStream::functionSignature(1,oneAddress,1,collidingFunctions));
+ pumpTimer=true;assert(UnoDcc::functions(1,oneAddress,1,collidingFunctions));
+ assert(UnoDcc::set(1,oneAddress,0));pumpTimer=false;
+ assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
+ while(dccHalves.size()<88*3)step();
+ for(unsigned packet=0;packet<3;++packet){
+   auto bit=[&](unsigned p){unsigned a=dccHalves[packet*88+p*2],b=dccHalves[packet*88+p*2+1];assert(a==b);return a==UnoDccStream::ONE;};
+   for(unsigned i=0;i<16;++i)assert(bit(i));assert(!bit(16)&&!bit(25)&&!bit(34)&&bit(43));
+   uint8_t bytes[3]={};for(unsigned byte=0;byte<3;++byte)for(unsigned p=0;p<8;++p)bytes[byte]=(bytes[byte]<<1)|bit(17+byte*9+p);
+   assert(bytes[0]==3&&bytes[1]==0x80&&bytes[2]==0x83);
+ }
+ UnoDcc::disarmBridge();
  // No main-loop servicing: the actual ISR's backup must still shut off A.
  enableEdges.clear();assert(UnoDcc::armBridge(true));
  for(unsigned i=0;i<BridgeGuard::HALVES+88 && !UnoDcc::guardExpired();++i)step();
@@ -129,5 +149,5 @@ int main(){
 }
 ''')
     exe=tmp/'test'
-    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(tmp),'-I',str(root/'firmware/uno-stack-test'),'-I',str(root/'libraries/AndenStackLink/src'),str(tmp/'test.cpp'),str(root/'firmware/uno-stack-test/UnoDcc.cpp'),str(root/'firmware/uno-stack-test/BridgeBench.cpp'),*library_sources(),'-o',str(exe)],check=True)
+    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-fsanitize=address,undefined','-fno-omit-frame-pointer','-I',str(tmp),'-I',str(root/'firmware/uno-stack-test'),'-I',str(root/'libraries/AndenStackLink/src'),str(tmp/'test.cpp'),str(root/'firmware/uno-stack-test/UnoDcc.cpp'),str(root/'firmware/uno-stack-test/BridgeBench.cpp'),*library_sources(),'-o',str(exe)],check=True)
     subprocess.run([str(exe)],check=True)

@@ -13,6 +13,9 @@ on a particular include order or on globals declared by a sketch.
 | `UnoLink.h/.cpp` | Checked UART transactions and cached Uno status |
 | `HttpSupport.h/.cpp` | JSON serialization/replies; server and Uno dependencies are explicit parameters |
 | `BrowserLease`, `StatusLed`, `FavoriteFunctions`, `WifiValidation` | Separately compiled policies and models |
+| `RosterStorage.h/.cpp` | Mount existing storage; initialize only verified erased flash |
+| `FirmwareImage.h/.cpp` | Portable streaming image profile/identity/size/CRC validator |
+| `FirmwareUpdate.h/.cpp` | Firmware-only HTTP staging, multipart lifecycle and deferred commit |
 | `SetupPage.h/.cpp` | Generated asset declaration and its single flash-resident definition |
 
 `RosterControl` receives references to the server and Uno link. It owns its models

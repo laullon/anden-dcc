@@ -1,3 +1,4 @@
+#include "FirmwareUpdate.h"
 #include "HttpSupport.h"
 #include "RosterControl.h"
 #include "SetupPage.h"
@@ -5,7 +6,6 @@
 #include "UnoLink.h"
 #include "WifiValidation.h"
 #include <Arduino.h>
-#include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
@@ -14,7 +14,7 @@ using HttpSupport::jsonString;
 
 // ESP Wi-Fi/web runtime. RosterControl owns the roster and output sessions.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.6.4";
+constexpr char VERSION[] = "0.6.5";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
@@ -26,7 +26,7 @@ void sendStatus();
 UnoLink uno;
 ESP8266WebServer server(80);
 RosterControl rosterControl(server, uno);
-ESP8266HTTPUpdateServer updater(false); // No debug output on the Uno UART.
+FirmwareUpdate updater(server);
 bool mdnsReady = false;
 bool apReady = false;
 bool stationConfigured = false;
@@ -147,6 +147,8 @@ void setup() {
           F("{\"error\":\"Finish the search and turn track power off before setup changes.\"}"));
       return ESP8266WebServer::CLIENT_REQUEST_IS_HANDLED;
     }
+    if (method == "POST" && url == "/update")
+      updater.beginRequest(otaCapacity());
     return ESP8266WebServer::CLIENT_REQUEST_CAN_CONTINUE;
   });
   server.on("/", HTTP_GET, [] {
@@ -273,9 +275,9 @@ void setup() {
         server, 202,
         F("{\"message\":\"Saved Wi-Fi will be forgotten. The setup network stays available.\"}"));
   });
-  // Tested core uploader handles flash staging, image checks, and reboot.
+  // Firmware-only staging validates the complete image before committing it.
   // No authentication, as requested for this local prototype.
-  updater.setup(&server, "/update");
+  updater.registerRoutes();
   server.onNotFound([] { server.send(404, "text/plain", "Not found"); });
   rosterControl.registerRoutes();
   server.begin();

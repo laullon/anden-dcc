@@ -2,7 +2,6 @@
 #include "BridgeBench.h"
 #include <Arduino.h>
 #include <UnoDccStream.h>
-#include <string.h>
 #include <util/atomic.h>
 
 #if !defined(__AVR_ATmega328P__)
@@ -77,13 +76,10 @@ void begin() {
   }
 }
 bool set(uint8_t count, const uint8_t* addresses, uint8_t mask) {
-  if (!running)
+  if (!running || count > UnoDccStream::CAPACITY || (count && !addresses))
     return false;
-  uint16_t sig = UnoDccStream::signature(count, addresses, mask);
-  if (stream.pending == 255 && stream.banks[stream.active].count == count &&
-      stream.banks[stream.active].mask == mask && stream.banks[stream.active].signature == sig &&
-      !memcmp(stream.banks[stream.active].addresses, addresses, count))
-    return true;
+  // A signature confirms transport state; it is not an equality check between
+  // legacy, stationary-control and extended-function schedules.
   if (!stream.prepare(count, addresses, mask))
     return false;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {

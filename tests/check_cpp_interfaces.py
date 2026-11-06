@@ -8,7 +8,7 @@ from native_support import ROOT, library_sources
 
 headers = [p.name for p in (ROOT / 'libraries/AndenStackLink/src').glob('*.h')]
 headers += ['BrowserLease.h', 'FavoriteFunctions.h', 'StatusLed.h', 'WifiValidation.h',
-            'BridgeBench.h', 'UnoDcc.h']
+            'BridgeBench.h', 'UnoDcc.h', 'FirmwareImage.h', 'RosterStorage.h']
 includes = ['-I', str(ROOT / 'libraries/AndenStackLink/src'),
             '-I', str(ROOT / 'firmware/esp13-ota'),
             '-I', str(ROOT / 'firmware/uno-stack-test')]
@@ -51,7 +51,7 @@ int main() {
 ''')
     sources = library_sources() + [str(ROOT / 'firmware/esp13-ota' / (name + '.cpp'))
                                   for name in ['BrowserLease', 'FavoriteFunctions', 'StatusLed',
-                                               'WifiValidation']]
+                                               'WifiValidation', 'FirmwareImage']]
     sources.append(str(ROOT / 'firmware/uno-stack-test/BridgeBench.cpp'))
     executable = folder / 'interfaces'
     subprocess.run([compiler, '-std=c++11', '-Wall', '-Wextra', '-Werror', *includes,

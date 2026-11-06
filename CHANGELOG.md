@@ -1,5 +1,21 @@
 # Changelog
 
+## Full review · ESP13 0.6.5 / Uno 0.6.1 · 2026-11-06
+
+- Validate Uno roster bounds before signature buffers or address pointers are used.
+- Apply legacy roster schedules even when a different mode has a colliding CRC16.
+- Preserve control readiness when a malformed roster command is rejected.
+- Use a monotonic finder settling clock, independent of system clock corrections.
+- Validate image headers, app identity, embedded size and core CRC in the browser,
+  helper and ESP endpoint; reject filesystem/multiple/incomplete upload requests.
+- Commit staged firmware only after the complete HTTP request passes validation.
+- Preserve nonblank/unreadable flash on a failed filesystem mount; only format
+  verified erased storage on first use.
+- Guard Wi-Fi/update changes during timed bench outputs as well as track operation.
+- Verify asset markers and preserve literal SVG text during web embedding.
+- Require the tested installed Arduino core versions before building.
+- Add native parser, sanitizer, image, HTTP upload and generator regression checks.
+
 ## C++ module refactor · 2026-11-06
 
 - Move nontrivial implementations into separately compiled `.cpp` modules.

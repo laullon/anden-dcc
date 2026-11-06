@@ -64,6 +64,20 @@ const source=()=>fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.ht
     assert.deepEqual(f.errors,[]);
    }finally{await f.close()}
   },
+  async finder_clock_changes(){
+   const f=await fixture();try{
+    await f.page.locator('#find-address').click();await f.page.locator('#finder-range button').click();
+    await f.page.waitForFunction(()=>!finderBusy&&!statusRefreshing&&state.dcc.finder.active);
+    const answer=f.page.locator('[data-finder-answer="on"]');assert(await answer.isDisabled());
+    const before=await f.page.locator('#finder-wait').innerText();
+    await f.page.clock.setSystemTime(new Date('2040-01-01T00:00:00Z'));await f.page.evaluate(()=>renderFinder());
+    assert(await answer.isDisabled(),'A forward clock correction must not bypass the decoder settling interval');
+    assert.equal(await f.page.locator('#finder-wait').innerText(),before);
+    await f.page.clock.setSystemTime(new Date('2000-01-01T00:00:00Z'));await f.page.evaluate(()=>renderFinder());
+    assert.equal(await f.page.locator('#finder-wait').innerText(),before,'A backward clock correction must not extend settling by years');
+    assert.deepEqual(f.errors,[]);
+   }finally{await f.close()}
+  },
   async power_poll(){
    const f=await fixture();try{
     await f.page.locator('#track-off').click();await f.page.waitForFunction(()=>!trackTurningOff&&!statusRefreshing&&!state.uno.trackActive);

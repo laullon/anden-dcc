@@ -3,8 +3,10 @@
 #include <AndenStackLink.h>
 #include <Arduino.h>
 #include <DccFunctions.h>
+#include <stdio.h>
+#include <string.h>
 
-constexpr char VERSION[] = "0.6.0";
+constexpr char VERSION[] = "0.6.1";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
 namespace {
 void serviceBridge(bool fresh = false);
@@ -80,7 +82,7 @@ void sendState(uint16_t sequence) {
   snprintf(body, sizeof(body), "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,2",
            sequence, VERSION, unsigned(rawA), unsigned(analogRead(A1)), unsigned(flags),
            unsigned(ledEdges), unsigned(dcc.running), unsigned(dcc.count), unsigned(dcc.signature),
-           unsigned(dcc.mask), dcc.packets, unsigned(dcc.faults),
+           unsigned(dcc.mask), static_cast<unsigned long>(dcc.packets), unsigned(dcc.faults),
            unsigned(bench.remaining(millis())), unsigned(bench.state), unsigned(bench.mode));
   size_t size = AndenLink::encode(wire, sizeof(wire), body);
   if (size)
@@ -190,7 +192,6 @@ void command() {
   if (!strcmp(parts[2], "ROSTER")) {
     if (bench.active())
       return;
-    controlReady = false;
     uint16_t count;
     if (n < 4 || !AndenLink::number(parts[3], count) || count > 8 || n != 4 + count * 2)
       return;
@@ -206,6 +207,7 @@ void command() {
     }
     if (!UnoDcc::set(count, addresses, mask))
       return;
+    controlReady = false;
   } else if (n != 3)
     return;
   else if (!strcmp(parts[2], "LED")) {

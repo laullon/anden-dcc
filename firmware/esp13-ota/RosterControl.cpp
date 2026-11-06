@@ -1,5 +1,6 @@
 #include "RosterControl.h"
 #include "HttpSupport.h"
+#include "RosterStorage.h"
 #include "UnoLink.h"
 #include <DccFunctions.h>
 #include <LittleFS.h>
@@ -33,7 +34,7 @@ const char* RosterControl::stopReason() const {
   return trackStopReason;
 }
 bool RosterControl::setupLocked() const {
-  return finder.active() || uno.trackActive();
+  return finder.active() || uno.benchActive();
 }
 const LocoRoster& RosterControl::configuration() const {
   return roster;
@@ -90,13 +91,7 @@ int RosterControl::rosterNumber(const String& text, int maximum) {
 void RosterControl::loadRoster() {
   roster.save(0, 3, "", "electric");
   roster.save(0, 4, "", "diesel");
-  LittleFSConfig config;
-  config.setAutoFormat(false);
-  LittleFS.setConfig(config);
-  rosterStorage = LittleFS.begin();
-  // v0.1.x never used this reserved filesystem. Initialize it on first use.
-  if (!rosterStorage && LittleFS.format())
-    rosterStorage = LittleFS.begin();
+  rosterStorage = mountRosterStorage();
   if (!rosterStorage || !LittleFS.exists("/locos.cfg"))
     return;
   File file = LittleFS.open("/locos.cfg", "r");

@@ -1,6 +1,6 @@
 # Uno DCC controller
 
-**Uno 0.6.0**, paired with ESP13 0.6.4. Supported MCU: **ATmega328P, 16 MHz,
+**Uno 0.6.1**, paired with ESP13 0.6.5. Supported MCU: **ATmega328P, 16 MHz,
 5 V Arduino Uno R3**. It generates DCC, routes bridge A, checks the UART protocol
 and owns the output timeouts. Speed stays zero. Bridge B remains disabled.
 

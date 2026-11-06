@@ -17,16 +17,25 @@ sys.path.insert(0, str(experiment))
 import ota
 from ota import APP_ID, IMAGE_LIMIT, validate_image
 
-valid = bytes([0xE9, 1, 3, 0x20]) + APP_ID
+from esp_image_fixture import make_image
+
+valid = make_image()
 validate_image(valid)
-for invalid in (b'', b'UF2'+APP_ID, bytes([0xE9, 1, 3, 0x40])+APP_ID,
-                bytes([0xE9, 1, 3, 0x20])+b'other app', valid+b'\0'*IMAGE_LIMIT):
+assert ota.image_crc(b'123456789') == 0x0376E6E7
+wrong_profile = bytearray(valid)
+wrong_profile[3] = 0x40
+corrupt = bytearray(valid)
+corrupt[-1] ^= 1
+wrong_app = valid.replace(APP_ID, b'x' * len(APP_ID))
+for invalid in (b'', b'UF2'+APP_ID, bytes([0xE9, 1, 3, 0x20])+APP_ID,
+                wrong_profile, wrong_app, corrupt, valid[:-1], valid + b'\0',
+                valid+b'\0'*IMAGE_LIMIT):
     try:
         validate_image(invalid)
     except ValueError:
         pass
     else:
-        raise AssertionError('Accepted an incompatible image')
+        raise AssertionError('Accepted an incompatible or damaged image')
 try:
     validate_image(valid, len(valid)-1)
 except ValueError:
@@ -127,4 +136,4 @@ int main() {
     subprocess.run([os.environ.get('CXX','c++'), '-std=c++11', '-I', str(experiment),
                     str(source),*[str(experiment / (name + '.cpp')) for name in ['BrowserLease','StatusLed','WifiValidation']], '-o', str(binary)], check=True)
     subprocess.run([str(binary)], check=True)
-print('PASS: browser lease expiry/renewal/stale-token/rollover, ESP13 LED heartbeat/request pulses/quiet polling/rollover, embedded page, credential boundaries, app/platform/layout/size OTA guards, wrong-target refusal and verified-reboot helper flow.')
+print('PASS: browser lease expiry/renewal/stale-token/rollover, ESP13 LED heartbeat/request pulses/quiet polling/rollover, embedded page, credential boundaries, app/platform/layout/size/CRC OTA guards, wrong-target refusal and verified-reboot helper flow.')
