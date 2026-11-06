@@ -12,6 +12,7 @@ with tempfile.TemporaryDirectory(prefix='anden-stack-link-') as tmp:
     source=Path(tmp)/'check.cpp'
     source.write_text(r'''
 #include <cassert>
+#include <cstddef>
 #include <cstring>
 #include <string>
 #include "AndenStackLink.h"
@@ -22,13 +23,13 @@ bool receive(Receiver& rx,const std::string& wire) {
 int main() {
   assert(crc16("123456789",9)==0x29B1);
   char wire[MAX_BODY+8];
-  size_t size=encode(wire,sizeof(wire),"AD1,42,LED");assert(size);
+  std::size_t size=encode(wire,sizeof(wire),"AD1,42,LED");assert(size);
   Receiver rx;
   assert(!receive(rx,std::string(wire,size-1)));
-  assert(rx.feed('\n'));assert(!strcmp(rx.body,"AD1,42,LED"));
+  assert(rx.feed('\n'));assert(!std::strcmp(rx.body,"AD1,42,LED"));
   assert(rx.validFrames==1);
   // Every single-bit corruption of the command body must be rejected.
-  for(size_t i=1;i<size-6;++i)for(unsigned bit=0;bit<8;++bit) {
+  for(std::size_t i=1;i<size-6;++i)for(unsigned bit=0;bit<8;++bit) {
     Receiver bad;std::string corrupt(wire,size);corrupt[i]^=char(1<<bit);
     assert(!receive(bad,corrupt));
     assert(receive(bad,std::string(wire,size))); // resynchronizes afterward
@@ -51,7 +52,7 @@ int main() {
   assert(!number("65536",numberValue));assert(!number("-1",numberValue));
   assert(!number("1x",numberValue));assert(!number("",numberValue));
   char command[]="AD1,42,PING";char* parts[3];
-  assert(fields(command,parts,3)==3);assert(!strcmp(parts[2],"PING"));
+  assert(fields(command,parts,3)==3);assert(!std::strcmp(parts[2],"PING"));
   char extra[]="AD1,42,PING,extra";assert(fields(extra,parts,3)==0);
   char empty[]="AD1,,PING";assert(fields(empty,parts,3)==0);
 }

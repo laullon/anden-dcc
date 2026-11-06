@@ -2,6 +2,7 @@
 #include "BridgeBench.h"
 #include <Arduino.h>
 #include <UnoDccStream.h>
+#include <string.h>
 #include <util/atomic.h>
 
 #if !defined(__AVR_ATmega328P__)

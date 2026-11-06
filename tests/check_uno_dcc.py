@@ -8,11 +8,12 @@ with tempfile.TemporaryDirectory(prefix='anden-uno-dcc-') as temp:
     file=Path(temp)/'test.cpp';exe=Path(temp)/'test'
     file.write_text(r'''
 #include <cassert>
+#include <cstddef>
 #include <vector>
 #include <array>
 #include "UnoDccStream.h"
 using Packet=std::array<unsigned,3>;
-Packet decode(const std::vector<unsigned>& halves,size_t start){
+Packet decode(const std::vector<unsigned>& halves,std::size_t start){
   bool bits[44];
   for(unsigned i=0;i<44;++i){unsigned a=halves[start+i*2],b=halves[start+i*2+1];
     assert(a==b);assert(a==116||a==200);bits[i]=a==116;}

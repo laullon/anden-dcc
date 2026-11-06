@@ -51,6 +51,7 @@ uint32_t millis();
 ''')
     (tmp/'test.cpp').write_text(r'''
 #include <cassert>
+#include <cstddef>
 #include <cstdio>
 #include "Arduino.h"
 uint32_t clockTicks=0;
@@ -96,13 +97,13 @@ int main(){
  for(unsigned i=1;i<=32-skipped;++i)assert(directionEdges[i].time-directionEdges[i-1].time==UnoDccStream::ONE);
  assert(directionEdges[33-skipped].time-directionEdges[32-skipped].time==UnoDccStream::ZERO);
  unsigned ones=0,zeros=0;
- for(size_t i=1;i<directionEdges.size();++i){
+ for(std::size_t i=1;i<directionEdges.size();++i){
   unsigned width=directionEdges[i].time-directionEdges[i-1].time;
   assert(width==UnoDccStream::ONE || width==UnoDccStream::ZERO);
   if(width==UnoDccStream::ONE)++ones;else ++zeros;
  }
  assert(ones&&zeros);
- UnoDcc::disarmBridge();size_t count=directionEdges.size();
+ UnoDcc::disarmBridge();std::size_t count=directionEdges.size();
  for(unsigned i=0;i<100;++i)step();assert(directionEdges.size()==count && !(PORTD.value&_BV(PD3)));
  // Exercise the new variable-length six-group refresh through the actual ISR.
  uint8_t allAddresses[]={3,6,7,8,9,10,126,127};uint32_t flags[8];
@@ -111,7 +112,7 @@ int main(){
  directionEdges.clear();assert(UnoDcc::armBridge(true));
  for(unsigned i=0;i<48*106*2;++i)step((i*7)%37);
  assert(UnoDcc::isRunning()&&UnoDcc::status().faults==0);
- for(size_t i=1;i<directionEdges.size();++i){auto width=directionEdges[i].time-directionEdges[i-1].time;assert(width==116||width==200);}
+ for(std::size_t i=1;i<directionEdges.size();++i){auto width=directionEdges[i].time-directionEdges[i-1].time;assert(width==116||width==200);}
  UnoDcc::disarmBridge();
  // No main-loop servicing: the actual ISR's backup must still shut off A.
  enableEdges.clear();assert(UnoDcc::armBridge(true));
