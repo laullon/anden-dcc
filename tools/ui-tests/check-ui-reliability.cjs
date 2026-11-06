@@ -44,12 +44,12 @@ const source=()=>fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.ht
  const tests={
   async timeout(){
    const f=await fixture();try{
-    await f.card.locator('summary').click();f.control.holdPost='/dcc/function';await f.card.locator('.function-on').click();
-    await f.page.waitForFunction(()=>rosterBusy);assert.equal(await f.card.locator('.function-on').isDisabled(),true);
+    await f.card.locator('summary').click();f.control.holdPost='/dcc/function';await f.card.locator('.function-test-toggle').click();
+    await f.page.waitForFunction(()=>rosterBusy);assert.equal(await f.card.locator('.function-test-toggle').isDisabled(),true);
     await f.page.clock.fastForward(11000);
     await f.page.waitForFunction(()=>!rosterBusy,{},{timeout:2000});
     await f.page.waitForFunction(()=>document.getElementById('roster-message').classList.contains('error'),{},{timeout:2000});
-    assert.equal(await f.card.locator('.function-on').isDisabled(),false,'Timed-out function request must release controls');
+    assert.equal(await f.card.locator('.function-test-toggle').isDisabled(),false,'Timed-out function request must release controls');
     assert.deepEqual(f.errors,[]);
    }finally{await f.close()}
   },
@@ -57,7 +57,7 @@ const source=()=>fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.ht
    const f=await fixture();try{
     await f.page.locator('#find-address').click();f.control.holdPost='/finder/start';await f.page.locator('#finder-range button').click();
     await f.page.waitForFunction(()=>finderBusy);
-    assert.equal(await f.card.locator('[data-on="1"]').isDisabled(),true,'Pending finder start must lock locomotive commands immediately');
+    assert.equal(await f.card.locator('.favorite-strip [data-function="0"]').isDisabled(),true,'Pending finder start must lock locomotive commands immediately');
     const before=f.calls.length;
     await f.page.evaluate(()=>{rosterCommand('/dcc/f0',{address:3,on:1});stackAction('ping')});await f.page.waitForTimeout(50);
     assert.equal(f.calls.length,before,'Shared command guards must reject roster/diagnostic commands during finder start');

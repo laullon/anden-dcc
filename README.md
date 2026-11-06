@@ -16,7 +16,7 @@ a **Deek-Robot L298P motor shield** powers the rails, and a **DOIT ESP13 shield*
 hosts Wi-Fi, the panel and firmware updates. These three stacked boards are the
 supported build.
 
-**Current firmware: ESP13 0.6.3 / Uno 0.6.0.** Speed stays at zero. This release
+**Current firmware: ESP13 0.6.4 / Uno 0.6.0.** Speed stays at zero. This release
 controls functions and direction; it does not offer a throttle or CV programming.
 [Español](README.es.md) · [Wiring and BOM](docs/hardware/README.md) ·
 [API](docs/API.md) · [Validation](docs/VALIDATION.md) · [UI review](docs/UI-REVIEW.md)
@@ -25,8 +25,10 @@ controls functions and direction; it does not offer a throttle or CV programming
 
 - Two loco cards to start, up to eight independent short addresses (1–127).
 - Electric, diesel and steam artwork, with directional white/red lights.
-- F0–F28 On/Off controls. Expand **Explore functions**, test a function, give it
-  a name and pin it. Up to eight named favorites per loco remain visible when collapsed.
+- F0–F28 single-button toggles, including a permanent F0 button on every loco.
+  Expand **Explore functions**, test a function, give it a name and pin it. Up to eight named favorites per loco remain visible when collapsed.
+  Functions and direction can be prepared with track power off; switching them
+  changes the requested state without enabling the track.
 - Explicit track power with a compact control that stays visible after scrolling.
 - Guided address discovery: enter a range, watch the lights and answer the questions.
 - System / Light / Dark buttons. Wi-Fi and OTA live under the collapsed **Setup** menu.
@@ -101,7 +103,7 @@ Turn track power off before an ESP update. Use Setup → firmware, or:
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.3
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.4
 ```
 
 OTA updates **only the ESP**. Uno updates still use USB with both ESP switches OFF

@@ -1,5 +1,12 @@
 # Changelog
 
+## Consistent function toggles 0.6.4 · 2026-11-06
+
+- Use the same single-button On/Off control for every function and the explorer.
+- Always show F0 on every loco, using its saved name or Headlights.
+- Allow F0–F28 presets with track power off, without enabling output.
+- Preserve request, connection, firmware-capability and finder guards.
+
 ## Human-readable controller status 0.6.3 · 2026-11-06
 
 - Describe track power, DCC operation and the second output in plain language.

@@ -14,11 +14,11 @@ const make=(id,address,name='',type='electric',f0=false)=>({id,address,name,type
  });
  await page.goto('http://espdcc.test/');await page.waitForFunction(()=>document.querySelectorAll('.loco').length===2);
  const card=id=>page.locator('.loco[data-id="'+id+'"]');
- const on=id=>card(id).locator('[data-on="1"]');
+ const on=id=>card(id).locator('.favorite-strip [data-function="0"]');
  const a=await card(1).boundingBox(),b=await card(2).boundingBox();assert.equal(a.y,b.y);
  // A delayed old poll must not undo an acknowledged F0 command.
  holdNext=true;await page.evaluate(()=>{window.oldPoll=refreshStatus()});await page.waitForTimeout(20);
- await on(1).click();await page.waitForFunction(()=>document.querySelector('.loco[data-id="1"] [data-on="1"]').getAttribute('aria-pressed')==='true');
+ await on(1).click();await page.waitForFunction(()=>document.querySelector('.loco[data-id="1"] .favorite-strip [data-function="0"]').getAttribute('aria-pressed')==='true');
  release();await page.evaluate(()=>window.oldPoll);assert.equal(await on(1).getAttribute('aria-pressed'),'true');assert.equal(await on(2).getAttribute('aria-pressed'),'false');
  await card(1).locator('.edit-loco').click();await page.locator('#loco-name').fill('Night express');await page.locator('#loco-type').selectOption('steam');assert.equal(await page.locator('#loco-preview svg').getAttribute('data-model'),'santa-fe');await page.locator('#save-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);assert.equal(state.dcc.locos[0].f0,true);
  await card(1).locator('.edit-loco').click();await page.locator('#loco-address').fill('4');await page.locator('#save-loco').click();assert.equal(saves,1);assert((await page.locator('#editor-message').textContent()).includes('already'));await page.locator('#loco-address').fill('37');await page.locator('#save-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);assert.equal(state.dcc.locos[0].f0,false);

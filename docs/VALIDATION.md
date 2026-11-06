@@ -16,6 +16,14 @@ shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
   mouse targets during polling, function favorites/drafts, direction, finder,
   themes, setup/OTA, offline behavior and 320 px layouts.
 
+## Uniform function controls 0.6.4, 6 November 2026
+
+All eight browser suites pass with a permanent single F0 toggle and the same
+control for F1–F28, including power-off presets. Live ESP 0.6.4 checks toggled F0
+and F28 both ways while A/B stayed disabled, restored the original function states,
+and preserved loco/favorite metadata. No power-on request was sent; no JavaScript
+or timing faults were observed. Uno 0.6.0 is unchanged. ESP image: 414,176 bytes.
+
 ## UI reliability review 0.6.2, 6 November 2026
 
 Eight browser suites pass, including new regressions for timeouts, conflicting

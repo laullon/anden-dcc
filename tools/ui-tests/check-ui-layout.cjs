@@ -6,21 +6,22 @@ const root=path.resolve(__dirname,'../..');
  let offline=false;
  await page.route('http://layout.test/**',route=>{const request=route.request();if(new URL(request.url()).pathname==='/api/status'&&offline)return route.abort();assert.equal(request.method(),'GET','Layout checks must never send controller commands');return route.fulfill(new URL(request.url()).pathname==='/api/status'?{json:state}:{contentType:'text/html',body:fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.html'),'utf8')})});
  await page.goto('http://layout.test/');await page.waitForFunction(()=>document.querySelector('.loco'));
- const card=page.locator('.loco'),row=card.locator('.loco-bottom').first(),name=card.locator('.function-name');
+ const card=page.locator('.loco'),row=card.locator('.favorite-strip'),name=card.locator('.function-name');
  for(const theme of ['light','dark']){
   await page.locator('#theme [data-theme-choice='+theme+']').click();
   await row.evaluate(element=>element.scrollIntoView({block:'center'}));
   const cardBox=await card.boundingBox();
-  for(const on of [0,1]){
-   const button=row.locator('[data-on="'+on+'"]'),box=await button.boundingBox();
-   try{assert(box.x>=cardBox.x&&box.x+box.width<=cardBox.x+cardBox.width,theme+' F0 '+(on?'On':'Off')+' must fit inside its clipped card; got '+JSON.stringify({box,cardBox}));assert(await button.evaluate(element=>{const r=element.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('button')===element}),theme+' F0 button must be reachable by mouse/touch')}catch(error){failures.push(error.message)}
+  assert.equal(await row.locator('[data-function="0"]').count(),1);
+  for(const button of await row.locator('[data-function="0"]').all()){
+   const box=await button.boundingBox();
+   try{assert(box.x>=cardBox.x&&box.x+box.width<=cardBox.x+cardBox.width,theme+' F0 toggle must fit inside its clipped card; got '+JSON.stringify({box,cardBox}));assert(await button.evaluate(element=>{const r=element.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('button')===element}),theme+' F0 button must be reachable by mouse/touch')}catch(error){failures.push(error.message)}
   }
   if((await card.locator('details').getAttribute('open'))===null)await card.locator('summary').click();
   // A field may be fully inside the viewport while covered by the fixed toolbar.
   // Native Tab then leaves its position alone, so scroll-padding must reserve room.
   await name.evaluate(element=>element.scrollIntoView({block:'end'}));
   await page.locator('#floating-power').waitFor({state:'visible'});
-  await card.locator('.function-on').evaluate(element=>element.focus({preventScroll:true}));
+  await card.locator('.function-test-toggle').evaluate(element=>element.focus({preventScroll:true}));
   await page.keyboard.press('Tab');assert(await name.evaluate(element=>element===document.activeElement));
   const box=await name.boundingBox(),bar=await page.locator('#floating-power').boundingBox();
   try{assert(box.y+box.height<=bar.y,theme+' keyboard-focused name must stay above the floating power bar; got '+JSON.stringify({box,bar}));assert(await name.evaluate(element=>{const r=element.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===element}),theme+' name field must be reachable by mouse/touch')}catch(error){failures.push(error.message)}
@@ -44,5 +45,5 @@ const root=path.resolve(__dirname,'../..');
  await page.evaluate(()=>{rosterBusy=true;lock(true)});await checkGuard('Own save pending',false);await page.evaluate(()=>{rosterBusy=false;lock(false)});await checkRecovered();
  await page.locator('#cancel-loco').click();assert.equal(await page.locator('#loco-dialog').evaluate(element=>element.open),false);
  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);
- console.log('PASS: long F0 names keep both controls inside their cards, and scrolled/native-keyboard focus remains above compact power in 320px light/dark themes; open editor guards offline, output/search/storage changes and pending save without losing drafts.');
+ console.log('PASS: long F0 names keep their single toggle inside each card, and scrolled/native-keyboard focus remains above compact power in 320px light/dark themes; open editor guards offline, output/search/storage changes and pending save without losing drafts.');
 }finally{await browser.close()}})().catch(error=>{console.error(error);process.exit(1)});

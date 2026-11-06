@@ -1,6 +1,6 @@
 # ESP13 web controller
 
-**ESP13 0.6.3 / Uno 0.6.0.** This application hosts the panel, Wi-Fi setup,
+**ESP13 0.6.4 / Uno 0.6.0.** This application hosts the panel, Wi-Fi setup,
 persistent roster and ESP OTA updates. The Uno owns DCC and output timing.
 See the [main guide](../../README.md), [wiring](../../docs/hardware/README.md),
 [HTTP API](../../docs/API.md) and [stationary test](../uno-stack-test/FIRST-LOCO-TEST.md).
@@ -58,7 +58,7 @@ and a new boot ID:
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.3
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.4
 ```
 
 OTA replaces the **ESP application only**; it cannot update the Uno. Keep OTA
@@ -81,16 +81,19 @@ The Uno L LED is a separate test, blocked whenever an output is enabled.
 ## Function explorer and favorites (0.6.0)
 
 Each loco card has a collapsed **Explore functions** panel. Open it, choose F0–F28
-and use On/Off to test that function while track power is on. Function meanings
-come from your decoder: F1 might be sound on one loco and something else on another.
+and use its single button to toggle On/Off, just like the buttons on the card.
+F0 always appears on every card. Track power can stay OFF while you set any
+function or direction; those settings take effect on the rails when power is on.
+Function meanings come from your decoder: F1 might be sound on one loco and something else on another.
 Selecting a function alone sends no command. These controls latch On/Off; there is
 no momentary horn button yet.
 
 Enter a short name and choose **Pin favorite**. Up to eight favorites per loco
 stay visible as quick toggle buttons above the collapsed panel. Select a pinned
 function to rename it or remove its pin. Pinning/removing does not change its
-current On/Off state. A named F0 changes the existing headlight label rather than
-adding a duplicate button. Naming/pinning works with track power off.
+current On/Off state. A named F0 changes its permanent button label rather than
+adding a duplicate. Reset name restores Headlights; the F0 button is never removed.
+Naming/pinning works with track power off.
 
 Names are limited to 24 UTF-8 bytes. Pins/names live on the ESP, shared across
 browsers and preserved by normal OTA with the same filesystem layout. Unsaved

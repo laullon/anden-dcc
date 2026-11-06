@@ -37,23 +37,23 @@ const root=path.resolve(__dirname,'../..');
  await page.locator('#track-on').click();await page.waitForFunction(()=>document.getElementById('track-label').textContent==='Track is ON');
  await page.waitForFunction(()=>document.getElementById('track-on').disabled);await page.waitForTimeout(1100);assert(keeps>=1);assert.equal(on,1);assert(await page.locator('#track-on').isHidden());assert(await page.locator('#track-off').isVisible());
  // Polling must preserve a pressed mouse target until mouseup/click.
- const mouseTarget=page.locator('.loco[data-id="1"] [data-on="1"]');await mouseTarget.scrollIntoViewIfNeeded();const originalNode=await mouseTarget.elementHandle();const rect=await mouseTarget.boundingBox();
+ const mouseTarget=page.locator('.loco[data-id="1"] .favorite-strip [data-function="0"]');await mouseTarget.scrollIntoViewIfNeeded();const originalNode=await mouseTarget.elementHandle();const rect=await mouseTarget.boundingBox();
  assert(await originalNode.evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===el}));await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();
  for(let i=0;i<4;i++){state.dcc.packets++;await page.evaluate(()=>refreshStatus());assert(await originalNode.evaluate(e=>e.isConnected));}
- await page.mouse.up();await page.waitForFunction(()=>!rosterBusy&&document.querySelector('.loco[data-id="1"] [data-on="1"]').getAttribute('aria-pressed')==='true');
+ await page.mouse.up();await page.waitForFunction(()=>!rosterBusy&&document.querySelector('.loco[data-id="1"] .favorite-strip [data-function="0"]').getAttribute('aria-pressed')==='true');
  // Page visibility is not a stop command; one lost HTTP response is retried.
  const beforeOff=off;await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'))});await page.waitForTimeout(700);assert.equal(off,beforeOff);assert(state.uno.trackActive);await page.evaluate(()=>delete document.hidden);
  failNextKeep=true;await page.waitForFunction(()=>document.getElementById('track-message').textContent.includes('retrying'));await page.waitForFunction(()=>document.getElementById('track-message').textContent==='');assert.equal(off,beforeOff);assert(state.uno.trackActive);
  assert(await page.locator('.loco[data-id="1"] [data-forward="1"]').isEnabled());assert(await page.locator('.edit-loco').first().isDisabled());assert(await page.locator('#add-loco').isDisabled());
  await page.locator('.loco[data-id="1"] [data-forward="1"]').click();assert.equal(state.dcc.locos[0].forward,true);
- await page.locator('.loco[data-id="2"] [data-on="1"]').click();assert.equal(state.dcc.locos[1].f0,true);
+ await page.locator('.loco[data-id="2"] .favorite-strip [data-function="0"]').click();assert.equal(state.dcc.locos[1].f0,true);
  // Each illustration swaps its white/red ends with direction, and goes dark with F0 off.
  const colors=()=>page.locator('.loco[data-id="1"]').evaluate(card=>({left:getComputedStyle(card.querySelector('.lamp-left')).fill,right:getComputedStyle(card.querySelector('.lamp-right')).fill}));
  await page.waitForFunction(()=>!rosterBusy);
  for(const kind of ['electric','diesel','steam']){
   state.dcc.locos[0].type=kind;state.dcc.locos[0].f0=true;state.dcc.locos[0].forward=true;await page.evaluate(()=>refreshStatus());const forward=await colors();assert.notEqual(forward.left,forward.right);
   await page.locator('.loco[data-id="1"] [data-forward="0"]').click();await page.waitForFunction(()=>!rosterBusy&&document.querySelector('.loco[data-id="1"]').dataset.forward==='false');const reverse=await colors();assert.equal(reverse.left,forward.right);assert.equal(reverse.right,forward.left);
-  await page.locator('.loco[data-id="1"] [data-on="0"]').click();await page.waitForFunction(()=>!rosterBusy&&!document.querySelector('.loco[data-id="1"]').classList.contains('lights-on'));const dark=await colors();assert.equal(dark.left,dark.right);
+  await page.locator('.loco[data-id="1"] .favorite-strip [data-function="0"]').click();await page.waitForFunction(()=>!rosterBusy&&!document.querySelector('.loco[data-id="1"]').classList.contains('lights-on'));const dark=await colors();assert.equal(dark.left,dark.right);
  }
  state.dcc.locos[0].type='electric';state.dcc.locos[0].f0=true;state.dcc.locos[0].forward=false;await page.evaluate(()=>refreshStatus());
  fs.mkdirSync(path.join(root,'build/ui'),{recursive:true});
@@ -67,7 +67,7 @@ const root=path.resolve(__dirname,'../..');
  await page.setViewportSize({width:320,height:1100});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
  await page.evaluate(()=>refreshStatus());await page.locator('#track-on').click();await page.locator('#find-address').click();await page.locator('#finder-range button').click();
  await page.waitForFunction(()=>document.getElementById('finder-question').textContent.includes('turn the lights on'));
- assert(await page.locator('.loco [data-on="1"]').first().isDisabled());
+ assert(await page.locator('.loco .favorite-strip [data-function="0"]').first().isDisabled());
  assert(await page.locator('[data-finder-answer="on"]').isDisabled());
  async function answer(value){await page.waitForFunction(v=>!document.querySelector('[data-finder-answer="'+v+'"]').disabled,value);await page.locator('[data-finder-answer="'+value+'"]').click();}
  await answer('on');await answer('off');
