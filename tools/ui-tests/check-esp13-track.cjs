@@ -37,8 +37,8 @@ const root=path.resolve(__dirname,'../..');
  await page.locator('#track-on').click();await page.waitForFunction(()=>document.getElementById('track-label').textContent==='Track is ON');
  await page.waitForFunction(()=>document.getElementById('track-on').disabled);await page.waitForTimeout(1100);assert(keeps>=1);assert.equal(on,1);assert(await page.locator('#track-on').isHidden());assert(await page.locator('#track-off').isVisible());
  // Polling must preserve a pressed mouse target until mouseup/click.
- const mouseTarget=page.locator('.loco[data-id="1"] [data-on="1"]');const originalNode=await mouseTarget.elementHandle();const rect=await mouseTarget.boundingBox();
- await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();
+ const mouseTarget=page.locator('.loco[data-id="1"] [data-on="1"]');await mouseTarget.scrollIntoViewIfNeeded();const originalNode=await mouseTarget.elementHandle();const rect=await mouseTarget.boundingBox();
+ assert(await originalNode.evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===el}));await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();
  for(let i=0;i<4;i++){state.dcc.packets++;await page.evaluate(()=>refreshStatus());assert(await originalNode.evaluate(e=>e.isConnected));}
  await page.mouse.up();await page.waitForFunction(()=>!rosterBusy&&document.querySelector('.loco[data-id="1"] [data-on="1"]').getAttribute('aria-pressed')==='true');
  // Page visibility is not a stop command; one lost HTTP response is retried.
