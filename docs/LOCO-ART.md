@@ -27,8 +27,8 @@ python3 firmware/esp13-ota/embed.py
 ```
 
 The script refreshes the marked template block in `firmware/esp13-ota/web/index.html` and the
-embedded `SetupPage.h`. CI checks both for freshness. Each SVG is embedded once
-and cloned in the browser; it is not duplicated in firmware for every loco.
+embedded `SetupPage.cpp` (with declarations in `SetupPage.h`). CI checks both
+for freshness. Each SVG is embedded once and cloned in the browser; it is not duplicated in firmware for every loco.
 No image downloads, external fonts or raster assets are needed at runtime.
 
 SVGs are compressed with the complete page and included in the ESP application.

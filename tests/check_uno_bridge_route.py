@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Exercise the actual Uno Timer1 ISR against simulated timer/port registers."""
+from native_support import library_sources
 from pathlib import Path
 import os,subprocess,tempfile
 root=Path(__file__).resolve().parents[1]
@@ -46,7 +47,7 @@ extern uint16_t OCR1B;
 extern Counter TCNT1;
 inline void pinMode(uint8_t,uint8_t){}
 inline void digitalWrite(uint8_t pin,uint8_t level){unsigned mask=1U<<(pin==10?2:4);if(level)PORTB|=mask;else PORTB&=~mask;}
-inline uint32_t millis(){return clockTicks/2000;}
+uint32_t millis();
 ''')
     (tmp/'test.cpp').write_text(r'''
 #include <cassert>
@@ -58,29 +59,42 @@ Port PORTB,PORTD;
 uint8_t PINB=0,TCCR1A=0,TCCR1B=0,TIMSK1=0,TIFR1=0;
 uint16_t OCR1B=0;Counter TCNT1;
 #include "UnoDcc.h"
+#include "BridgeBench.h"
+#include <UnoDccStream.h>
+void TIMER1_COMPB_vect();
 uint32_t hardwareEdge=0;uint16_t lastCompare=0;
 bool boundaryEnableSeen=false;
 void step(unsigned delay=0){
- assert(UnoDcc::running);
+ assert(UnoDcc::isRunning());
  uint16_t next=OCR1B;hardwareEdge+=uint16_t(next-lastCompare);lastCompare=next;
  clockTicks=hardwareEdge+delay;PINB^=_BV(PB2);
- bool wasEnabled=PORTD.value&_BV(PD3),boundary=UnoDcc::stream.atPacketStart();
+ bool wasEnabled=PORTD.value&_BV(PD3);
  TIMER1_COMPB_vect();
- if(!wasEnabled && (PORTD.value&_BV(PD3))){assert(boundary);boundaryEnableSeen=true;}
- if(UnoDcc::dccBridge && !UnoDcc::bridgePending)assert(bool(PORTB.value&_BV(PB4))==bool(PINB&_BV(PB2)));
+ if(!wasEnabled && (PORTD.value&_BV(PD3))){boundaryEnableSeen=true;}
+ if(UnoDcc::bridgeIsActive() && !UnoDcc::bridgeStartPending())assert(bool(PORTB.value&_BV(PB4))==bool(PINB&_BV(PB2)));
 }
+bool pumpTimer=false;
+uint32_t millis(){if(pumpTimer)step();return clockTicks/2000;}
 int main(){
  PORTB.watched=_BV(PB4);PORTB.direction=true;PORTD.watched=_BV(PD3);
  UnoDcc::begin();digitalWrite(12,HIGH);assert(UnoDcc::armBridge(false));
  // DC mode is not touched by the waveform ISR.
  for(unsigned i=0;i<64;++i){step();assert(PORTB.value&_BV(PB4));}
  UnoDcc::disarmBridge();assert(!(PORTD.value&_BV(PD3))&&!(PORTB.value&_BV(PB4)));
- uint8_t addresses[]={3,4};assert(UnoDcc::stream.prepare(2,addresses,0));UnoDcc::stream.commit();
+ uint8_t addresses[]={3,4};pumpTimer=true;assert(UnoDcc::set(2,addresses,0));pumpTimer=false;
  directionEdges.clear();enableEdges.clear();assert(UnoDcc::armBridge(true));assert(!(PORTD.value&_BV(PD3)));
  // Vary simulated interrupt entry latency through 0..18 us; the phase wait absorbs it.
  for(unsigned i=0;i<88*12;++i)step((i*7)%37);
- assert(boundaryEnableSeen && UnoDcc::deadlineFaults==0);
+ assert(boundaryEnableSeen && UnoDcc::status().faults==0);
  assert(enableEdges.size()==1 && enableEdges.front().value==1);
+ // Enabling must coincide with the first edge of a complete packet preamble.
+ assert(directionEdges.size()>33);
+ const unsigned firstDelay=directionEdges.front().time-enableEdges.front().time;
+ assert(firstDelay==0 || firstDelay==UnoDccStream::ONE);
+ // If the first half is already LOW, it creates no direction transition.
+ const unsigned skipped=firstDelay?1:0;
+ for(unsigned i=1;i<=32-skipped;++i)assert(directionEdges[i].time-directionEdges[i-1].time==UnoDccStream::ONE);
+ assert(directionEdges[33-skipped].time-directionEdges[32-skipped].time==UnoDccStream::ZERO);
  unsigned ones=0,zeros=0;
  for(size_t i=1;i<directionEdges.size();++i){
   unsigned width=directionEdges[i].time-directionEdges[i-1].time;
@@ -93,26 +107,26 @@ int main(){
  // Exercise the new variable-length six-group refresh through the actual ISR.
  uint8_t allAddresses[]={3,6,7,8,9,10,126,127};uint32_t flags[8];
  for(unsigned i=0;i<8;++i)flags[i]=i%2?DccFunctions::MASK:0;
- assert(UnoDcc::stream.prepareFunctions(8,allAddresses,0xA5,flags));UnoDcc::stream.commit();
+ pumpTimer=true;assert(UnoDcc::functions(8,allAddresses,0xA5,flags));pumpTimer=false;
  directionEdges.clear();assert(UnoDcc::armBridge(true));
  for(unsigned i=0;i<48*106*2;++i)step((i*7)%37);
- assert(UnoDcc::running&&UnoDcc::deadlineFaults==0);
+ assert(UnoDcc::isRunning()&&UnoDcc::status().faults==0);
  for(size_t i=1;i<directionEdges.size();++i){auto width=directionEdges[i].time-directionEdges[i-1].time;assert(width==116||width==200);}
  UnoDcc::disarmBridge();
  // No main-loop servicing: the actual ISR's backup must still shut off A.
  enableEdges.clear();assert(UnoDcc::armBridge(true));
- for(unsigned i=0;i<BridgeGuard::HALVES+88 && !UnoDcc::bridgeGuard.expired;++i)step();
- assert(UnoDcc::bridgeGuard.expired && !(PORTD.value&_BV(PD3)) && !UnoDcc::dccBridge);
+ for(unsigned i=0;i<BridgeGuard::HALVES+88 && !UnoDcc::guardExpired();++i)step();
+ assert(UnoDcc::guardExpired() && !(PORTD.value&_BV(PD3)) && !UnoDcc::bridgeIsActive());
  assert(enableEdges.size()==2 && enableEdges[0].value==1 && enableEdges[1].value==0);
  unsigned duration=enableEdges[1].time-enableEdges[0].time;
  assert(duration>=uint32_t(BridgeGuard::HALVES-1)*UnoDccStream::ONE && duration<=uint32_t(BridgeGuard::HALVES)*UnoDccStream::ZERO);
  // A mirror arriving outside the allowed phase must stop both output and timer.
- assert(UnoDcc::armBridge(true));while(UnoDcc::bridgePending)step();
+ assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
  step(UnoDcc::BRIDGE_DELAY_TICKS+3);
- assert(!UnoDcc::running && !(PORTD.value&_BV(PD3)) && !(PORTB.value&_BV(PB4)) && UnoDcc::deadlineFaults==1);
+ assert(!UnoDcc::isRunning() && !(PORTD.value&_BV(PD3)) && !(PORTB.value&_BV(PB4)) && UnoDcc::status().faults==1);
  std::printf("PASS: actual Timer1 ISR, DC isolation, packet-boundary enable, D12 legacy/F0-F28 58/100 us phase model under ISR delays, stop, backup guard and late-edge fail-off.\n");
 }
 ''')
     exe=tmp/'test'
-    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(tmp),'-I',str(root/'firmware/uno-stack-test'),'-I',str(root/'libraries/AndenStackLink/src'),str(tmp/'test.cpp'),'-o',str(exe)],check=True)
+    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(tmp),'-I',str(root/'firmware/uno-stack-test'),'-I',str(root/'libraries/AndenStackLink/src'),str(tmp/'test.cpp'),str(root/'firmware/uno-stack-test/UnoDcc.cpp'),str(root/'firmware/uno-stack-test/BridgeBench.cpp'),*library_sources(),'-o',str(exe)],check=True)
     subprocess.run([str(exe)],check=True)

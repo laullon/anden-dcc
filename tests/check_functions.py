@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Decode every F0–F28 refresh group and validate named-favorite records."""
+from native_support import library_sources
 from pathlib import Path
 import os,subprocess,tempfile
 root=Path(__file__).resolve().parents[1]
@@ -11,6 +12,7 @@ with tempfile.TemporaryDirectory(prefix='anden-functions-') as d:
 #include <string>
 #include <vector>
 #include "UnoDccStream.h"
+#include "AndenStackLink.h"
 #include "LocoRoster.h"
 #include "FavoriteFunctions.h"
 using Bytes=std::vector<unsigned>;
@@ -61,6 +63,6 @@ int main(){
  FavoriteFunctions loaded;assert(loaded.loadRecord("1\t2\tAir horn"));assert(loaded.loadRecord("2\t28\tSmoke"));assert(!loaded.loadRecord("1\t2\tDuplicate"));assert(!loaded.loadRecord("9\t2\tBad"));assert(!loaded.loadRecord("1\t29\tBad"));assert(!loaded.loadRecord("1\t1\tLine\nname"));
 }
 ''')
- subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'libraries/AndenStackLink/src'),'-I',str(root/'firmware/esp13-ota'),str(source),'-o',str(exe)],check=True)
+ subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'libraries/AndenStackLink/src'),'-I',str(root/'firmware/esp13-ota'),str(source),str(root/'firmware/esp13-ota/FavoriteFunctions.cpp'),*library_sources(),'-o',str(exe)],check=True)
  subprocess.run([str(exe)],check=True)
 print('PASS: F0-F28 group decoding/XOR/independence, 8-loco refresh, all publication phases, startup stops, full UART snapshot and favorite validation/limits/records.')

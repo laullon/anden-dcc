@@ -34,6 +34,6 @@ int main(){
  assert(uint32_t(BridgeGuard::HALVES)*100<=6000000UL);
 }
 ''')
-    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'firmware/uno-stack-test'),str(source),'-o',str(exe)],check=True)
+    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'firmware/uno-stack-test'),str(source),str(root/'firmware/uno-stack-test/BridgeBench.cpp'),'-o',str(exe)],check=True)
     subprocess.run([str(exe)],check=True)
 print('PASS: bridge default-off, fixed 3-second DC/DCC modes and no-extension pulse, manual stop, raw cutoff, timing/guard faults, rollover and independent half-bit guard.')

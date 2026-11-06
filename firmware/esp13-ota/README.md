@@ -16,8 +16,8 @@ tools/build-esp13.sh
 ```
 
 The build embeds `web/index.html` and the original SVGs from `../../web/locos/`
-into `SetupPage.h`, runs host checks, compiles with the local AndenStackLink
-library, and validates `build/esp13-ota/esp13-ota.ino.bin`. The manifest records
+into `SetupPage.cpp` with declarations in `SetupPage.h`, runs host checks,
+compiles with the local AndenStackLink library, and validates `build/esp13-ota/esp13-ota.ino.bin`. The manifest records
 version, board profile, size and SHA-256. Maximum OTA image: **448 KiB**.
 
 ## First serial installation

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Exercise the production search state and transmitted address/function words."""
+from native_support import library_sources
 from pathlib import Path
 import subprocess, tempfile
 root=Path(__file__).resolve().parents[1]
@@ -65,5 +66,5 @@ int main() {
  std::puts("PASS: every short-address range (endpoints/midpoint), every target in 1-100 and 1-127; full-range ON/OFF coverage, excluded-address OFF, retry/stale tokens, settling, singletons, confirmation failures, cancellation, timeout and timer wrap.");
 }
 ''')
- subprocess.run(['c++','-std=c++17','-O2','-I',str(root/'libraries/AndenStackLink/src'),str(p),'-o',str(exe)],check=True)
+ subprocess.run(['c++','-std=c++17','-O2','-I',str(root/'libraries/AndenStackLink/src'),str(p),*library_sources(),'-o',str(exe)],check=True)
  subprocess.run([str(exe)],check=True)

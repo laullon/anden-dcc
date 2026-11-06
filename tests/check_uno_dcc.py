@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Decode complete Uno DCC streams, including every snapshot update boundary."""
+from native_support import library_sources
 from pathlib import Path
 import os,subprocess,tempfile
 root=Path(__file__).resolve().parents[1]
@@ -45,6 +46,6 @@ int main(){
   assert(invalid.prepare(2,addresses,0));invalid.commit();assert(!invalid.prepare(2,changed,0));
 }
 ''')
-    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'libraries/AndenStackLink/src'),str(file),'-o',str(exe)],check=True)
+    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'libraries/AndenStackLink/src'),str(file),*library_sources(),'-o',str(exe)],check=True)
     subprocess.run([str(exe)],check=True)
 print('PASS: Uno 58/100 us half-bit model, full packet decoding/XOR, all 88 publication phases, eight-loco refresh and idle packets.')

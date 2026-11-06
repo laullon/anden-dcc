@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Exercise the shared UART framing against corruption and startup noise."""
+from native_support import library_sources
 from pathlib import Path
 import os
 import subprocess
@@ -57,6 +58,6 @@ int main() {
 ''')
     binary=Path(tmp)/'check'
     subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(include),
-                    str(source),'-o',str(binary)],check=True)
+                    str(source),*library_sources(),'-o',str(binary)],check=True)
     subprocess.run([str(binary)],check=True)
 print('PASS: stack UART CRC vector, corrupted commands, noise/overflow recovery, boundaries and numeric fields.')

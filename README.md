@@ -19,7 +19,7 @@ supported build.
 **Current firmware: ESP13 0.6.4 / Uno 0.6.0.** Speed stays at zero. This release
 controls functions and direction; it does not offer a throttle or CV programming.
 [Español](README.es.md) · [Wiring and BOM](docs/hardware/README.md) ·
-[API](docs/API.md) · [Validation](docs/VALIDATION.md) · [UI review](docs/UI-REVIEW.md)
+[API](docs/API.md) · [Validation](docs/VALIDATION.md) · [UI review](docs/UI-REVIEW.md) · [Code structure](docs/CODE-STRUCTURE.md)
 
 ## The panel
 

@@ -4,6 +4,7 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$root"
 cli=${ARDUINO_CLI:-arduino-cli}
 python3 firmware/esp13-ota/embed.py
+python3 tests/check_cpp_interfaces.py
 python3 tests/check_esp13.py
 python3 tests/check_stack_link.py
 python3 tests/check_uno_dcc.py

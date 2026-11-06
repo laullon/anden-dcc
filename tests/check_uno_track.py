@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Decode the stationary control stream and startup stop sequence."""
+from native_support import library_sources
 from pathlib import Path
 import os,subprocess,tempfile
 root=Path(__file__).resolve().parents[1]
@@ -51,6 +52,6 @@ int main(){
  UnoDccStream invalid;uint8_t bad[]={1,0};assert(!invalid.prepareControl(2,a,0,3,bad));assert(!invalid.prepareControl(2,a,0,4,speeds));
 }
 ''')
-    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'libraries/AndenStackLink/src'),str(source),'-o',str(exe)],check=True)
+    subprocess.run([os.environ.get('CXX','c++'),'-std=c++11','-I',str(root/'libraries/AndenStackLink/src'),str(source),*library_sources(),'-o',str(exe)],check=True)
     subprocess.run([str(exe)],check=True)
 print('PASS: 128-step zero-speed/direction packets, XOR, F0 refresh, 32 startup broadcast stops, empty-roster stop, all 106 publication phases and all 127 finder splits.')

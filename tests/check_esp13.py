@@ -125,6 +125,6 @@ int main() {
 ''')
     binary = Path(tmp) / 'check'
     subprocess.run([os.environ.get('CXX','c++'), '-std=c++11', '-I', str(experiment),
-                    str(source), '-o', str(binary)], check=True)
+                    str(source),*[str(experiment / (name + '.cpp')) for name in ['BrowserLease','StatusLed','WifiValidation']], '-o', str(binary)], check=True)
     subprocess.run([str(binary)], check=True)
 print('PASS: browser lease expiry/renewal/stale-token/rollover, ESP13 LED heartbeat/request pulses/quiet polling/rollover, embedded page, credential boundaries, app/platform/layout/size OTA guards, wrong-target refusal and verified-reboot helper flow.')

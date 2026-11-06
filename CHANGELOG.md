@@ -1,5 +1,14 @@
 # Changelog
 
+## C++ module refactor · 2026-11-06
+
+- Move nontrivial implementations into separately compiled `.cpp` modules.
+- Give RosterControl explicit server/Uno dependencies and private model/session ownership.
+- Keep Uno scheduler state and the Timer1 ISR private to UnoDcc.cpp.
+- Generate the web payload once in SetupPage.cpp with declarations in its header.
+- Link native tests to production objects; add standalone-header and multiple-TU checks.
+- Preserve protocol, storage, UI, timeouts and release identifiers; no hardware reflash.
+
 ## Consistent function toggles 0.6.4 · 2026-11-06
 
 - Use the same single-button On/Off control for every function and the explorer.

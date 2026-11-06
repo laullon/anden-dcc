@@ -16,3 +16,15 @@ whether the motor supply was connected. Disconnect motor VIN and tracks for
 uploads and diagnostics.
 
 Contributions use the [MIT license](LICENSE). Third-party tools retain their own licenses.
+
+## C++ boundaries
+
+Keep module interfaces in headers and implementations in `.cpp` files. Put
+mutable runtime state under one owner, pass dependencies explicitly, and avoid
+implementation includes or sketch-global dependencies. Small inline helpers
+are appropriate where their cost/role warrants it. See
+[code structure and validation](docs/CODE-STRUCTURE.md).
+
+The native checks must link production translation units. Keep public headers
+self-contained; run `python3 tests/check_cpp_interfaces.py` after changing them.
+Use `.clang-format` for C++ sources, excluding generated `SetupPage.h/.cpp`.
