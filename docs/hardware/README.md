@@ -8,7 +8,7 @@ The motor shield must use the Rev3-style pinout below. Check clone markings.
 
 ## Power
 
-- Uno USB powers the Uno and both shields' 5 V logic.
+- Uno USB supplies the stack's 5 V rail. The ESP13 shield regulates its own logic supply.
 - A compatible USB-C PD charger/trigger supplies **verified 15 V DC** to the motor
   shield VIN/GND screw terminals. Measure voltage and polarity before connection.
 - **Open VIN CONNECT on the motor shield.** With all power removed, verify its
@@ -26,8 +26,8 @@ A one-cable power supply is not part of this validated connection plan.
 
 | Uno pin | Connected function |
 | --- | --- |
-| D0 / RX | ESP13 UART through shield switches/level interface |
-| D1 / TX | ESP13 UART through shield switches/level interface |
+| D0 / RX | ESP13 TX through shield switches and level interface |
+| D1 / TX | ESP13 RX through shield switches and level interface |
 | D3 | Motor enable A |
 | D12 | Motor direction A / routed DCC |
 | D9 | Brake A, held LOW |

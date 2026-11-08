@@ -16,6 +16,13 @@ shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
   mouse targets during polling, function favorites/drafts, direction, finder,
   themes, setup/OTA, offline behavior and 320 px layouts.
 
+## Build snapshot at `e138437`
+
+The comment update regenerated the embedded web page. Both targets built and
+all eight browser suites passed. ESP13 0.6.5 built to 411,776 bytes with 34,204
+bytes static RAM. Uno 0.6.1 used 12,588 bytes flash and 1,018 bytes static RAM.
+For later builds, check the ESP manifest and the Uno compiler output.
+
 ## Full review · ESP13 0.6.5 / Uno 0.6.1, 6 November 2026
 
 Both firmware targets compile and all eight browser suites pass. New regressions

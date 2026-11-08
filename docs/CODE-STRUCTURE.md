@@ -45,6 +45,7 @@ the half-bit scheduler are implemented in `.cpp`, not in headers.
 
 ## Generated assets, formatting and checks
 
+Install the dependencies from [the main guide](../README.md#checks-and-limits).
 Edit `firmware/esp13-ota/web/index.html` or `web/locos/`, then run:
 
 ```sh
@@ -63,7 +64,10 @@ consumers that include the same headers. The ISR simulator links `UnoDcc.cpp` an
 observes output transitions through simulated registers; it does not include an
 implementation file or modify private scheduler state.
 
-## Refactor validation
+## Refactor validation at `92667bd`
+
+These measurements describe the 6 November 2026 refactor. See
+[Validation](VALIDATION.md) for subsequent builds.
 
 Both target builds and native checks pass. All eight existing browser suites pass;
 the web page and compressed payload are byte-for-byte unchanged. UART commands,

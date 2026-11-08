@@ -1,6 +1,6 @@
 # Timed DCC scope test on bridge A
 
-ESP / Uno **0.4.0** adds **DCC · 3 s** under **Setup → Motor shield bench test**.
+Select **DCC · 3 s** under **Setup → Motor shield bench test**.
 This is a no-load waveform check. Keep trains, rails and other loads disconnected.
 The existing A + / A − buttons remain three-second DC polarity tests.
 
@@ -29,9 +29,11 @@ connection or a second probe. The generic USB logic analyzer is not a rail probe
 | A “1” bit | Two nominal 58 µs halves, total 116 µs |
 | A “0” bit | Two nominal 100 µs halves, total 200 µs |
 
-The waveform carries the current short-address F0 roster in round-robin order,
-or idle packets when empty. It does not send speed/startup-stop commands and
-is not ready for locomotive use. F1–F4 are OFF in these function-group packets.
+The burst uses the synchronized DCC schedule. With the current Uno firmware,
+each roster entry gets five function-group packets (F0–F28) and a zero-speed
+direction packet. An empty stationary roster repeats broadcast stops. For a
+locomotive, use the separate [stationary track procedure](FIRST-LOCO-TEST.md),
+which starts with a broadcast stop burst and uses a renewable power session.
 
 ## Routing and cutoff
 
@@ -61,17 +63,18 @@ behavior and continuous train control are not validated by this no-load test.
 
 ## Protocol and diagnostics
 
-- New command: `AD1,id,DCCTEST` (fixed three-second duration).
-- `BENCHSTOP` stops either DC or DCC.
-- The state response adds a seventeenth field, `benchMode`: 0 = DC reverse,
-  1 = DC forward, 2 = DCC. The existing bench state and remaining time remain.
-- The ESP accepts older 8/14/16-field replies, but DCC scope controls require
-  the 17-field capability and a fresh, synchronized roster.
-- `uno.bench.dccSupported`, `mode` and `active` identify the test. Top-level and
-  `dcc.trackPower` are true only for an enabled DCC burst. They report the command
-  state, not a measurement of motor VIN or output voltage.
+- `AD1,id,DCCTEST` requests a fixed three-second DCC test.
+- `BENCHSTOP` stops DC, a DCC burst or normal track output.
+- The seventeenth STATE field carries the output mode. Values 0 and 1 are DC
+  reverse and forward, 2 is a DCC burst, and 3 is normal track operation on
+  replies with the eighteenth capability field.
+- DCC scope controls require a reply with a mode field and a synchronized roster.
+- `uno.bench.dccSupported` reports capability. `uno.bench.active` with
+  `uno.bench.mode == 2` identifies a running burst. The top-level and
+  `dcc.trackPower` flags cover both DCC burst and normal track output. These
+  fields report the controller's output state.
 
-## Validation
+## Initial validation on ESP / Uno 0.4.0
 
 - Uno 0.4.0: 8,212 bytes flash / 591 bytes static RAM. Direct-port routing is
   restricted at compile time to the 16 MHz ATmega328P Uno.

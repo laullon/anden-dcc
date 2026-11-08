@@ -1,6 +1,6 @@
 # First locomotive test: lights, direction and address finder
 
-Uno **0.6.0** and ESP **0.6.4** provide stationary track operation to the Uno/ESP13/L298P stack.
+Uno **0.6.1** and ESP13 **0.6.5** provide stationary track operation on the Uno/ESP13/L298P stack.
 Speed is fixed at **zero**; the Uno rejects every nonzero speed request. No throttle,
 CV programming or automatic power restoration are provided. F0–F28 and named
 favorite functions are available in each locomotive card.
@@ -19,25 +19,26 @@ keeps the new track/direction controls disabled.
 1. With power off, connect a short test track and **one locomotive** to bridge A.
 2. Reconnect the isolated 15 V motor supply and open the panel.
 3. Set the locomotive's short address (1–127) in its card, if known.
-4. Press **Power on**. Startup sends 32 broadcast emergency-stop packets before
+4. Press **Turn power on**. Startup sends 32 broadcast stop packets before
    repeating each roster entry's function groups and 128-step zero-speed/direction packets.
-5. Switch F0 on and use **← Rev / Fwd →** to test directional headlights. These
-   are requested directions; actual end/lamp behavior depends on decoder mapping
-   and its normal-direction configuration. The decoder must support 128-step
+5. Switch **Headlights · F0** on and use **← Rev / Fwd →** to test directional
+   headlights. The decoder mapping and normal-direction configuration determine
+   which lamps respond. The decoder must support 128-step
    speed/direction packets. The direction choice is RAM-only and defaults forward.
-6. Press **Power off** before changing the roster or moving wires.
+6. Press **Turn power off** before editing the roster. Disconnect motor VIN before
+   changing wires.
 
 ## Find an unknown address
 
-Keep one locomotive on the test track. Power on, then choose **Find address**.
-Enter a possible range, for example **1–100**; address 0 is broadcast, not a loco
-candidate. The search first verifies all-on/all-off, halves the candidate range
-based on your answers, then confirms a single address with on/off again.
+Keep one locomotive on the test track. Select **Turn power on**, then **Find address**.
+Enter a possible range such as **1–100** and select **Start search**. The range
+accepts short addresses 1–127. Address 0 is reserved for broadcast packets.
+The search first verifies all-on and all-off, halves the candidate range based
+on your answers, then confirms the remaining address with another on/off test.
 
 Every candidate receives repeated F0 and zero-speed packets. Each step waits
 **10 seconds**: the Uno must service up to 127 addresses with both packet types.
-Repeat a question if
-unsure. Do not answer before the locomotive's lamps have settled.
+Repeat a question if unsure. Do not answer before the locomotive's lamps have settled.
 
 Normal loco controls, roster editing, Wi-Fi changes and OTA are locked during a
 search. Cancel, success or a three-minute inactivity timeout clears search lights
@@ -69,8 +70,8 @@ write decoder configuration.
 
 ## Protocol and implementation
 
-The STATE reply has an eighteenth capability field: `1` for stationary control,
-`2` for stationary control plus F0–F28 (Uno 0.6.0).
+The STATE reply has an eighteenth capability field. Value `1` means stationary
+control. Value `2` adds F0–F28 and is used by the current Uno firmware.
 Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
 8/14/16/17-field responses remain readable.
 
@@ -90,10 +91,11 @@ The ESP exposes `/api/track/on`, `/api/track/keep` (session lease),
 `/finder/cancel`. Search replies include a step token; stale answers are rejected.
 The search state machine and Uno packet generator are checked separately. Search and roster banks change only at packet boundaries.
 
-## Verification
+## Stationary control verification on the 0.5.x releases
 
-Uno build: 10,752 bytes flash / 794 bytes static RAM. ESP image: 404,384 bytes.
-The ESP build and browser suites also pass.
+The initial 0.5.0 builds used 10,752 bytes of Uno flash and 794 bytes static RAM.
+The ESP image was 404,384 bytes. See [Validation](../../docs/VALIDATION.md) for
+current build sizes.
 
 Native tests decode stop/direction/F0 packets and XOR, every publication phase,
 every search range/target and all 127 generated splits. They cover lease expiry,
@@ -114,9 +116,10 @@ capture's 2 µs resolution. This is logic-pin verification, not a loaded rail te
 
 The installed ESP/Uno pair also completed a 1–100 search with simulated answers
 for address 37, including settling, stale-step rejection, cleanup and restored
-roster. In version 0.5.0, observed web lost-heartbeat cutoff was 2.179 seconds including
-polling latency; ESP 0.5.4 now uses the separate six-second browser grace above. The actual UI sustained power, changed direction/F0 and switched off on
-reload without restarting; no browser errors or timing faults were reported.
+roster. In 0.5.0, loss of the browser heartbeat cut power after 2.179 seconds
+including polling latency. ESP 0.5.4 introduced the six-second browser grace.
+The UI sustained power, changed direction and F0, and switched off on reload.
+The run recorded zero browser errors and timing faults.
 
 On 2026-11-06, the installed ESP 0.5.4 / Uno 0.5.0 pair stayed enabled through a
 three-second browser-heartbeat gap. It disabled output after 6.129 seconds when
@@ -140,8 +143,9 @@ Packet reference: [NMRA S-9.2.1, broadcast, 128-step control and function groups
 Each locomotive gets six packet slots: F0–F4, zero-speed/direction, F5–F8,
 F9–F12, F13–F20 and F21–F28. The entire schedule repeats while the generator is
 running; enabling the bridge still requires explicit track power. Instructions
-are `80`/F0–F4, `B0`/F5–F8, `A0`/F9–F12, `DE data`/F13–F20 and
-`DF data`/F21–F28, with XOR checksums. See
+use base opcodes `0x80` for F0–F4, `0xB0` for F5–F8 and `0xA0` for F9–F12.
+The `0xDE` and `0xDF` opcodes carry a separate data byte for F13–F20 and
+F21–F28. Every packet carries an XOR checksum. See
 [NMRA S-9.2.1](https://www.nmra.org/sites/default/files/standards/sandrp/DCC/S/s-9.2.1_dcc_extended_packet_formats.pdf).
 
 The Uno prepares two banks of compact packet bytes in the main loop and selects

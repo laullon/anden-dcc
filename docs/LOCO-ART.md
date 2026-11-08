@@ -15,8 +15,9 @@ or claims that the decoder identifies a particular model.
 Choose the type in the loco editor. The preview changes locally, then Save stores
 the choice with the name and address on the ESP. Existing cards default to
 electric. Selecting a type does not send speed/function commands or reset F0.
-Headlight fills continue to follow each card's requested F0 state. The editor
-preview shows illuminated lamps for illustration only.
+The card shows a white headlight and red tail light when track output is active,
+F0 is on and the finder is idle. Direction swaps the colors. The editor preview
+lights both ends for illustration.
 
 ## Editing / embedding
 
@@ -32,7 +33,7 @@ for freshness. Each SVG is embedded once and cloned in the browser; it is not du
 No image downloads, external fonts or raster assets are needed at runtime.
 
 SVGs are compressed with the complete page and included in the ESP application.
-The PNG preview is documentation only and is not stored in firmware.
+The [PNG artwork preview](../assets/loco-types.png) uses simulated controller data.
 
 ## Visual references
 
@@ -43,4 +44,3 @@ under the repository's MIT license.
 - [269 green/yellow Arnold model reference](https://www.gaugemasterretail.com/arnold-hn2608s-renfe-269-electric-locomotive-green-and-yellow-iv.html)
 - [Original 333 green/yellow Roco model reference](https://www.eltallerdelmodelista.com/en/railway-modelling/scale-1-87-h0/locomotives/spain/36017-diesel-locomotive-series-333-renfe-roco-73702.html)
 - [Santa Fe 151F-3101, Museu del Ferrocarril de Catalunya](https://museudelferrocarril.org/es/colecciones/coleccion.asp?cat=%27Locomotoras+de+vapor%27&id=25)
-- [Santa Fe 5001 model/factory side-view reference](https://www.faller.de/en/detail/index/sArticle/21051)

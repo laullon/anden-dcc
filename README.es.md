@@ -40,7 +40,15 @@ primera carga serie; después se actualiza por OTA. OTA no actualiza el Uno.
 
 Conecta a la Wi-Fi abierta **anden-esp13**, abre **http://192.168.13.1/** y configura
 tu red de 2,4 GHz dentro de Setup. Vuelve a tu red y abre
-**http://anden-esp13.local/** o la IP del router. El panel está en inglés.
+**http://anden-esp13.local/** o la IP del ESP13 que aparece en **Your Wi-Fi**.
+El panel está en inglés.
+
+Edita las direcciones conocidas con la vía apagada. Si no conoces la dirección,
+coloca una sola locomotora en la vía de prueba, enciende la salida y abre
+**Find address**. Apaga la vía antes de guardar el resultado en una ficha.
+
+Para actualizar el ESP13, termina la búsqueda, apaga las salidas y elige el
+archivo `.bin` en **Setup → ESP13 firmware**. Recarga el panel tras el reinicio.
 
 La protección por corriente aún no está calibrada. El sistema apaga la salida
 al perder la conexión de control y no la reactiva automáticamente. Mantén la

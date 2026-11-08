@@ -7,7 +7,7 @@ See the [main guide](../../README.md), [wiring](../../docs/hardware/README.md),
 
 ## Build
 
-Tested core: **esp8266:esp8266@3.1.2**. Use **Generic ESP8266, 1 MB / 64 KB
+The build requires **esp8266:esp8266@3.1.2**. Use **Generic ESP8266, 1 MB / 64 KB
 LittleFS, DOUT, 80 MHz**. Keep this layout for OTA compatibility. The board must
 have at least 1 MB of flash; identify its actual flash size before first upload.
 
@@ -17,20 +17,24 @@ tools/build-esp13.sh
 
 The build embeds `web/index.html` and the original SVGs from `../../web/locos/`
 into `SetupPage.cpp` with declarations in `SetupPage.h`, runs host checks,
-compiles with the local AndenStackLink library, and validates `build/esp13-ota/esp13-ota.ino.bin`. The manifest records
-version, board profile, size and SHA-256. Builds require the tested installed core
-version, so the manifest matches the compiler platform. Maximum OTA image: **448 KiB**.
+compiles with the local AndenStackLink library and validates
+`build/esp13-ota/esp13-ota.ino.bin`. The adjacent `manifest.json` records version,
+board profile, size and SHA-256. The OTA cap is **448 KiB**. The actual limit
+may be smaller and appears in the panel and `/api/status` as `otaMaxBytes`.
 
 ## First serial installation
 
-OTA needs this application to be running first. For an unmodified ESP13:
+OTA requires this application to be running already. Use [esptool 5](https://docs.espressif.com/projects/esptool/en/latest/esp8266/esptool/basic-commands.html)
+for the initial serial installation.
 
 1. Disconnect motor VIN and track. Isolate the Uno UART with both shield switches OFF.
 2. Power the ESP shield adequately and connect common GND to a **3.3 V logic**
    USB-UART adapter: adapter TX → ESP RX0, RX → ESP TX0. Use the raw ESP header;
    do not apply 5 V logic there. Avoid conflicting supply feeds.
 3. Enter ROM bootloader mode: hold KEY, press/release ESP RST, then release KEY.
-4. Identify the flash and save a full backup before writing. Do not guess its size.
+4. Identify the flash and save a full backup before writing. Substitute the
+   detected flash capacity in bytes for `ACTUAL_FLASH_SIZE_BYTES`. If a serial
+   command cannot sync, repeat the KEY/RST sequence before retrying.
 
 ```sh
 python -m esptool --chip esp8266 --port ADAPTER_PORT --before no-reset --after no-reset flash-id
@@ -48,7 +52,8 @@ connect Uno and ESP for normal operation; OFF permits Uno USB upload.
 
 Join the open **anden-esp13** Wi-Fi and browse **http://192.168.13.1/**. Setup
 saves your 2.4 GHz router details. Return to your network and browse
-**http://anden-esp13.local/** or the router IP. The recovery AP stays available.
+**http://anden-esp13.local/** or the ESP13 IP shown under **Your Wi-Fi**. The
+recovery AP stays available.
 There is deliberately no app login or AP password. The SDK stores router
 credentials outside the sketch; do not commit them or full flash backups.
 
@@ -57,15 +62,16 @@ browser, helper and ESP upload endpoint validate both image headers, embedded
 length, application identity and the ESP8266 core checksum. The endpoint accepts
 exactly one firmware file, stages it without activating it, and commits only
 after the entire request is valid. Filesystem uploads are unsupported. The
-browser shows progress; the browser and helper verify a new boot ID and the
-expected version:
+browser shows progress and displays the installed version after it observes a new
+boot ID. The CLI helper also checks the version against `--expect-version`.
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
   --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.5
 ```
 
-OTA replaces the **ESP application only**; it cannot update the Uno. Keep OTA
+Add `--dry-run` to check the image and target before uploading. Reload the panel
+after reboot to load the new web UI. Update the Uno separately over USB. Keep OTA
 support in replacement builds. Interrupted/bad updates may require serial recovery;
 there is no automatic rollback. Normal OTA preserves roster/favorites and router
 settings with this layout; flash erasure or layout changes can remove them.
@@ -82,7 +88,7 @@ The DOIT blue LED uses **GPIO16, active LOW**: 500 ms blink while connecting,
 steady when joined, 120 ms dip on user requests. Automatic status polling is quiet.
 The Uno L LED is a separate test, blocked whenever an output is enabled.
 
-## Function explorer and favorites (0.6.0)
+## Function explorer and favorites
 
 Each loco card has a collapsed **Explore functions** panel. Open it, choose F0–F28
 and use its single button to toggle On/Off, just like the buttons on the card.
@@ -99,8 +105,9 @@ current On/Off state. A named F0 changes its permanent button label rather than
 adding a duplicate. Reset name restores Headlights; the F0 button is never removed.
 Naming/pinning works with track power off.
 
-Names are limited to 24 UTF-8 bytes. Pins/names live on the ESP, shared across
-browsers and preserved by normal OTA with the same filesystem layout. Unsaved
+Favorite labels are limited to 24 UTF-8 bytes. Loco names allow up to 48 bytes.
+The ESP shares pins and names across browsers and preserves them through OTA
+with the same filesystem layout. Unsaved
 name drafts, selection and expanded state stay in the current page through polling;
 they reset on reload. Active F0–F28 states live in RAM and start OFF after ESP
 restart. Address changes reset them; renaming preserves them. Removing a loco
@@ -114,7 +121,7 @@ them with defaults. A failed filesystem mount also preserves nonblank or unreada
 flash; only a verified entirely erased region is initialized automatically.
 Filesystem erase/layout changes can still remove this data.
 
-New endpoints (URL-encoded POST; success returns the `dcc` object):
+Function endpoints accept URL-encoded POST fields and return `dcc` on success.
 
 | Path | Fields | Effect |
 | --- | --- | --- |
@@ -127,6 +134,6 @@ returns a numeric 29-bit `functions` mask and a `favorites` array of `{number,na
 F0 remains compatible with `/dcc/f0`. Finder activity locks function changes and
 favorite edits. HTTP 400 means invalid fields or a full pin list; 409 means a search
 is active; 500 means persistence failed; 501 means the Uno needs upgrading; 503
-means the new snapshot was not acknowledged. A failed request leaves saved data
-and acknowledged state unchanged. Upgrade **both boards** for actual F1–F28 output.
+means the new snapshot was not acknowledged. Refresh status before retrying a
+request with a missing reply. F1–F28 require Uno firmware that reports capability `2`.
 

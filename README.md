@@ -16,8 +16,9 @@ a **Deek-Robot L298P motor shield** powers the rails, and a **DOIT ESP13 shield*
 hosts Wi-Fi, the panel and firmware updates. These three stacked boards are the
 supported build.
 
-**Current firmware: ESP13 0.6.5 / Uno 0.6.1.** Speed stays at zero. This release
-controls functions and direction; it does not offer a throttle or CV programming.
+**Current firmware in this repository is ESP13 0.6.5 / Uno 0.6.1.** The panel
+controls functions and direction with speed fixed at zero.
+
 [Español](README.es.md) · [Wiring and BOM](docs/hardware/README.md) ·
 [API](docs/API.md) · [Validation](docs/VALIDATION.md) · [UI review](docs/UI-REVIEW.md) · [Code structure](docs/CODE-STRUCTURE.md) · [Full review](docs/CODE-REVIEW.md)
 
@@ -42,6 +43,8 @@ survive ordinary ESP OTA with the same flash layout.
 
 <img src="assets/ui-desktop.png" alt="The locomotive panel with function favorites" width="840">
 
+Panel preview with simulated controller data. [Mobile preview](assets/ui-mobile.png).
+
 ## Hardware
 
 | Part | Role |
@@ -49,7 +52,7 @@ survive ordinary ESP OTA with the same flash layout.
 | Arduino Uno R3 / ATmega328P, 16 MHz, 5 V | Timer1 DCC, checked serial commands, output timeout |
 | Deek-Robot L298P motor shield, Uno Rev3-style pinout | Bridge A powers the track; bridge B stays disabled |
 | DOIT ESP13 / ESP-WROOM-02 Wi-Fi shield | Web UI, Wi-Fi, saved roster, OTA |
-| USB power for Uno | Supplies the boards' 5 V logic |
+| USB power for Uno | Supplies the stack's 5 V rail |
 | USB-C PD trigger + compatible charger/cable, verified 15 V output | Separate motor VIN supply |
 
 **Open the motor shield's VIN CONNECT link** before using separate motor power.
@@ -61,7 +64,8 @@ neither rail is ground. See the [wiring guide](docs/hardware/README.md),
 
 ## Build and first upload
 
-Use Arduino CLI and the tested cores:
+Install Arduino CLI, Python 3 and a host C++ compiler. The build scripts
+require these exact Arduino core versions.
 
 ```sh
 arduino-cli core install arduino:avr@1.8.7
@@ -76,10 +80,12 @@ The build compiles both sketches and runs native checks. For Arduino IDE, open
 library. Generated web assets are checked in.
 
 For the Uno upload, disconnect motor VIN and the track, leave USB connected and
-turn both ESP13 UART switches OFF:
+turn both ESP13 UART switches OFF. Replace `UNO_PORT` with the Uno port
+from `arduino-cli board list`.
 
 ```sh
-arduino-cli upload --fqbn arduino:avr:uno --port UNO_PORT --input-dir build/uno-stack-test
+arduino-cli upload --fqbn arduino:avr:uno --port UNO_PORT \
+  --input-file build/uno-stack-test/uno-stack-test.ino.hex
 ```
 
 The ESP needs one serial installation before OTA is possible. Use a 3.3 V logic
@@ -92,14 +98,20 @@ adapter, stack the boards and turn both UART switches ON for normal operation.
 
 1. Join the open **anden-esp13** network and open **http://192.168.13.1/**.
 2. Expand Setup and save your 2.4 GHz Wi-Fi details.
-3. Return to your network and open **http://anden-esp13.local/** or the router IP.
-4. Edit the locomotive addresses, or use **Find address** with one loco on the track.
-5. Turn power on explicitly, then test headlights, direction and functions.
+3. Return to your network and open **http://anden-esp13.local/** or the ESP13 IP
+   shown under **Your Wi-Fi**.
+4. If you know the decoder address, edit the loco card with track power off.
+   For an unknown address, put one loco on the test track, select **Turn power
+   on**, then open **Find address** and choose **Start search**. Turn power off
+   before saving the result to a card.
+5. With the address set, turn power on and test headlights, direction and functions.
 
 The setup network remains available for recovery. The panel and OTA intentionally
 have no login. Router credentials are stored on the ESP, not in source control.
 
-Turn track power off before an ESP update. Use Setup → firmware, or:
+Stop track and bench output and finish any address search before an ESP update.
+In **Setup**, choose the ESP13 firmware `.bin` and select **Upload & restart**.
+To upload from the terminal, run:
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
@@ -108,9 +120,12 @@ python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
 
 OTA updates **only the ESP**. Uno updates still use USB with both ESP switches OFF
 and motor power disconnected. The ESP layout stays **1 MB / 64 KB LittleFS**,
-DOUT, for compatibility with the installed application.
+DOUT, for compatibility with the installed application. Reload the panel after
+the ESP restarts so the browser loads the new UI.
 
 ## Checks and limits
+
+Use Node.js 24 for the browser checks, as in CI.
 
 ```sh
 npm ci --prefix tools/ui-tests

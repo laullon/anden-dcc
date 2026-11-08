@@ -2,8 +2,8 @@ source,destination,purpose
 Uno USB,Uno and shield 5V logic,Logic power
 PD +15V,Motor shield VIN terminal,Motor power; VIN CONNECT open
 PD GND,Motor shield GND,Common ground
-Uno D0 RX,ESP13 UART via shield,Checked UART
-Uno D1 TX,ESP13 UART via shield,Checked UART
+ESP13 TX via shield,Uno D0 RX,Checked UART request
+Uno D1 TX,ESP13 RX via shield,Checked UART reply
 Uno D3,Motor shield enable A,Output enable
 Uno D12,Motor shield direction A,Routed DCC
 Uno D9,Motor shield brake A,Held LOW

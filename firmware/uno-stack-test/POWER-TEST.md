@@ -1,14 +1,14 @@
 # Uno / ESP13 / L298P: first powered bench test
 
 This guide starts with a **no-load DC test**. The separate
-[timed DCC scope test](DCC-SCOPE.md) is available in firmware 0.4.0. Leave trains, rails and loads
+[timed DCC scope test](DCC-SCOPE.md) checks the alternating waveform. Leave trains, rails and loads
 disconnected from both bridges. The firmware can pulse **bridge A for 3 seconds**
 in either direction; B stays disabled. Keep normal track mode OFF for this check.
 
 ## Power wiring
 
 The Deek-Robot shield normally joins its motor VIN terminal to the Arduino VIN
-header. Isolate that connection **before using the planned 15 V motor supply**.
+header. Isolate that connection **before connecting the separate 15 V motor supply**.
 Our stack keeps the Uno/ESP logic powered from Uno USB.
 
 1. With the PD output disconnected from every board, select 15 V using the PD
@@ -26,7 +26,7 @@ Our stack keeps the Uno/ESP logic powered from Uno USB.
    | Meter red / black | A+ / A−, for the output test only |
 
 4. Power Uno USB first. With both ESP switches ON, wait for Uno connected and
-   **D3 LOW / D11 LOW** in the panel. Then connect the PD charger and verify the
+   **D3 LOW / D11 LOW** under **Technical readings**. Then connect the PD charger and verify the
    voltage at the shield's VIN/GND terminals. The unloaded L298P should stay cool;
    disconnect the motor supply if it heats rapidly.
 
@@ -40,9 +40,9 @@ Sources: [DCC-EX isolation and power wiring](https://dcc-ex.com/ex-commandstatio
 
 ## Meter test
 
-Install **Uno 0.4.0** and **ESP 0.4.0** using the stack README. Keep motor VIN
-unplugged for the Uno upload; both ESP switches OFF. Afterward turn the switches
-ON, confirm the link, and reconnect the isolated motor supply.
+Use the current Uno and ESP13 builds from the [installation guide](../../README.md#build-and-first-upload).
+Keep motor VIN unplugged and both ESP switches OFF during the Uno upload.
+Afterward turn the switches ON, confirm the link, and reconnect the isolated motor supply.
 
 Open **Setup → Motor shield bench test**. Use the meter in DC-volts mode across
 **A+ and A−** with red on A+, black on A−. No other output connection is needed.
@@ -74,9 +74,9 @@ reading on the unloaded terminals need not settle to exactly zero immediately.
 - The panel blocks LED and roster controls while an output is enabled. Background
   status polls can observe the pulse but never start or renew one.
 
-The assembly still needs calibrated overload behavior, physical DCC waveform
-checks under load, startup stop packets and validated continuous gating before using
-trains. Do not connect a logic analyzer directly to powered bridge outputs.
+Use the [stationary track guide](FIRST-LOCO-TEST.md) for the locomotive procedure
+and [Validation](../../docs/VALIDATION.md) for the recorded limits. Use the
+[logic-pin connections](../../DCC-ANALYZER.md) for a USB analyzer.
 
 ## Observations, 2026-11-03
 
@@ -101,5 +101,5 @@ trains. Do not connect a logic analyzer directly to powered bridge outputs.
   bridge-A output polarity at no load. Afterward both enables read LOW, with no
   reported deadline or CRC faults.
 
-Loaded sensing/calibration, fault response under real current, thermal limits,
-powered DCC waveform quality and locomotive operation remain unvalidated.
+These were no-load DC observations. See the [scope guide](DCC-SCOPE.md) for
+the subsequent no-load DCC observation.
