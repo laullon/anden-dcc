@@ -17,10 +17,12 @@ void command();
 AndenLink::Receiver receiver;
 BridgeBench bench;
 uint8_t ledEdges = 0;
+// A stationary schedule must be acknowledged before TRACKON can enable A.
 bool controlReady = false;
 uint16_t rawA = 0;
 uint32_t nextEdge = 0, lastSense = 0;
 
+// Sample while running and force a fresh reading before enable and status replies.
 void serviceBridge(bool fresh) {
   uint32_t now = millis();
   if (fresh || (bench.active() && uint32_t(now - lastSense) >= 1)) {
@@ -111,6 +113,7 @@ void command() {
     sendState(sequence);
     return;
   }
+  // Only a healthy, still-running track session may renew the ISR guard.
   if (!strcmp(parts[2], "KEEP") && n == 3) {
     serviceBridge(true);
     if (bench.renew(millis()))
@@ -131,6 +134,7 @@ void command() {
     sendState(sequence);
     return;
   }
+  // CONTROLX carries one absolute function snapshot for the entire roster.
   if (!strcmp(parts[2], "CONTROLX")) {
     if (bench.active() && bench.mode != BridgeBench::Track)
       return;
@@ -227,7 +231,7 @@ void command() {
 void setup() {
   const uint8_t pins[] = {ENABLE_A, ENABLE_B, BRAKE_A, BRAKE_B, DIR_A, DIR_B};
   for (uint8_t pin : pins) {
-    digitalWrite(pin, LOW);
+    digitalWrite(pin, LOW); // Set the latch before switching the pin to output.
     pinMode(pin, OUTPUT);
   }
   Serial.begin(115200);
@@ -241,6 +245,7 @@ void loop() {
     digitalWrite(DIR_B, ledEdges ? !digitalRead(DIR_B) : LOW);
     nextEdge = millis() + 120;
   }
+  // Service current and timeout checks while draining a burst of UART bytes.
   while (Serial.available()) {
     serviceBridge();
     int c = Serial.read();

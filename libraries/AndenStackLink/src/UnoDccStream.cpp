@@ -56,6 +56,7 @@ uint16_t UnoDccStream::controlSignature(uint8_t count, const uint8_t* addresses,
 }
 
 void UnoDccStream::encode(uint8_t* out, uint8_t& size, const uint8_t* bytes, uint8_t count) {
+  // Sixteen preamble ones, one zero separator per byte, then a final one.
   size = 17 + count * 9;
   memset(out, 0, 7);
   for (uint8_t p = 0; p < size; ++p) {
@@ -99,6 +100,7 @@ bool UnoDccStream::prepareControl(uint8_t count, const uint8_t* addresses, uint8
 uint16_t UnoDccStream::functionSignature(uint8_t count, const uint8_t* addresses,
                                          uint8_t directions, const uint32_t* functions) {
   char bytes[3 + CAPACITY * 5];
+  // Tag the extended format and serialize each function mask little-endian.
   bytes[0] = char(0xF6);
   bytes[1] = count;
   bytes[2] = directions;
@@ -142,6 +144,8 @@ bool UnoDccStream::prepareFinder(uint8_t first, uint8_t last, uint8_t onLow, uin
   if (!prepare(0, empty, 0))
     return false;
   Bank& b = banks[active ^ 1];
+  // Keep only the range in RAM. The ISR alternates F0 and stop packets for
+  // every address, including addresses excluded from the lit half.
   b.first = first;
   b.last = last;
   b.onLow = onLow;
@@ -179,6 +183,8 @@ bool UnoDccStream::stopBit(uint8_t position, uint8_t address) {
   return (address ^ 0xBF) & (0x80 >> (position - 44));
 }
 
+// Each bit uses the same duration for both halves. Publish a queued bank only
+// before the first half of a new packet, after the previous packet has finished.
 uint16_t UnoDccStream::nextHalfTicks() {
   if (!second) {
     if (!position && pending != 255) {
@@ -186,6 +192,7 @@ uint16_t UnoDccStream::nextHalfTicks() {
       pending = 255;
       slot = 0;
     }
+    // Refresh starts with broadcast stops, then resumes at the first roster slot.
     if (!position && startupPending) {
       startupPending = false;
       startupRemaining = 32;

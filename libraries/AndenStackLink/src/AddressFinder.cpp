@@ -48,6 +48,8 @@ bool AddressFinder::start(unsigned lo, unsigned hi, uint32_t now) {
   return true;
 }
 
+// Verify the lights respond in both states before splitting the range. The
+// step token binds each answer to the question that produced it.
 bool AddressFinder::answer(bool on, uint32_t token, uint32_t now) {
   if (!active() || stage == Stage::Cleanup || token != step || wait(now))
     return false;
@@ -139,6 +141,7 @@ void AddressFinder::next(uint32_t now) {
 }
 
 void AddressFinder::finish(bool ok, uint32_t now) {
+  // Clear search lights before reporting a result and restoring the roster.
   success = ok;
   result = ok ? low : 0;
   change(Stage::Cleanup, now);

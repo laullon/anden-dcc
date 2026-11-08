@@ -4,9 +4,11 @@
 
 class LocoRoster;
 
+// Owns the checked UART exchange and the last accepted Uno STATE snapshot.
 class UnoLink {
 public:
   void begin();
+  // Borrow the controller-owned roster for background synchronization.
   void attach(const LocoRoster& value);
   void holdRoster(bool hold);
   void invalidate();
@@ -27,6 +29,8 @@ public:
   uint32_t packetCount() const;
   uint16_t faultCount() const;
 
+  // True means a valid STATE reply matched this request. Callers check the
+  // reported output or schedule to tell whether the requested action took effect.
   bool query(const char* command);
   bool online() const;
   bool outputsDisabled() const;

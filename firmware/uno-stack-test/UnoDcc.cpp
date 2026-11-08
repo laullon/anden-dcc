@@ -10,13 +10,15 @@
 static_assert(F_CPU == 16000000UL, "Uno DCC timing requires a 16 MHz CPU");
 namespace UnoDcc {
 namespace {
+// The main loop prepares schedules. Timer1 owns the waveform and DCC output edges.
 UnoDccStream stream;
 BridgeGuard bridgeGuard;
 volatile bool running = false;
 volatile uint16_t deadlineFaults = 0;
 volatile bool dccBridge = false, bridgePending = false;
 } // namespace
-// Only this helper and the packet-boundary ISR can set enable A HIGH.
+// DC can enable immediately. DCC leaves A disabled until the ISR reaches a
+// packet boundary, so the first signal on the rails starts with a preamble.
 bool armBridge(bool dcc) {
   bool armed = false;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
@@ -45,6 +47,7 @@ void disarmBridge() {
   }
 }
 namespace {
+// Drop track power before halting Timer1. Recovery requires a reset.
 void timingFault() {
   PORTD &= ~_BV(PD3);
   dccBridge = false;
@@ -72,7 +75,7 @@ void begin() {
     TCCR1A = _BV(COM1B0); // OC1B toggles in hardware at compare, normal mode.
     running = true;
     TIMSK1 = _BV(OCIE1B);
-    TCCR1B = _BV(CS11);
+    TCCR1B = _BV(CS11); // 16 MHz / 8 gives 0.5 us timer ticks.
   }
 }
 bool set(uint8_t count, const uint8_t* addresses, uint8_t mask) {
@@ -85,6 +88,8 @@ bool set(uint8_t count, const uint8_t* addresses, uint8_t mask) {
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     stream.commit();
   }
+  // Report success only once the ISR has published the new bank. This bounded
+  // wait also covers the case where a timer fault prevents publication.
   uint32_t start = millis();
   while (stream.pending != 255 && uint32_t(millis() - start) < 20) {
   }
@@ -191,6 +196,8 @@ ISR(TIMER1_COMPB_vect) {
     UnoDcc::bridgePending = false;
     PORTB &= ~_BV(PB4);
   }
+  // Schedule from the hardware edge to keep ISR latency out of the bit period.
+  // A signed delta handles timer wrap and rejects a compare too close to arm.
   uint16_t due = edge + UnoDcc::stream.nextHalfTicks();
   if (int16_t(due - TCNT1) <= 8)
     UnoDcc::timingFault();

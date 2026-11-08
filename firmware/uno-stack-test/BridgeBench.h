@@ -5,6 +5,7 @@
 class BridgeBench {
 public:
   static constexpr uint16_t DURATION_MS = 3000, RAW_LIMIT = 100;
+  // State and mode numbers are carried in the UART STATE reply.
   enum State : uint8_t {
     Idle,
     Running,
@@ -33,7 +34,7 @@ private:
 
 // Main arms/disarms with interrupts masked. Timer1 calls tick() each half-bit.
 // 60,000 halves last 3.48–6 seconds at the fixed 58/100 us timings, providing
-// a second cutoff if the main loop stops servicing its 3-second deadline.
+// a second cutoff if the main loop stops servicing the bench or track deadline.
 class BridgeGuard {
 public:
   static constexpr uint16_t HALVES = 60000;

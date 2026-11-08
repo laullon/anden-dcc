@@ -21,8 +21,9 @@ public:
     uint16_t signature;
   };
   Bank banks[2] = {};
-  volatile uint8_t active = 0, pending = 255;
+  volatile uint8_t active = 0, pending = 255; // 255 means no bank is queued.
   volatile uint32_t packets = 0;
+  // Signature helpers expect a validated count and arrays with that many entries.
   static uint16_t signature(uint8_t count, const uint8_t* addresses, uint8_t mask);
 
   // Call commit() with interrupts disabled after prepare() succeeds.
@@ -37,6 +38,7 @@ public:
   bool prepareFunctions(uint8_t count, const uint8_t* addresses, uint8_t directions,
                         const uint32_t* functions);
   bool prepareFinder(uint8_t first, uint8_t last, uint8_t onLow, uint8_t onHigh);
+  // Request the startup stop burst at the next packet boundary with interrupts masked.
   void startStopped() { startupPending = true; }
   void commit() { pending = active ^ 1; }
   bool atPacketStart() const { return position == 0 && !second; }

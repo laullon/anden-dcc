@@ -16,5 +16,6 @@ public:
 
 private:
   uint16_t token = 0, sequence = 0;
+  // Track the latest browser heartbeat and latest Uno renewal separately.
   uint32_t seen = 0, kept = 0;
 };

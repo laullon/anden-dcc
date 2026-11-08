@@ -15,6 +15,7 @@ int hex(char c) {
 } // namespace
 
 bool Receiver::feed(char c) {
+  // A new start marker resynchronizes the parser after noise or a partial frame.
   if (c == '@') {
     used = 0;
     collecting = true;
@@ -56,6 +57,7 @@ bool Receiver::feed(char c) {
 }
 
 uint16_t crc16(const char* data, size_t size) {
+  // CRC-16/CCITT-FALSE, polynomial 0x1021 with initial value 0xFFFF.
   uint16_t crc = 0xFFFF;
   for (size_t i = 0; i < size; ++i) {
     crc ^= uint16_t(uint8_t(data[i])) << 8;

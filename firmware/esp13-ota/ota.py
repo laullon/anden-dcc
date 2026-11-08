@@ -98,6 +98,7 @@ def main():
     if 'Update Success!' not in result:
         raise RuntimeError('Updater rejected image: ' + re.sub('<[^>]*>', ' ', result).strip()[:300])
     print('Upload accepted. Waiting for reboot…', flush=True)
+    # A reply with the expected version can still come from the old boot.
     for _ in range(35):
         time.sleep(2)
         try:

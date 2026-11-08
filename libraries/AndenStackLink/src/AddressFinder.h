@@ -1,12 +1,13 @@
 #pragma once
 #include <stdint.h>
 
-// Human-observed F0 search. No CV reads/writes, broadcast or speed packets.
+// Human-observed F0 search state. The Uno builds the live schedule with F0
+// and zero-speed packets for each address in the original range.
 class AddressFinder {
 public:
   static constexpr unsigned WORDS = 128;
-  // 128 * 44 bits * 200 us < 1.13 s. Four seconds covers three full
-  // worst-case refreshes plus the decoder response margin.
+  // Default for the F0-only schedule model. The ESP allows more time for the
+  // live range schedule, which also sends a stop packet per address.
   static constexpr uint32_t SETTLE_MS = 4000, TIMEOUT_MS = 180000;
   enum class Stage {
     Idle,
@@ -34,6 +35,7 @@ public:
   void dismiss();
   // Returns true only when a timeout changes the transmitted schedule.
   bool tick(uint32_t now);
+  // F0-only schedule used by the host model checks.
   void schedule(uint32_t (&words)[WORDS]) const;
 
 private:

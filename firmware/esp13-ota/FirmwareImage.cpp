@@ -6,6 +6,7 @@ namespace {
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 // Prefix lengths for the identity matcher, allowing identifiers across chunks.
 constexpr uint8_t PREFIX[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
+// elf2bin stores length and CRC after the 4 KiB loader and sketch headers.
 constexpr size_t SIZE_OFFSET = 4096 + 16;
 constexpr size_t CRC_OFFSET = SIZE_OFFSET + 4;
 static_assert(sizeof(PREFIX) == sizeof(APP_ID) - 1, "Identity prefix table must match APP_ID");
@@ -52,6 +53,7 @@ bool FirmwareImage::append(const uint8_t* data, size_t length) {
       expectedSize |= uint32_t(value) << (8 * (received - SIZE_OFFSET));
     if (received >= CRC_OFFSET && received < CRC_OFFSET + 4)
       expectedCrc |= uint32_t(value) << (8 * (received - CRC_OFFSET));
+    // elf2bin calculates CRC-32/MPEG-2 with both metadata words set to zero.
     if (received >= SIZE_OFFSET && received < CRC_OFFSET + 4)
       value = 0;
     crc ^= uint32_t(value) << 24;

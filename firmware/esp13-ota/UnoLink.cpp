@@ -16,6 +16,7 @@ void UnoLink::invalidate() {
   dirty = true;
 }
 
+// Poll faster during output tests. Finder owns the temporary schedule while held.
 void UnoLink::loop() {
   if (uint32_t(millis() - lastPoll) >= (benchActive() ? 300 : 2000) && query("STATUS") && capable &&
       desired && !finderHold && (outputsDisabled() || trackActive()) && !matches(*desired))
@@ -59,6 +60,8 @@ bool UnoLink::syncRoster(const LocoRoster& value) {
       directions |= 1 << i;
     command += "," + String(l.address) + "," + String(l.f0 ? 1 : 0);
   }
+  // Prefer the newest snapshot supported by the Uno. The control variants
+  // include explicit zero-speed packets.
   if (trackCapable) {
     command = "CONTROL," + String(value.count) + "," + String(mask) + "," + String(directions);
     for (uint8_t i = 0; i < value.count; ++i)
@@ -144,6 +147,7 @@ bool UnoLink::query(const char* command) {
   size_t size = AndenLink::encode(wire, sizeof(wire), body);
   if (!size)
     return false;
+  // Drain old traffic through the parser, then accept only the new sequence ID.
   while (Serial.available())
     receiver.feed(char(Serial.read()));
   Serial.write(reinterpret_cast<const uint8_t*>(wire), size);
@@ -238,6 +242,7 @@ String UnoLink::json() const {
 bool UnoLink::accept(uint16_t expected) {
   char* parts[18];
   size_t n = AndenLink::fields(receiver.body, parts, 18);
+  // Older Uno versions omit trailing DCC, bench and capability fields.
   if ((n != 8 && n != 14 && n != 16 && n != 17 && n != 18) || strcmp(parts[0], "AD1") ||
       strcmp(parts[2], "STATE"))
     return false;
@@ -273,6 +278,7 @@ bool UnoLink::accept(uint16_t expected) {
   uint16_t reportedMode = (f & 16) ? 1 : 0;
   if (n >= 17 && (!AndenLink::number(parts[16], reportedMode) || reportedMode > (n == 18 ? 3 : 2)))
     return false;
+  // Publish the snapshot only after every field in this reply has passed validation.
   benchCapable = n >= 16;
   dccBenchCapable = n >= 17;
   functionsCapable = n == 18 && !strcmp(parts[17], "2");

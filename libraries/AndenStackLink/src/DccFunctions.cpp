@@ -9,10 +9,12 @@ uint8_t packet(uint8_t address, uint32_t flags, bool forward, uint8_t group, uin
     out[1] = groupOne(flags);
     break;
   case 1:
+    // The 128-step speed byte carries direction with the speed bits clear.
     out[1] = 0x3F;
     out[2] = forward ? 0x80 : 0;
     count = 4;
     break;
+  // Function groups carry F5–F8, F9–F12, F13–F20 and F21–F28 in order.
   case 2:
     out[1] = 0xB0 | ((flags >> 5) & 15);
     break;

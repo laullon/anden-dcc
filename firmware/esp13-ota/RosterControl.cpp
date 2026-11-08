@@ -13,6 +13,7 @@ RosterControl::RosterControl(ESP8266WebServer& webServer, UnoLink& unoLink)
     : server(webServer), uno(unoLink) {
 }
 void RosterControl::begin() {
+  // Allow several full-range sweeps of F0 and zero-speed packets to settle.
   finder.settleMs = 10000;
   loadRoster();
   uno.attach(roster);
@@ -49,6 +50,8 @@ String RosterControl::finderStatus() {
          ",\"result\":" + String(finder.result) + ",\"waitMs\":" + String(finder.wait(millis())) +
          "}";
 }
+// Keep addressing the original range. The lit subset changes per question,
+// and a zero lower bound tells the Uno to switch all search lights off.
 bool RosterControl::applyFinder(const AddressFinder& value) {
   unsigned low = 0, high = 0;
   if (value.stage == AddressFinder::Stage::VerifyOn) {
@@ -77,6 +80,7 @@ void RosterControl::serviceFinder() {
     finder.cancel(millis());
   }
   if (!finder.active()) {
+    // Cleanup finished. Restore the saved roster and resume background sync.
     uno.holdRoster(false);
     uno.invalidate();
     uno.syncRoster(roster);
@@ -105,6 +109,8 @@ void RosterControl::loadRoster() {
     rosterStorage = false;
     return;
   }
+  // Parse into temporary models. A bad record keeps the defaults and disables
+  // saves so the existing file remains available for recovery.
   LocoRoster loaded;
   std::unique_ptr<FavoriteFunctions> loadedFavorites(new (std::nothrow) FavoriteFunctions);
   if (!loadedFavorites) {
@@ -137,6 +143,7 @@ bool RosterControl::saveRoster(const LocoRoster& value, const FavoriteFunctions*
   if (!rosterStorage)
     return false;
   const auto& savedFavorites = changed ? *changed : favorites;
+  // Write both models together. Replace the saved file only after a full write.
   File file = LittleFS.open("/locos.tmp", "w");
   if (!file)
     return false;
@@ -204,6 +211,8 @@ String RosterControl::dccStatus() {
   }
   return out + "],\"finder\":" + finderStatus() + "}";
 }
+// The ESP renews the short Uno lease while the browser lease is valid.
+// A browser disconnect can briefly interrupt heartbeats without cutting power.
 void RosterControl::serviceTrackLease() {
   if (!browserLease.active())
     return;
@@ -235,6 +244,7 @@ void RosterControl::trackRoutes() {
                                 F("Track start refused. Check current cutoff and timing status."));
       return;
     }
+    // Issue a browser token only after the Uno confirms the output is enabled.
     uint16_t trackLease = browserLease.start(millis());
     trackStopReason = "Track A output is disabled.";
     HttpSupport::sendJson(server, 200, "{\"lease\":" + String(trackLease) + "}");
@@ -259,6 +269,7 @@ void RosterControl::trackRoutes() {
     HttpSupport::sendJson(server, 200, F("{\"ok\":true}"));
   });
   server.on("/api/track/off", HTTP_POST, [this] {
+    // A pagehide Stop belongs to one session. Manual Stop applies to any output.
     if (server.hasArg("lease")) {
       uint16_t lease;
       if (!AndenLink::number(server.arg("lease").c_str(), lease) ||
@@ -298,6 +309,7 @@ void RosterControl::finderRoutes() {
       HttpSupport::sendUnoError(server, uno, 409, F("Search unavailable."));
       return;
     }
+    // Suppress automatic roster sync until the search and its cleanup finish.
     uno.holdRoster(true);
     if (!applyFinder(changed)) {
       uno.holdRoster(false);

@@ -147,6 +147,7 @@ void setup() {
           F("{\"error\":\"Finish the search and turn track power off before setup changes.\"}"));
       return ESP8266WebServer::CLIENT_REQUEST_IS_HANDLED;
     }
+    // The hook runs before multipart parsing, so reset upload state here.
     if (method == "POST" && url == "/update")
       updater.beginRequest(otaCapacity());
     return ESP8266WebServer::CLIENT_REQUEST_CAN_CONTINUE;
@@ -290,6 +291,7 @@ void loop() {
   rosterControl.loop();
   uno.loop();
   refreshStatusLed();
+  // Give the HTTP response time to leave before changing the station link.
   if ((pendingConnect || pendingForget) && int32_t(millis() - applyAt) >= 0) {
     bool forget = pendingForget;
     pendingConnect = pendingForget = false;
