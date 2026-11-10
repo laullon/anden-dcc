@@ -16,7 +16,7 @@ success. Starting a search and answering a question also require a checked reply
 | POST | `/dcc/f0` | `address`, `on` (0/1) |
 | POST | `/dcc/function` | `address`, `function` (0–28), `on` (0/1) |
 | POST | `/dcc/direction` | `address`, `forward` (0/1). Stops cab motion before changing direction. |
-| POST | `/locos/save` | Required `address`. Optional `id` (omit to add), `name` and `type` (`electric`, `diesel`, `steam`) |
+| POST | `/locos/save` | Required `address`. Optional `id` (omit to add), `name` `type` (`electric`, `diesel`, `steam`) and `onDiorama` (0/1). |
 | POST | `/locos/remove` | `id` |
 | POST | `/locos/favorite` | `id`, `function`, `name`; pin or rename |
 | POST | `/locos/favorite/remove` | `id`, `function`; remove pin only |
@@ -39,8 +39,8 @@ Read `otaMaxBytes` from status before uploading. To confirm the restart, poll
 ## Status and persistence
 
 `dcc` includes `ready`, `running`, packet/fault counters, `functionsSupported`,
-`maxFunction=28`, `maxFavorites=8`, `finder` and `locos`. Each loco includes `id`,
-`address`, `name`, `type`, `forward`, `speed=0`, `f0`, numeric 29-bit `functions`,
+`cabFilterSupported`, `maxFunction=28`, `maxFavorites=8`, `finder` and `locos`. Each loco includes `id`,
+`address`, `name`, `type`, `onDiorama`, `forward`, `speed=0`, `f0`, numeric 29-bit `functions`,
 `favorites: [{number,name}]`, and debug F0-group `bytes`. Read reported output
 state from `uno.online`, `uno.enableA`, `uno.enableB` and `uno.trackActive`.
 The `speed` field reports the web request, which is always zero. Read the
@@ -55,8 +55,9 @@ LittleFS `/locos.cfg` using a temporary file and rename. Up to eight favorite na
 Pinning/removing does not activate/deactivate a function. Active function states
 are RAM-only and start OFF on ESP boot; changing an address resets them.
 
-Legacy `anden-roster-2` files are read and upgraded on save to `anden-roster-3`.
-Loco rows are `L\tid\taddress\ttype\tname`; favorite rows are
+Legacy `anden-roster-2` and `anden-roster-3` files load with all locos unmarked
+and upgrade on save to `anden-roster-4`.
+Loco rows are `L\tid\taddress\ttype\tonDiorama\tname`; favorite rows are
 `F\tid\tfunction\tname`. OTA with the same layout preserves this filesystem.
 On a failed mount, only an entirely erased filesystem region is initialized.
 Invalid stored records leave the default roster available with saves disabled.

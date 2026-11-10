@@ -98,8 +98,8 @@ bool UnoDccStream::prepareControl(uint8_t count, const uint8_t* addresses, uint8
 }
 
 uint16_t UnoDccStream::functionSignature(uint8_t count, const uint8_t* addresses,
-                                         uint8_t directions, const uint32_t* functions) {
-  char bytes[3 + CAPACITY * 5];
+                                         uint8_t directions, const uint32_t* functions, uint8_t cabMask) {
+  char bytes[4 + CAPACITY * 5];
   // Tag the extended format and serialize each function mask little-endian.
   bytes[0] = char(0xF6);
   bytes[1] = count;
@@ -109,12 +109,16 @@ uint16_t UnoDccStream::functionSignature(uint8_t count, const uint8_t* addresses
     for (uint8_t j = 0; j < 4; ++j)
       bytes[4 + i * 5 + j] = char(functions[i] >> (j * 8));
   }
-  return AndenLink::crc16(bytes, 3 + count * 5);
+  uint8_t length = 3 + count * 5;
+  // Zero preserves the original CONTROLX signature for older ESP firmware.
+  if (cabMask)
+    bytes[length++] = char(cabMask);
+  return AndenLink::crc16(bytes, length);
 }
 
 bool UnoDccStream::prepareFunctions(uint8_t count, const uint8_t* addresses, uint8_t directions,
-                                    const uint32_t* functions) {
-  if (count > CAPACITY || !functions)
+                                    const uint32_t* functions, uint8_t cabMask) {
+  if (count > CAPACITY || !functions || (count < 8 && (cabMask >> count)))
     return false;
   uint8_t mask = 0, speeds[CAPACITY] = {0};
   for (uint8_t i = 0; i < count; ++i) {
@@ -127,12 +131,13 @@ bool UnoDccStream::prepareFunctions(uint8_t count, const uint8_t* addresses, uin
     return false;
   Bank& b = banks[active ^ 1];
   b.functionMode = count > 0;
+  b.cabMask = cabMask;
   b.slots = count ? count * DccFunctions::GROUPS : 1;
   for (uint8_t i = 0; i < count; ++i)
     for (uint8_t g = 0; g < DccFunctions::GROUPS; ++g)
       DccFunctions::packet(addresses[i], functions[i], directions & (1 << i), g,
                            b.functionPackets[i][g]);
-  b.signature = functionSignature(count, addresses, directions, functions);
+  b.signature = functionSignature(count, addresses, directions, functions, cabMask);
   return true;
 }
 
@@ -144,6 +149,8 @@ bool UnoDccStream::prepareMotion(uint8_t address, uint8_t speedCode) {
   for (uint8_t i = 0; i < current.count; ++i) {
     if (current.addresses[i] != address)
       continue;
+    if (speedCode > 1 && !(current.cabMask & (1 << i)))
+      return false;
     const uint8_t motionSlot = i * DccFunctions::GROUPS + 1;
     if (current.moving && current.firstSlot != motionSlot)
       return false;

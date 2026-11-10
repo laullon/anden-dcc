@@ -1,7 +1,7 @@
 # First locomotive test: lights, direction and address finder
 
 This guide covers stationary track operation on the Uno/ESP13/L298P stack.
-The web panel requests zero speed. Uno 0.7.0 also supports an optional
+The web panel requests zero speed. The Uno also supports an optional
 [encoder cab](CAB.md) for short moves. Leave the knob at step zero for this
 test. F0–F28 and named favorites are available in each locomotive card.
 
@@ -71,7 +71,8 @@ write decoder configuration.
 ## Protocol and implementation
 
 The STATE reply has an eighteenth capability field. Value `1` means stationary
-control. Value `2` adds F0–F28 and is used by the current Uno firmware.
+control. Value `2` adds F0–F28. Value `3` also accepts a trailing cab eligibility
+mask in CONTROLX.
 Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
 8/14/16/17-field responses remain readable.
 
@@ -79,7 +80,9 @@ Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
 - `CONTROLX,count,directionMask,address,functionMask,...`: 0.6.0 atomic roster,
   with one decimal 29-bit mask per address (bit 0 = F0, bit 28 = F28). Maximum
   eight short addresses; the checked body limit is 144 bytes. All speed packets
-  remain zero. The ESP uses this only after seeing capability `2`.
+  remain zero for web requests. Capability `2` accepts the original form.
+  Capability `3` also accepts a final decimal mask of the roster positions
+  marked **On diorama**. Omitting the mask selects no loco for cab movement.
 - `TRACKON`: explicit start, requiring a prepared control/search schedule.
 - `KEEP`: renew only an already-running stationary track lease.
 - `BENCHSTOP`: immediate output disable.

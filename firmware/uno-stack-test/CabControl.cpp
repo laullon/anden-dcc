@@ -3,8 +3,8 @@
 #include <Arduino.h>
 
 namespace {
-constexpr uint8_t ENCODER_A = 4, ENCODER_B = 5, BUTTON = 6;
-constexpr uint16_t HOLD_MS = 700, RELEASE_MS = 25, MAX_MOVE_MS = 800;
+constexpr uint8_t ENCODER_A = 4, ENCODER_B = 5, SELECT = 6, STOP = 2;
+constexpr uint16_t RELEASE_MS = 25, MAX_MOVE_MS = 800;
 
 uint8_t readPhase() {
   return (digitalRead(ENCODER_A) ? 2 : 0) | (digitalRead(ENCODER_B) ? 1 : 0);
@@ -14,20 +14,22 @@ uint8_t readPhase() {
 void CabControl::begin() {
   pinMode(ENCODER_A, INPUT_PULLUP);
   pinMode(ENCODER_B, INPUT_PULLUP);
-  pinMode(BUTTON, INPUT_PULLUP);
+  pinMode(SELECT, INPUT_PULLUP);
+  pinMode(STOP, INPUT_PULLUP);
   phase = readPhase();
-  buttonLatched = digitalRead(BUTTON) == LOW;
-  longHandled = buttonLatched;
-  lastLow = millis();
+  selectLatched = digitalRead(SELECT) == LOW;
+  selectLowAt = millis();
 }
 
-void CabControl::roster(uint8_t size, const uint8_t* values) {
-  count = size;
-  uint8_t next = size ? values[0] : 0;
+void CabControl::roster(uint8_t size, const uint8_t* values, uint8_t cabMask) {
+  count = 0;
+  uint8_t next = 0;
   for (uint8_t i = 0; i < size; ++i) {
-    addresses[i] = values[i];
-    if (values[i] == selected)
-      next = selected;
+    if (!(cabMask & (1 << i)))
+      continue;
+    addresses[count++] = values[i];
+    if (!next || values[i] == selected)
+      next = values[i];
   }
   selected = next;
   transitions = 0;
@@ -60,21 +62,34 @@ bool CabControl::poll(bool trackPowered) {
   const uint8_t previous = phase;
   phase = current;
 
+  if (digitalRead(STOP) == LOW) {
+    stopLowAt = now;
+    transitions = 0;
+    if (!stopLatched) {
+      stopLatched = true;
+      // The same broadcast stop burst used at track startup stops all addresses.
+      if (trackPowered)
+        UnoDcc::startStopped();
+      return stop();
+    }
+    return true;
+  }
+  if (stopLatched) {
+    if (uint32_t(now - stopLowAt) >= RELEASE_MS)
+      stopLatched = false;
+    return true;
+  }
+
   if (speed && (!trackPowered || uint32_t(now - motionStarted) >= MAX_MOVE_MS))
     return stop();
 
-  if (digitalRead(BUTTON) == LOW) {
-    lastLow = now;
+  if (digitalRead(SELECT) == LOW) {
+    selectLowAt = now;
     transitions = 0;
-    if (!buttonLatched) {
-      buttonLatched = true;
-      longHandled = false;
-      pressedAt = now;
-      // Stop on the first low sample. Only release is debounced.
-      return speed ? stop() : !trackPowered || !count || UnoDcc::motion(selected, 1);
-    }
-    if (!longHandled && uint32_t(now - pressedAt) >= HOLD_MS) {
-      longHandled = true;
+    if (!selectLatched) {
+      selectLatched = true;
+      if (!stop())
+        return false;
       for (uint8_t i = 0; i < count; ++i) {
         if (addresses[i] == selected) {
           selected = addresses[(i + 1) % count];
@@ -84,10 +99,9 @@ bool CabControl::poll(bool trackPowered) {
     }
     return true;
   }
-
-  if (buttonLatched) {
-    if (uint32_t(now - lastLow) >= RELEASE_MS)
-      buttonLatched = false;
+  if (selectLatched) {
+    if (uint32_t(now - selectLowAt) >= RELEASE_MS)
+      selectLatched = false;
     return true;
   }
   if (!trackPowered || !count) {

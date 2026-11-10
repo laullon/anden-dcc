@@ -58,7 +58,8 @@ bool isRunning() { return running; }
 bool guardExpired() { return false; }
 bool bridgeStartPending() { return false; }
 bool bridgeIsActive() { return pins[3]; }
-void startStopped() {}
+unsigned broadcastStops = 0;
+void startStopped() { ++broadcastStops; }
 bool armBridge(bool) { pins[3] = 1; return true; }
 void disarmBridge() { pins[3] = 0; }
 void renewGuard() {}
@@ -67,8 +68,8 @@ bool set(uint8_t count, const uint8_t* addresses, uint8_t mask) { return schedul
 bool control(uint8_t count, const uint8_t* addresses, uint8_t mask, uint8_t directions, const uint8_t* speeds) {
     return schedule.prepareControl(count, addresses, mask, directions, speeds);
 }
-bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, const uint32_t* flags) {
-    return schedule.prepareFunctions(count, addresses, directions, flags);
+bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, const uint32_t* flags, uint8_t cabMask) {
+    return schedule.prepareFunctions(count, addresses, directions, flags, cabMask);
 }
 bool motion(uint8_t address, uint8_t speedCode) {
     if (!schedule.prepareMotion(address, speedCode)) return false;
@@ -113,8 +114,9 @@ int main() {
     send("AD1,6,CONTROL,1,0,1,3,1",false);
     assert(!pins[3]);
 
-    // Publish a two-loco roster and use the actual cab poller and packet bank.
-    send("AD1,9,CONTROLX,2,3,3,1,6,8");
+    // Only slots 0 and 2 are on the diorama. Reject bits beyond the roster.
+    send("AD1,8,CONTROLX,3,7,3,1,4,0,6,8,8",false);
+    send("AD1,9,CONTROLX,3,7,3,1,4,0,6,8,5");
     UnoDcc::schedule.active ^= 1;
     auto rotate = [](bool clockwise) {
         const int phases[] = {2,0,1};
@@ -133,29 +135,44 @@ int main() {
     for (int i = 0; i < 5; ++i) rotate(true);
     assert(cab.step() == 3 && packetSpeed(0) == 4 && packetSpeed(1) == 0);
     rotate(false); assert(cab.step() == 2 && packetSpeed(0) == 3);
-    pins[6] = LOW; loop();
+    const unsigned starts = UnoDcc::broadcastStops;
+    pins[2] = LOW; loop();
     assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3]);
-    clockMs += 700; loop(); assert(cab.address() == 6);
-    clockMs += 100; loop(); assert(cab.address() == 6);
-    rotate(true); assert(cab.step() == 0);
-    pins[6] = HIGH; loop();
+    assert(cab.address() == 3 && UnoDcc::broadcastStops == starts+1);
+    rotate(true); assert(cab.step() == 0 && UnoDcc::broadcastStops == starts+1);
+    pins[2] = HIGH; loop();
     rotate(true); assert(cab.step() == 0); // Release bounce cannot restart motion.
     clockMs += 25; loop();
-    rotate(true); assert(cab.step() == 1 && packetSpeed(1) == 2);
-    clockMs += 800; loop(); assert(cab.step() == 0 && packetSpeed(1) == 1 && pins[3]);
+
+    pins[6] = LOW; loop(); assert(cab.address() == 6 && cab.step() == 0);
+    clockMs += 50; loop(); assert(cab.address() == 6); // One change per press.
+    pins[6] = HIGH; clockMs += 25; loop();
+    rotate(true); assert(cab.step() == 1 && packetSpeed(2) == 2);
+    pins[6] = LOW; loop();
+    assert(cab.address() == 3 && cab.step() == 0 && packetSpeed(2) == 1);
+    pins[6] = HIGH; clockMs += 25; loop();
     rotate(true);
-    send("AD1,11,CONTROLX,2,1,3,1,6,8");
+    clockMs += 800; loop(); assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3]);
+    rotate(true);
+    send("AD1,11,CONTROLX,3,5,3,1,4,0,6,8,4"); // Remove selected address 3.
     UnoDcc::schedule.active ^= 1;
-    assert(cab.step() == 0 && cab.address() == 6 && packetSpeed(1) == 0);
+    assert(cab.step() == 0 && cab.address() == 6 && packetSpeed(0) == 0);
     rotate(true); assert(cab.step() == 1);
     clockMs += 2000; loop();
-    assert(cab.step() == 0 && !pins[3] && packetSpeed(1) == 1);
+    assert(cab.step() == 0 && !pins[3] && packetSpeed(2) == 1);
     send("AD1,12,TRACKON");
-    assert(pins[3] && cab.step() == 0 && packetSpeed(1) == 1);
+    assert(pins[3] && cab.step() == 0 && packetSpeed(2) == 1);
     send("AD1,13,FIND,1,10,1,5");
     UnoDcc::schedule.active ^= 1;
     rotate(true); assert(cab.step() == 0 && cab.address() == 0);
     send("AD1,14,BENCHSTOP");
+    send("AD1,15,CONTROLX,1,1,3,0"); // Legacy snapshot opts in nobody.
+    UnoDcc::schedule.active ^= 1;
+    send("AD1,16,TRACKON");
+    rotate(true); assert(cab.address() == 0 && cab.step() == 0 && pins[3]);
+    const unsigned idleStops = UnoDcc::broadcastStops;
+    pins[2] = LOW; loop();
+    assert(UnoDcc::broadcastStops == idleStops+1 && pins[3]);
 }
 ''')
     executable = folder / 'commands'
@@ -166,4 +183,4 @@ int main() {
                     str(ROOT / 'firmware/uno-stack-test/CabControl.cpp'), *library_sources(),
                     '-o', str(executable)], check=True)
     subprocess.run([str(executable)], check=True)
-print('PASS: real Uno UART parser, transactional malformed-command rejection, cab selection, stop, speed cap, timeout, roster/direction changes and default-off outputs.')
+print('PASS: real Uno UART parser, transactional malformed-command rejection, filtered cab selection, dedicated broadcast STOP, speed cap, timeout, roster/direction changes and default-off outputs.')

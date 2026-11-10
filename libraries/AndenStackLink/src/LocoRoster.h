@@ -10,7 +10,7 @@ public:
   enum class Type : uint8_t { Electric, Diesel, Steam };
   struct Loco {
     uint8_t id = 0, address = 0;
-    bool f0 = false, forward = true;
+    bool f0 = false, forward = true, onDiorama = false;
     uint32_t functions = 0;
     Type type = Type::Electric;
     char name[NAME_BYTES + 1] = {};
@@ -21,6 +21,7 @@ public:
 
   static uint32_t functionMask(const Loco& loco);
   static bool setFunction(Loco& loco, uint8_t number, bool on);
+  uint8_t dioramaMask() const;
   int findId(uint8_t id) const;
   int findAddress(uint8_t address) const;
   static const char* typeName(Type type);
@@ -28,7 +29,7 @@ public:
   // Omitting type preserves existing cards and defaults new cards to electric.
   Result save(uint8_t id, uint8_t address, const char* name, const char* type = nullptr);
   // Decode the actual LittleFS record format on-device and in host checks.
-  bool loadRecord(const char* line, bool legacy);
+  bool loadRecord(const char* line, bool legacy, bool hasPresence = false);
   bool remove(uint8_t id);
   void schedule(uint32_t (&words)[CAPACITY]) const;
 };

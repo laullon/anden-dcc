@@ -1,5 +1,12 @@
 # Changelog
 
+## Diorama selection and STOP · ESP13 / Uno 0.7.1
+
+- Save **On diorama** per loco. The cab only selects marked addresses.
+- Press the encoder button to cycle marked locos. Use the separate D2 button
+  to stop all motion while preserving track power and selection.
+- Update the ESP13 first to enable the new cab filter capability.
+
 ## Encoder cab · ESP13 / Uno 0.7.0
 
 - Adjust local crawl speed by turning an encoder. Press to stop and hold to

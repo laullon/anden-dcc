@@ -112,8 +112,9 @@ bool control(uint8_t count, const uint8_t* addresses, uint8_t mask, uint8_t dire
   }
   return stream.pending == 255;
 }
-bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, const uint32_t* flags) {
-  if (!running || !stream.prepareFunctions(count, addresses, directions, flags))
+bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, const uint32_t* flags,
+               uint8_t cabMask) {
+  if (!running || !stream.prepareFunctions(count, addresses, directions, flags, cabMask))
     return false;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     stream.commit();

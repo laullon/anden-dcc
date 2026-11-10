@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-constexpr char VERSION[] = "0.7.0";
+constexpr char VERSION[] = "0.7.1";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
 namespace {
 void serviceBridge(bool fresh = false);
@@ -107,7 +107,7 @@ void sendState(uint16_t sequence) {
                   (digitalRead(DIR_A) ? 16 : 0) | (digitalRead(DIR_B) ? 32 : 0);
   char body[AndenLink::MAX_BODY + 1], wire[AndenLink::MAX_BODY + 8];
   auto dcc = UnoDcc::status();
-  snprintf(body, sizeof(body), "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,2",
+  snprintf(body, sizeof(body), "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,3",
            sequence, VERSION, unsigned(rawA), unsigned(analogRead(A1)), unsigned(flags),
            unsigned(ledEdges), unsigned(dcc.running), unsigned(dcc.count), unsigned(dcc.signature),
            unsigned(dcc.mask), static_cast<unsigned long>(dcc.packets), unsigned(dcc.faults),
@@ -166,9 +166,14 @@ void command() {
   if (!strcmp(parts[2], "CONTROLX")) {
     if (bench.active() && bench.mode != BridgeBench::Track)
       return;
-    uint16_t count, directions;
-    if (n < 5 || !AndenLink::number(parts[3], count) || count > 8 || n != 5 + count * 2 ||
+    uint16_t count, directions, cabMask = 0;
+    if (n < 5 || !AndenLink::number(parts[3], count) || count > 8 ||
+        (n != 5 + count * 2 && n != 6 + count * 2) ||
         !AndenLink::number(parts[4], directions) || directions > 255)
+      return;
+    // A legacy snapshot has no opt-in cab addresses.
+    if (n == 6 + count * 2 &&
+        (!AndenLink::number(parts[n - 1], cabMask) || cabMask >= (1U << count)))
       return;
     uint8_t addresses[8] = {0};
     uint32_t flags[8] = {0};
@@ -179,9 +184,9 @@ void command() {
         return;
       addresses[i] = a;
     }
-    if (!stopCab() || !UnoDcc::functions(count, addresses, directions, flags))
+    if (!stopCab() || !UnoDcc::functions(count, addresses, directions, flags, cabMask))
       return;
-    cab.roster(count, addresses);
+    cab.roster(count, addresses, cabMask);
     controlReady = true;
     sendState(sequence);
     return;

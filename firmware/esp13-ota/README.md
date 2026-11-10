@@ -1,6 +1,6 @@
 # ESP13 web controller
 
-**ESP13 0.7.0 / Uno 0.7.0.** This application hosts the panel, Wi-Fi setup,
+**ESP13 0.7.1 / Uno 0.7.1.** This application hosts the panel, Wi-Fi setup,
 persistent roster and ESP OTA updates. The Uno owns DCC and output timing.
 See the [main guide](../../README.md), [wiring](../../docs/hardware/README.md),
 [HTTP API](../../docs/API.md) and [stationary test](../uno-stack-test/FIRST-LOCO-TEST.md).
@@ -67,11 +67,11 @@ boot ID. The CLI helper also checks the version against `--expect-version`.
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.0
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.1
 ```
 
 Add `--dry-run` to check the image and target before uploading. Reload the panel
-after reboot to load the new web UI. Update the Uno separately over USB. Keep OTA
+after reboot to load the new web UI. Update the Uno separately over USB after updating the ESP13. Keep OTA
 support in replacement builds. Interrupted/bad updates may require serial recovery;
 there is no automatic rollback. Normal OTA preserves roster/favorites and router
 settings with this layout; flash erasure or layout changes can remove them.
@@ -88,7 +88,8 @@ The DOIT blue LED uses **GPIO16, active LOW**: 500 ms blink while connecting,
 steady when joined, 120 ms dip on user requests. Automatic status polling is quiet.
 The Uno L LED is a separate test, blocked whenever an output is enabled.
 The [encoder cab](../uno-stack-test/CAB.md) controls speed locally while the
-web page keeps the track power session alive.
+web page keeps the track power session alive. With track power off, save
+**On diorama** in each loco's editor to include it in cab selection.
 
 ## Function explorer and favorites
 
@@ -115,8 +116,9 @@ they reset on reload. Active F0–F28 states live in RAM and start OFF after ESP
 restart. Address changes reset them; renaming preserves them. Removing a loco
 also removes its pins before its ID can be reused.
 
-Storage accepts old `anden-roster-2` files and upgrades on the next save to
-`anden-roster-3`: `L\tid\taddress\ttype\tname` records followed by
+Storage reads `anden-roster-2` and `anden-roster-3` with each loco unmarked.
+The next save writes `anden-roster-4`, with
+`L\tid\taddress\ttype\tonDiorama\tname` records followed by
 `F\tid\tfunction\tname` records. The temporary-file/rename save contains both
 roster and pins. Invalid existing files disable saves rather than silently replacing
 them with defaults. A failed filesystem mount also preserves nonblank or unreadable
@@ -137,5 +139,5 @@ F0 remains compatible with `/dcc/f0`. Finder activity locks function changes and
 favorite edits. HTTP 400 means invalid fields or a full pin list; 409 means a search
 is active; 500 means persistence failed; 501 means the Uno needs upgrading; 503
 means the new snapshot was not acknowledged. Refresh status before retrying a
-request with a missing reply. F1–F28 require Uno firmware that reports capability `2`.
+request with a missing reply. F1–F28 require Uno capability `2` or `3`. Cab filtering requires `3`.
 

@@ -38,8 +38,7 @@ A one-cable power supply is not part of this validated connection plan.
 | A1 | Current-sense B, telemetry only |
 | D10 | DCC hardware reference for analyzer; not a rail connection |
 
-The optional [encoder cab](../../firmware/uno-stack-test/CAB.md) uses D4–D6
-and A4/A5. The main stack connections above still apply.
+The optional [encoder cab](../../firmware/uno-stack-test/CAB.md) uses D4–D6 for the encoder, D2 for STOP and A4/A5 for the OLED. The main stack connections above still apply.
 
 ## Upload and first test
 

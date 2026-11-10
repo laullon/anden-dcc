@@ -104,7 +104,8 @@ void RosterControl::loadRoster() {
     return;
   }
   String header = file.readStringUntil('\n');
-  bool current = header == "anden-roster-3";
+  const bool hasPresence = header == "anden-roster-4";
+  const bool current = hasPresence || header == "anden-roster-3";
   if (!current && header != "anden-roster-2") {
     rosterStorage = false;
     return;
@@ -123,7 +124,7 @@ void RosterControl::loadRoster() {
     if (!current)
       ok = loaded.loadRecord(line.c_str(), false);
     else if (line.startsWith("L\t"))
-      ok = loaded.loadRecord(line.c_str() + 2, false);
+      ok = loaded.loadRecord(line.c_str() + 2, false, hasPresence);
     else if (line.startsWith("F\t"))
       ok = loadedFavorites->loadRecord(line.c_str() + 2);
     if (!ok) {
@@ -147,11 +148,11 @@ bool RosterControl::saveRoster(const LocoRoster& value, const FavoriteFunctions*
   File file = LittleFS.open("/locos.tmp", "w");
   if (!file)
     return false;
-  String data = "anden-roster-3\n";
+  String data = "anden-roster-4\n";
   for (uint8_t i = 0; i < value.count; ++i) {
     const auto& l = value.entries[i];
     data += "L\t" + String(l.id) + "\t" + String(l.address) + "\t" + LocoRoster::typeName(l.type) +
-            "\t" + l.name + "\n";
+            "\t" + String(l.onDiorama ? 1 : 0) + "\t" + l.name + "\n";
   }
   for (uint8_t i = 0; i < value.count; ++i) {
     uint8_t id = value.entries[i].id;
@@ -173,6 +174,8 @@ String RosterControl::dccStatus() {
   out += uno.matches(roster) ? "true" : "false";
   out += ",\"functionsSupported\":";
   out += uno.functionsSupported() ? "true" : "false";
+  out += ",\"cabFilterSupported\":";
+  out += uno.cabFilterSupported() ? "true" : "false";
   out += ",\"maxFunction\":28,\"maxFavorites\":8";
   out += ",\"running\":";
   out += uno.dccReady() ? "true" : "false";
@@ -188,6 +191,8 @@ String RosterControl::dccStatus() {
     out += "{\"id\":" + String(l.id) + ",\"address\":" + String(l.address) +
            ",\"name\":" + jsonString(l.name) +
            ",\"type\":" + jsonString(LocoRoster::typeName(l.type));
+    out += ",\"onDiorama\":";
+    out += l.onDiorama ? "true" : "false";
     out += ",\"forward\":";
     out += l.forward ? "true" : "false";
     out += ",\"speed\":0";
@@ -495,6 +500,12 @@ void RosterControl::rosterRoutes() {
     int address = rosterNumber(server.arg("address"), 127);
     String name = server.arg("name"), type = server.arg("type");
     name.trim();
+    const bool setPresence = server.hasArg("onDiorama");
+    const String presence = server.arg("onDiorama");
+    if (setPresence && presence != "0" && presence != "1") {
+      HttpSupport::sendJson(server, 400, F("{\"error\":\"On diorama must be 0 or 1.\"}"));
+      return;
+    }
     if (id < 0 || address < 0) {
       HttpSupport::sendJson(server, 400, F("{\"error\":\"Invalid ID or address\"}"));
       return;
@@ -511,6 +522,8 @@ void RosterControl::rosterRoutes() {
           F("{\"error\":\"Invalid name/type, duplicate address or roster full\"}"));
       return;
     }
+    if (setPresence)
+      changed.entries[changed.findAddress(address)].onDiorama = presence == "1";
     if (!saveRoster(changed)) {
       HttpSupport::sendJson(server, 500, F("{\"error\":\"Could not save roster\"}"));
       return;

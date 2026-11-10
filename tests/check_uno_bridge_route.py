@@ -144,7 +144,7 @@ int main(){
  // A cab update leads with the selected speed packet. Check the real ISR bits
  // and verify the short guard still cuts A with ordinary bridge KEEP messages.
  assert(!UnoDcc::motion(6,2));
- pumpTimer=true;assert(UnoDcc::functions(8,allAddresses,0xA5,flags));pumpTimer=false;
+ pumpTimer=true;assert(UnoDcc::functions(8,allAddresses,0xA5,flags,2));pumpTimer=false;
  assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
  auto updateSpeed=[&](uint8_t code) {
    pumpTimer=true;assert(UnoDcc::motion(6,code));pumpTimer=false;
@@ -161,6 +161,7 @@ int main(){
      for(unsigned p=0;p<8;++p)bytes[byte]=(bytes[byte]<<1)|bit(17+byte*9+p);
    assert(bytes[0]==6&&bytes[1]==0x3F&&bytes[2]==code&&bytes[3]==(6^0x3F^code));
  };
+ assert(!UnoDcc::motion(3,2)); // Ineligible even while stopped.
  updateSpeed(2);
  assert(!UnoDcc::motion(3,2));
  assert(!UnoDcc::motion(6,5));

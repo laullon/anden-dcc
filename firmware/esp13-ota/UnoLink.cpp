@@ -38,7 +38,8 @@ bool UnoLink::matches(const LocoRoster& value) const {
          dccCount == value.count && dccMask == mask &&
          dccSignature ==
              (functionsCapable
-                  ? UnoDccStream::functionSignature(value.count, addresses, directions, functions)
+                  ? UnoDccStream::functionSignature(value.count, addresses, directions, functions,
+                                                      cabFilterCapable ? value.dioramaMask() : 0)
               : trackCapable
                   ? UnoDccStream::controlSignature(value.count, addresses, mask, directions, speeds)
                   : UnoDccStream::signature(value.count, addresses, mask));
@@ -71,11 +72,14 @@ bool UnoLink::syncRoster(const LocoRoster& value) {
     command = "CONTROLX," + String(value.count) + "," + String(directions);
     for (uint8_t i = 0; i < value.count; ++i)
       command += "," + String(addresses[i]) + "," + String(functions[i]);
+    if (cabFilterCapable)
+      command += "," + String(value.dioramaMask());
   }
   if (!query(command.c_str()) || !dccRunning || dccCount != value.count || dccMask != mask ||
       dccSignature !=
           (functionsCapable
-               ? UnoDccStream::functionSignature(value.count, addresses, directions, functions)
+               ? UnoDccStream::functionSignature(value.count, addresses, directions, functions,
+                                                      cabFilterCapable ? value.dioramaMask() : 0)
            : trackCapable
                ? UnoDccStream::controlSignature(value.count, addresses, mask, directions, speeds)
                : UnoDccStream::signature(value.count, addresses, mask))) {
@@ -88,6 +92,10 @@ bool UnoLink::syncRoster(const LocoRoster& value) {
 
 bool UnoLink::functionsSupported() const {
   return online() && functionsCapable;
+}
+
+bool UnoLink::cabFilterSupported() const {
+  return online() && cabFilterCapable;
 }
 
 bool UnoLink::trackSupported() const {
@@ -281,7 +289,8 @@ bool UnoLink::accept(uint16_t expected) {
   // Publish the snapshot only after every field in this reply has passed validation.
   benchCapable = n >= 16;
   dccBenchCapable = n >= 17;
-  functionsCapable = n == 18 && !strcmp(parts[17], "2");
+  cabFilterCapable = n == 18 && !strcmp(parts[17], "3");
+  functionsCapable = cabFilterCapable || (n == 18 && !strcmp(parts[17], "2"));
   trackCapable = n == 18 && (!strcmp(parts[17], "1") || functionsCapable);
   benchRemaining = remaining;
   benchState = testState;

@@ -54,12 +54,19 @@ int main(){
  for(unsigned i=0;i<32;++i)assert((packet(startup)==Bytes{0,0x41,0x41}));assert(packet(startup)[0]==3);
  UnoDccStream invalid;functions[0]=uint32_t(1)<<29;assert(!invalid.prepareFunctions(1,addresses,1,functions));
  uint32_t parsed;assert(AndenLink::number32("536870911",parsed,DccFunctions::MASK)&&parsed==DccFunctions::MASK);assert(!AndenLink::number32("536870912",parsed,DccFunctions::MASK));assert(!AndenLink::number32("4294967296",parsed));assert(!AndenLink::number32("-1",parsed));
- std::string command="AD1,65535,CONTROLX,8,255";for(unsigned i=0;i<8;++i)command+=",127,536870911";
+ std::string command="AD1,65535,CONTROLX,8,255";for(unsigned i=0;i<8;++i)command+=",127,536870911";command+=",255";
  char wire[AndenLink::MAX_BODY+8];auto size=AndenLink::encode(wire,sizeof(wire),command.c_str());assert(size);AndenLink::Receiver rx;bool received=false;for(unsigned i=0;i<size;++i)received|=rx.feed(wire[i]);assert(received);
  LocoRoster roster;assert(roster.save(0,3,"Test")==LocoRoster::Result::Ok);auto& loco=roster.entries[0];LocoRoster::setFunction(loco,28,true);LocoRoster::setFunction(loco,0,true);assert(LocoRoster::functionMask(loco)==((uint32_t(1)<<28)|1));LocoRoster::setFunction(loco,0,false);assert(LocoRoster::functionMask(loco)==(uint32_t(1)<<28));assert(!LocoRoster::setFunction(loco,29,true));roster.save(loco.id,4,"Test");assert(!LocoRoster::functionMask(loco));
  FavoriteFunctions favorites;assert(favorites.save(1,2,"Horn"));assert(favorites.save(1,2,"Air horn"));assert(favorites.locos[0].count==1);assert(!std::strcmp(favorites.locos[0].entries[0].name,"Air horn"));
  for(unsigned i=3;i<=9;++i)assert(favorites.save(1,i,"Feature"));assert(!favorites.save(1,10,"Full"));assert(favorites.remove(1,2));assert(favorites.save(1,28,"Smoke"));assert(favorites.save(2,0,"Headlights"));favorites.clear(1);assert(!favorites.locos[0].count&&favorites.locos[1].count==1);
  assert(!favorites.save(0,2,"Bad"));assert(!favorites.save(1,29,"Bad"));assert(!favorites.save(1,1,""));assert(!favorites.save(1,1,"Tab\tname"));assert(!favorites.save(1,1,std::string(25,'a').c_str()));
+ LocoRoster presence;
+ assert(presence.loadRecord("1\t3\telectric\tOld format",false));
+ assert(presence.loadRecord("2\t6\tdiesel\t1\tPresent",false,true));
+ assert(!presence.loadRecord("3\t7\tdiesel\t2\tInvalid",false,true));
+ assert(presence.count==2 && presence.dioramaMask()==2);
+ assert(presence.save(2,6,"Renamed")==LocoRoster::Result::Ok && presence.dioramaMask()==2);
+ assert(presence.remove(1) && presence.dioramaMask()==1);
  FavoriteFunctions loaded;assert(loaded.loadRecord("1\t2\tAir horn"));assert(loaded.loadRecord("2\t28\tSmoke"));assert(!loaded.loadRecord("1\t2\tDuplicate"));assert(!loaded.loadRecord("9\t2\tBad"));assert(!loaded.loadRecord("1\t29\tBad"));assert(!loaded.loadRecord("1\t1\tLine\nname"));
 }
 ''')

@@ -19,6 +19,14 @@ bool LocoRoster::setFunction(Loco& loco, uint8_t number, bool on) {
   return true;
 }
 
+uint8_t LocoRoster::dioramaMask() const {
+  uint8_t mask = 0;
+  for (uint8_t i = 0; i < count; ++i)
+    if (entries[i].onDiorama)
+      mask |= 1 << i;
+  return mask;
+}
+
 int LocoRoster::findId(uint8_t id) const {
   for (uint8_t i = 0; i < count; ++i)
     if (entries[i].id == id)
@@ -88,7 +96,7 @@ LocoRoster::Result LocoRoster::save(uint8_t id, uint8_t address, const char* nam
   return Result::Ok;
 }
 
-bool LocoRoster::loadRecord(const char* line, bool legacy) {
+bool LocoRoster::loadRecord(const char* line, bool legacy, bool hasPresence) {
   if (!line || strlen(line) > 80)
     return false;
   char record[81];
@@ -111,6 +119,17 @@ bool LocoRoster::loadRecord(const char* line, bool legacy) {
     type = second;
     name = third;
   }
+  bool onDiorama = false;
+  if (hasPresence) {
+    char* separator = strchr(name, '\t');
+    if (!separator)
+      return false;
+    *separator++ = 0;
+    if (strcmp(name, "0") && strcmp(name, "1"))
+      return false;
+    onDiorama = *name == '1';
+    name = separator;
+  }
   auto decimal = [](const char* t, unsigned maximum) -> int {
     if (!*t || strlen(t) > 3)
       return -1;
@@ -128,6 +147,7 @@ bool LocoRoster::loadRecord(const char* line, bool legacy) {
   if (save(0, address, name, type) != Result::Ok)
     return false;
   entries[count - 1].id = id;
+  entries[count - 1].onDiorama = onDiorama;
   return true;
 }
 

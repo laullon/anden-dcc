@@ -1,7 +1,8 @@
 # Encoder cab
 
-Uno 0.7.0 adds local crawl control for one locomotive at a time. Use the web
-panel to edit the roster, set direction and turn track power on. Keep that
+Uno and ESP13 0.7.1 provide local crawl control for one locomotive at a time.
+Update the ESP13 first so it understands the new Uno capability. Use the web
+panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
 
 ## Connections
@@ -13,14 +14,15 @@ on the shield headers.
 | --- | --- | --- |
 | Mechanical encoder | A / CLK | D4 |
 | Mechanical encoder | B / DT | D5 |
-| Encoder button | SW | D6 |
+| Encoder button | SW (select next loco) | D6 |
+| Momentary STOP button | Contact to GND when pressed | D2 |
 | Encoder contacts | Common and button return | GND |
 | SSD1306 OLED | SDA | A4 / SDA |
 | SSD1306 OLED | SCL | A5 / SCL |
 | SSD1306 OLED | GND | GND |
 | SSD1306 OLED | VCC | Uno 5 V, with a 5 V compatible breakout |
 
-The encoder inputs have pull-ups and expect contacts that close to ground. Use
+The encoder and STOP inputs have pull-ups and expect contacts that close to ground. Use
 the pin labels on your module. Swap A and B if clockwise decreases speed. The
 decoder counts four valid quadrature transitions per step.
 
@@ -32,13 +34,18 @@ commanded step 1. The cab can run with the display disconnected.
 
 ## Operation
 
-1. Set the decoder address and direction in the panel. Turn track power on.
+1. With power off, open **Edit** on each loco that is physically on the diorama.
+   Check **On diorama** and save. Existing rosters start with all cards unchecked.
+   Set direction in the panel, then turn track power on.
 2. Turn clockwise to increase the selected loco's speed and counterclockwise
    to reduce it. The initial cap is three DCC crawl steps. All other loco
    addresses keep their zero-speed refresh.
-3. Press the knob to send an emergency-stop packet at the next packet boundary.
-   Track power stays on for lights and sound. Keep the button down for about
-   0.7 seconds to select the next loco once. Release before turning again.
+3. Press the encoder button once to select the next marked loco. If the current
+   loco is moving, the Uno sends it a stop first. Selection wraps around the
+   marked list and the next loco starts at step zero.
+4. Press the separate **STOP** button to broadcast an emergency stop to all
+   addresses on the powered track. Selection stays put and the track stays
+   powered for lights and sound. Release STOP and turn the encoder again to move.
 
 An 800 ms motion limit starts with the first nonzero step. Turning the knob or
 receiving a web heartbeat cannot extend it. A fresh turn starts another move.

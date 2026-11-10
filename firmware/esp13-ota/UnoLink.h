@@ -17,6 +17,7 @@ public:
   bool syncRoster(const LocoRoster& value);
   bool functionsSupported() const;
   bool trackSupported() const;
+  bool cabFilterSupported() const;
   bool trackActive() const;
   bool dccReady() const;
   bool benchSupported() const;
@@ -48,7 +49,7 @@ private:
   uint16_t dccCount = 0, dccMask = 0, dccSignature = 0, faults = 0;
   uint32_t packets = 0;
   bool benchCapable = false, dccBenchCapable = false, trackCapable = false,
-       functionsCapable = false;
+       functionsCapable = false, cabFilterCapable = false;
   uint16_t benchRemaining = 0;
   uint8_t benchState = 0, mode = 0;
   bool accept(uint16_t expected);
