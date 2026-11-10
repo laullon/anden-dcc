@@ -16,5 +16,5 @@
 <rect x="35" y="580" width="1030" height="125" rx="12" fill="#fbe7cc"/>
 <text x="54" y="612" class="heading">Uploads and bench diagnostics: motor VIN and tracks disconnected</text>
 <text x="54" y="643" class="body">Both ESP switches OFF for Uno USB upload; ON for normal checked UART control.</text>
-<text x="54" y="674" class="body">Speed stays zero. Raw current cutoff is uncalibrated; loaded fault protection is not proven.</text>
+<text x="54" y="674" class="body">Track power starts at zero speed. Raw current cutoff is uncalibrated.</text>
 </svg>

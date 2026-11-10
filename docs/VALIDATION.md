@@ -16,6 +16,18 @@ shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
   mouse targets during polling, function favorites/drafts, direction, finder,
   themes, setup/OTA, offline behavior and 320 px layouts.
 
+## Encoder cab · ESP13 / Uno 0.7.0
+
+Both targets build and all eight browser suites pass. The Uno command harness
+exercises encoder speed changes, stop and long-press selection, the motion
+limit, schedule changes and power loss. The Timer1 model decodes the priority
+speed/stop packets and checks that the interrupt guard cuts power even when
+ordinary KEEP messages continue.
+
+Uno uses 17,046 bytes of flash and 1,311 bytes of static RAM. The ESP image is
+411,792 bytes. The OLED and stopping distances remain to be checked on hardware.
+See the [cab wiring and first check](../firmware/uno-stack-test/CAB.md).
+
 ## Build snapshot at `e138437`
 
 The comment update regenerated the embedded web page. Both targets built and

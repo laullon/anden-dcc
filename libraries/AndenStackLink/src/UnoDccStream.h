@@ -17,7 +17,8 @@ public:
     };
     uint8_t sizes[CAPACITY * 2], addresses[CAPACITY], count, mask, slots, first, last, onLow,
         onHigh;
-    bool functionMode;
+    bool functionMode, moving;
+    uint8_t firstSlot;
     uint16_t signature;
   };
   Bank banks[2] = {};
@@ -37,6 +38,7 @@ public:
                                     const uint32_t* functions);
   bool prepareFunctions(uint8_t count, const uint8_t* addresses, uint8_t directions,
                         const uint32_t* functions);
+  bool prepareMotion(uint8_t address, uint8_t speedCode);
   bool prepareFinder(uint8_t first, uint8_t last, uint8_t onLow, uint8_t onHigh);
   // Request the startup stop burst at the next packet boundary with interrupts masked.
   void startStopped() { startupPending = true; }

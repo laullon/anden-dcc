@@ -14,7 +14,7 @@ using HttpSupport::jsonString;
 
 // ESP Wi-Fi/web runtime. RosterControl owns the roster and output sessions.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.6.5";
+constexpr char VERSION[] = "0.7.0";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);

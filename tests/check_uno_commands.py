@@ -18,12 +18,13 @@ with tempfile.TemporaryDirectory(prefix='anden-uno-commands-') as directory:
 #define LOW 0
 #define HIGH 1
 #define OUTPUT 1
+#define INPUT_PULLUP 2
 #define A0 14
 #define A1 15
 extern uint32_t clockMs;
 extern uint8_t pins[20];
 inline uint32_t millis() { return clockMs; }
-inline void pinMode(uint8_t, uint8_t) {}
+inline void pinMode(uint8_t pin, uint8_t mode) { if (mode == INPUT_PULLUP) pins[pin] = HIGH; }
 inline void digitalWrite(uint8_t pin, uint8_t value) { pins[pin] = value; }
 inline int digitalRead(uint8_t pin) { return pins[pin]; }
 inline int analogRead(uint8_t) { return 0; }
@@ -42,10 +43,13 @@ extern FakeSerial Serial;
 #include "Arduino.h"
 #include "UnoDcc.h"
 #include "UnoDccStream.h"
+#include "CabDisplay.h"
 #include <cassert>
 uint32_t clockMs = 0;
 uint8_t pins[20] = {};
 FakeSerial Serial;
+void CabDisplay::begin() {}
+void CabDisplay::update(uint8_t, uint8_t) {}
 namespace UnoDcc {
 UnoDccStream schedule;
 bool running = false;
@@ -65,6 +69,11 @@ bool control(uint8_t count, const uint8_t* addresses, uint8_t mask, uint8_t dire
 }
 bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, const uint32_t* flags) {
     return schedule.prepareFunctions(count, addresses, directions, flags);
+}
+bool motion(uint8_t address, uint8_t speedCode) {
+    if (!schedule.prepareMotion(address, speedCode)) return false;
+    schedule.active ^= 1;
+    return true;
 }
 bool find(uint8_t first, uint8_t last, uint8_t low, uint8_t high) { return schedule.prepareFinder(first,last,low,high); }
 }
@@ -103,13 +112,58 @@ int main() {
     send("AD1,6,CONTROLX,1,1,3,536870912",false);
     send("AD1,6,CONTROL,1,0,1,3,1",false);
     assert(!pins[3]);
+
+    // Publish a two-loco roster and use the actual cab poller and packet bank.
+    send("AD1,9,CONTROLX,2,3,3,1,6,8");
+    UnoDcc::schedule.active ^= 1;
+    auto rotate = [](bool clockwise) {
+        const int phases[] = {2,0,1};
+        for (int i = 0; i < 4; ++i) {
+            const int phase = i == 3 ? 3 : phases[clockwise ? i : 2-i];
+            pins[4] = bool(phase & 2); pins[5] = bool(phase & 1);
+            ++clockMs; loop();
+        }
+    };
+    auto packetSpeed = [](unsigned index) {
+        return UnoDcc::schedule.banks[UnoDcc::schedule.active].functionPackets[index][1][2] & 127;
+    };
+    rotate(true); assert(cab.step() == 0);
+    send("AD1,10,TRACKON");
+    assert(pins[3] && cab.address() == 3);
+    for (int i = 0; i < 5; ++i) rotate(true);
+    assert(cab.step() == 3 && packetSpeed(0) == 4 && packetSpeed(1) == 0);
+    rotate(false); assert(cab.step() == 2 && packetSpeed(0) == 3);
+    pins[6] = LOW; loop();
+    assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3]);
+    clockMs += 700; loop(); assert(cab.address() == 6);
+    clockMs += 100; loop(); assert(cab.address() == 6);
+    rotate(true); assert(cab.step() == 0);
+    pins[6] = HIGH; loop();
+    rotate(true); assert(cab.step() == 0); // Release bounce cannot restart motion.
+    clockMs += 25; loop();
+    rotate(true); assert(cab.step() == 1 && packetSpeed(1) == 2);
+    clockMs += 800; loop(); assert(cab.step() == 0 && packetSpeed(1) == 1 && pins[3]);
+    rotate(true);
+    send("AD1,11,CONTROLX,2,1,3,1,6,8");
+    UnoDcc::schedule.active ^= 1;
+    assert(cab.step() == 0 && cab.address() == 6 && packetSpeed(1) == 0);
+    rotate(true); assert(cab.step() == 1);
+    clockMs += 2000; loop();
+    assert(cab.step() == 0 && !pins[3] && packetSpeed(1) == 1);
+    send("AD1,12,TRACKON");
+    assert(pins[3] && cab.step() == 0 && packetSpeed(1) == 1);
+    send("AD1,13,FIND,1,10,1,5");
+    UnoDcc::schedule.active ^= 1;
+    rotate(true); assert(cab.step() == 0 && cab.address() == 0);
+    send("AD1,14,BENCHSTOP");
 }
 ''')
     executable = folder / 'commands'
     subprocess.run([os.environ.get('CXX', 'c++'), '-std=c++11', '-I', str(folder),
                     '-I', str(ROOT / 'firmware/uno-stack-test'),
                     '-I', str(ROOT / 'libraries/AndenStackLink/src'), str(source),
-                    str(ROOT / 'firmware/uno-stack-test/BridgeBench.cpp'), *library_sources(),
+                    str(ROOT / 'firmware/uno-stack-test/BridgeBench.cpp'),
+                    str(ROOT / 'firmware/uno-stack-test/CabControl.cpp'), *library_sources(),
                     '-o', str(executable)], check=True)
     subprocess.run([str(executable)], check=True)
-print('PASS: real Uno UART parser, transactional malformed-command rejection, stationary control readiness and default-off outputs.')
+print('PASS: real Uno UART parser, transactional malformed-command rejection, cab selection, stop, speed cap, timeout, roster/direction changes and default-off outputs.')

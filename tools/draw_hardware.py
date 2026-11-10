@@ -22,7 +22,7 @@ svg='''<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="740" viewBox
 <rect x="35" y="580" width="1030" height="125" rx="12" fill="#fbe7cc"/>
 <text x="54" y="612" class="heading">Uploads and bench diagnostics: motor VIN and tracks disconnected</text>
 <text x="54" y="643" class="body">Both ESP switches OFF for Uno USB upload; ON for normal checked UART control.</text>
-<text x="54" y="674" class="body">Speed stays zero. Raw current cutoff is uncalibrated; loaded fault protection is not proven.</text>
+<text x="54" y="674" class="body">Track power starts at zero speed. Raw current cutoff is uncalibrated.</text>
 </svg>'''
 html='''<!doctype html><html lang="en"><meta charset="utf-8"><title>anden-dcc stack wiring</title><style>body{margin:24px;background:#eee}img{width:100%;max-width:1100px;display:block;margin:auto}@media print{@page{size:A4 landscape;margin:8mm}body{margin:0;background:white}img{width:100%;max-height:180mm}}</style><img src="schematic.svg" alt="Uno, motor shield and ESP13 connection overview">'''
 for name,data in [('schematic.svg',svg),('print.html',html)]:

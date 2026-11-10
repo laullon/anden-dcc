@@ -1,9 +1,9 @@
 # First locomotive test: lights, direction and address finder
 
-Uno **0.6.1** and ESP13 **0.6.5** provide stationary track operation on the Uno/ESP13/L298P stack.
-Speed is fixed at **zero**; the Uno rejects every nonzero speed request. No throttle,
-CV programming or automatic power restoration are provided. F0–F28 and named
-favorite functions are available in each locomotive card.
+This guide covers stationary track operation on the Uno/ESP13/L298P stack.
+The web panel requests zero speed. Uno 0.7.0 also supports an optional
+[encoder cab](CAB.md) for short moves. Leave the knob at step zero for this
+test. F0–F28 and named favorites are available in each locomotive card.
 
 ## Before the first run
 

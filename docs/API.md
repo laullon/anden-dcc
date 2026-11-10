@@ -15,7 +15,7 @@ success. Starting a search and answering a question also require a checked reply
 | POST | `/api/track/off` | Optional `lease`; absent means manual global Stop |
 | POST | `/dcc/f0` | `address`, `on` (0/1) |
 | POST | `/dcc/function` | `address`, `function` (0–28), `on` (0/1) |
-| POST | `/dcc/direction` | `address`, `forward` (0/1); speed stays zero |
+| POST | `/dcc/direction` | `address`, `forward` (0/1). Stops cab motion before changing direction. |
 | POST | `/locos/save` | Required `address`. Optional `id` (omit to add), `name` and `type` (`electric`, `diesel`, `steam`) |
 | POST | `/locos/remove` | `id` |
 | POST | `/locos/favorite` | `id`, `function`, `name`; pin or rename |
@@ -43,6 +43,8 @@ Read `otaMaxBytes` from status before uploading. To confirm the restart, poll
 `address`, `name`, `type`, `forward`, `speed=0`, `f0`, numeric 29-bit `functions`,
 `favorites: [{number,name}]`, and debug F0-group `bytes`. Read reported output
 state from `uno.online`, `uno.enableA`, `uno.enableB` and `uno.trackActive`.
+The `speed` field reports the web request, which is always zero. Read the
+commanded local step on the [cab display](../firmware/uno-stack-test/CAB.md).
 `uno.trackActive` identifies normal track operation. The top-level and
 `dcc.trackPower` flags also include a timed DCC burst.
 

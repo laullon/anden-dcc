@@ -1,5 +1,14 @@
 # Changelog
 
+## Encoder cab · ESP13 / Uno 0.7.0
+
+- Adjust local crawl speed by turning an encoder. Press to stop and hold to
+  select the next address. Show the address and step on a 128×32 I²C OLED.
+- Limit motion to one locomotive, three crawl steps and 800 ms per move.
+  Prioritize stop packets and add an interrupt backup cutoff.
+- Keep the web power session, direction, roster and function controls. Clear
+  motion on schedule changes or loss of track power.
+
 ## Full review · ESP13 0.6.5 / Uno 0.6.1 · 2026-11-06
 
 - Validate Uno roster bounds before signature buffers or address pointers are used.

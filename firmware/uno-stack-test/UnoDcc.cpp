@@ -16,13 +16,17 @@ BridgeGuard bridgeGuard;
 volatile bool running = false;
 volatile uint16_t deadlineFaults = 0;
 volatile bool dccBridge = false, bridgePending = false;
+// The main loop stops after 800 ms. If it stalls, the ISR cuts power after
+// 16,000 half-bits (0.928–1.6 s). Rotation and UART KEEP never extend this.
+constexpr uint16_t MOTION_GUARD_HALVES = 16000;
+volatile uint16_t motionHalves = 0;
 } // namespace
 // DC can enable immediately. DCC leaves A disabled until the ISR reaches a
 // packet boundary, so the first signal on the rails starts with a preamble.
 bool armBridge(bool dcc) {
   bool armed = false;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    if (running) {
+    if (running && !stream.banks[stream.active].moving && stream.pending == 255) {
       PORTD &= ~_BV(PD3);
       bridgeGuard.disarm();
       bridgeGuard.expired = false;
@@ -43,6 +47,7 @@ void disarmBridge() {
     dccBridge = false;
     bridgePending = false;
     bridgeGuard.disarm();
+    motionHalves = 0;
     PORTB &= ~_BV(PB4);
   }
 }
@@ -118,6 +123,31 @@ bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, cons
   }
   return stream.pending == 255;
 }
+bool motion(uint8_t address, uint8_t speedCode) {
+  if (!running || speedCode > MAX_CRAWL_STEP + 1 ||
+      !stream.prepareMotion(address, speedCode))
+    return false;
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    // Check power again after copying the bank. The ISR may have cut it.
+    if (speedCode > 1 && (!running || !dccBridge || bridgePending || !(PORTD & _BV(PD3))))
+      return false;
+    if (speedCode > 1 && !motionHalves)
+      motionHalves = MOTION_GUARD_HALVES;
+    stream.commit();
+  }
+  const uint32_t started = millis();
+  while (stream.pending != 255 && uint32_t(millis() - started) < 20) {
+  }
+  if (stream.pending != 255)
+    return false;
+  if (speedCode <= 1) {
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+      motionHalves = 0;
+    }
+  }
+  return running;
+}
+
 bool find(uint8_t first, uint8_t last, uint8_t low, uint8_t high) {
   if (!running || !stream.prepareFinder(first, last, low, high))
     return false;
@@ -190,7 +220,12 @@ ISR(TIMER1_COMPB_vect) {
       PORTD |= _BV(PD3);
     }
   }
-  if (UnoDcc::bridgeGuard.tick()) {
+  const bool motionExpired = UnoDcc::motionHalves && !--UnoDcc::motionHalves;
+  if (motionExpired) {
+    UnoDcc::bridgeGuard.disarm();
+    UnoDcc::bridgeGuard.expired = true;
+  }
+  if (motionExpired || UnoDcc::bridgeGuard.tick()) {
     PORTD &= ~_BV(PD3);
     UnoDcc::dccBridge = false;
     UnoDcc::bridgePending = false;

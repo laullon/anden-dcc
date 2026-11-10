@@ -141,11 +141,45 @@ int main(){
  assert(enableEdges.size()==2 && enableEdges[0].value==1 && enableEdges[1].value==0);
  unsigned duration=enableEdges[1].time-enableEdges[0].time;
  assert(duration>=uint32_t(BridgeGuard::HALVES-1)*UnoDccStream::ONE && duration<=uint32_t(BridgeGuard::HALVES)*UnoDccStream::ZERO);
+ // A cab update leads with the selected speed packet. Check the real ISR bits
+ // and verify the short guard still cuts A with ordinary bridge KEEP messages.
+ assert(!UnoDcc::motion(6,2));
+ pumpTimer=true;assert(UnoDcc::functions(8,allAddresses,0xA5,flags));pumpTimer=false;
+ assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
+ auto updateSpeed=[&](uint8_t code) {
+   pumpTimer=true;assert(UnoDcc::motion(6,code));pumpTimer=false;
+   const auto start=dccHalves.size()-1;
+   while(dccHalves.size()<start+106)step();
+   auto bit=[&](unsigned p) {
+     auto a=dccHalves[start+p*2],b=dccHalves[start+p*2+1];assert(a==b);
+     return a==UnoDccStream::ONE;
+   };
+   for(unsigned p=0;p<16;++p)assert(bit(p));
+   assert(!bit(16)&&!bit(25)&&!bit(34)&&!bit(43)&&bit(52));
+   uint8_t bytes[4]={};
+   for(unsigned byte=0;byte<4;++byte)
+     for(unsigned p=0;p<8;++p)bytes[byte]=(bytes[byte]<<1)|bit(17+byte*9+p);
+   assert(bytes[0]==6&&bytes[1]==0x3F&&bytes[2]==code&&bytes[3]==(6^0x3F^code));
+ };
+ updateSpeed(2);
+ assert(!UnoDcc::motion(3,2));
+ assert(!UnoDcc::motion(6,5));
+ updateSpeed(1);
+ assert(PORTD.value&_BV(PD3));
+ updateSpeed(4);
+ unsigned halves=0;
+ while(!UnoDcc::guardExpired() && halves<16000) {
+   if(halves%1000==0)UnoDcc::renewGuard();
+   step();++halves;
+ }
+ assert(halves>15000&&UnoDcc::guardExpired()&&!(PORTD.value&_BV(PD3)));
+ assert(!UnoDcc::armBridge(true)); // Stale motion bank cannot be armed.
+ pumpTimer=true;assert(UnoDcc::motion(6,1));pumpTimer=false;
  // A mirror arriving outside the allowed phase must stop both output and timer.
  assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
  step(UnoDcc::BRIDGE_DELAY_TICKS+3);
  assert(!UnoDcc::isRunning() && !(PORTD.value&_BV(PD3)) && !(PORTB.value&_BV(PB4)) && UnoDcc::status().faults==1);
- std::printf("PASS: actual Timer1 ISR, DC isolation, packet-boundary enable, D12 legacy/F0-F28 58/100 us phase model under ISR delays, stop, backup guard and late-edge fail-off.\n");
+ std::printf("PASS: actual Timer1 ISR, DC isolation, packet-boundary enable, D12 legacy/F0-F28 58/100 us phase model under ISR delays, priority cab motion/stop packets, cab/bridge guards and late-edge fail-off.\n");
 }
 ''')
     exe=tmp/'test'

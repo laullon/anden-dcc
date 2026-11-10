@@ -1,8 +1,9 @@
 # Uno DCC controller
 
-**Uno 0.6.1**, paired with ESP13 0.6.5. Supported MCU: **ATmega328P, 16 MHz,
+**Uno 0.7.0**, paired with ESP13 0.7.0. Supported MCU: **ATmega328P, 16 MHz,
 5 V Arduino Uno R3**. It generates DCC, routes bridge A, checks the UART protocol
-and owns the output timeouts. Speed stays zero. Bridge B remains disabled.
+and owns the output timeouts. The optional [encoder cab](CAB.md) controls
+crawl speed. Bridge B remains disabled.
 
 [Wiring and BOM](../../docs/hardware/README.md) ·
 [First locomotive / protocol](FIRST-LOCO-TEST.md) ·
@@ -30,11 +31,11 @@ stays LOW. D11 enable B and D8 brake B stay LOW; D13 direction B also drives the
 Uno L LED test and can blink only when both outputs are disabled. A0/A1 provide
 raw shield current readings; cutoff is uncalibrated.
 
-All five function groups covering F0–F28 and zero-speed/direction packets refresh
+All five function groups covering F0–F28 and speed/direction packets refresh
 for up to eight short addresses. Turning track power on starts with 32 broadcast
 stop packets. Double-buffered
-snapshots publish at complete packet boundaries. Packet bytes are prepared in
-the main loop; time-critical interrupt code selects prebuilt bytes.
+snapshots publish at complete packet boundaries. The local cab can replace one address's speed packet and prioritize it at the next
+packet boundary. Packet bytes are prepared in the main loop; time-critical interrupt code selects prebuilt bytes.
 
 Continuous track operation requires an explicit start and checked KEEP renewals. The independent
 two-second Uno lease expires locally; late KEEP never restarts it. Current/timing

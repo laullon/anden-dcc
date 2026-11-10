@@ -19,10 +19,12 @@ Capture at the fastest supported digital sample rate; a 500 kS/s capture provide
 to establish fine edge accuracy. A binary one is 58 µs high + 58 µs low; zero is
 100 µs + 100 µs. Decode complete DCC packets and verify XOR, not UART/SPI.
 
-The six slots per loco cover F0–F4, zero-speed/direction, F5–F8, F9–F12,
+The six slots per loco cover F0–F4, speed/direction, F5–F8, F9–F12,
 F13–F20 and F21–F28. Startup emits broadcast stops. Use the
 [three-second DCC test](firmware/uno-stack-test/DCC-SCOPE.md) under Setup for a
-bounded observation, or the explicit track session with its heartbeat.
+bounded observation, or the explicit track session with its heartbeat. To check
+local motion, keep motor VIN and track disconnected and follow the
+[encoder cab guide](firmware/uno-stack-test/CAB.md).
 
 Logic 2 worked with the particular generic analyzer used for development;
 compatibility of other units varies. Record device, sample rate, channels and

@@ -136,6 +136,30 @@ bool UnoDccStream::prepareFunctions(uint8_t count, const uint8_t* addresses, uin
   return true;
 }
 
+bool UnoDccStream::prepareMotion(uint8_t address, uint8_t speedCode) {
+  if (pending != 255 || !banks[active].functionMode || speedCode > 127)
+    return false;
+
+  const auto& current = banks[active];
+  for (uint8_t i = 0; i < current.count; ++i) {
+    if (current.addresses[i] != address)
+      continue;
+    const uint8_t motionSlot = i * DccFunctions::GROUPS + 1;
+    if (current.moving && current.firstSlot != motionSlot)
+      return false;
+    auto& next = banks[active ^ 1];
+    next = current;
+    auto& packet = next.functionPackets[i][1];
+    packet[2] = (packet[2] & 0x80) | speedCode;
+    packet[3] = packet[0] ^ packet[1] ^ packet[2];
+    // Keep the roster signature intact. Motion belongs to the local cab.
+    next.moving = speedCode > 1;
+    next.firstSlot = motionSlot;
+    return true;
+  }
+  return false;
+}
+
 bool UnoDccStream::prepareFinder(uint8_t first, uint8_t last, uint8_t onLow, uint8_t onHigh) {
   if (!first || last > 127 || first > last ||
       (onLow && (onLow < first || onHigh > last || onLow > onHigh)) || (!onLow && onHigh))
@@ -190,13 +214,13 @@ uint16_t UnoDccStream::nextHalfTicks() {
     if (!position && pending != 255) {
       active = pending;
       pending = 255;
-      slot = 0;
+      slot = banks[active].firstSlot;
     }
     // Refresh starts with broadcast stops, then resumes at the first roster slot.
     if (!position && startupPending) {
       startupPending = false;
       startupRemaining = 32;
-      slot = 0;
+      slot = banks[active].firstSlot;
     }
     const Bank& b = banks[active];
     if (!position && b.functionMode && !startupRemaining) {

@@ -1,4 +1,6 @@
 #include "BridgeBench.h"
+#include "CabControl.h"
+#include "CabDisplay.h"
 #include "UnoDcc.h"
 #include <AndenStackLink.h>
 #include <Arduino.h>
@@ -6,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-constexpr char VERSION[] = "0.6.1";
+constexpr char VERSION[] = "0.7.0";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
 namespace {
 void serviceBridge(bool fresh = false);
@@ -16,6 +18,8 @@ void command();
 
 AndenLink::Receiver receiver;
 BridgeBench bench;
+CabControl cab;
+CabDisplay display;
 uint8_t ledEdges = 0;
 // A stationary schedule must be acknowledged before TRACKON can enable A.
 bool controlReady = false;
@@ -38,6 +42,28 @@ void serviceBridge(bool fresh) {
     digitalWrite(ENABLE_A, LOW);
     digitalWrite(DIR_A, LOW);
   }
+}
+
+void cabFault() {
+  // A failed stop or speed publication makes the schedule unsafe to re-enable.
+  bench.stop();
+  UnoDcc::disarmBridge();
+  controlReady = false;
+  cab.clearRoster();
+}
+
+bool stopCab() {
+  if (cab.stop())
+    return true;
+  cabFault();
+  return false;
+}
+
+void serviceCab() {
+  const bool trackPowered = bench.active() && bench.mode == BridgeBench::Track &&
+                            digitalRead(ENABLE_A);
+  if (!cab.poll(trackPowered))
+    cabFault();
 }
 
 bool startBridge(uint8_t mode) {
@@ -103,6 +129,7 @@ void command() {
   if (!strcmp(parts[2], "BENCHSTOP") && n == 3) {
     bench.stop();
     UnoDcc::disarmBridge();
+    stopCab();
     serviceBridge();
     sendState(sequence);
     return;
@@ -128,8 +155,9 @@ void command() {
     for (uint8_t i = 0; i < 4; ++i)
       if (!AndenLink::number(parts[3 + i], values[i]) || values[i] > 127)
         return;
-    if (!UnoDcc::find(values[0], values[1], values[2], values[3]))
+    if (!stopCab() || !UnoDcc::find(values[0], values[1], values[2], values[3]))
       return;
+    cab.clearRoster();
     controlReady = true;
     sendState(sequence);
     return;
@@ -151,8 +179,9 @@ void command() {
         return;
       addresses[i] = a;
     }
-    if (!UnoDcc::functions(count, addresses, directions, flags))
+    if (!stopCab() || !UnoDcc::functions(count, addresses, directions, flags))
       return;
+    cab.roster(count, addresses);
     controlReady = true;
     sendState(sequence);
     return;
@@ -174,8 +203,9 @@ void command() {
       addresses[i] = a;
       speeds[i] = s;
     }
-    if (!UnoDcc::control(count, addresses, mask, directions, speeds))
+    if (!stopCab() || !UnoDcc::control(count, addresses, mask, directions, speeds))
       return;
+    cab.clearRoster();
     controlReady = true;
     sendState(sequence);
     return;
@@ -209,8 +239,9 @@ void command() {
       if (on)
         mask |= 1 << i;
     }
-    if (!UnoDcc::set(count, addresses, mask))
+    if (!stopCab() || !UnoDcc::set(count, addresses, mask))
       return;
+    cab.clearRoster();
     controlReady = false;
   } else if (n != 3)
     return;
@@ -234,12 +265,15 @@ void setup() {
     digitalWrite(pin, LOW); // Set the latch before switching the pin to output.
     pinMode(pin, OUTPUT);
   }
+  cab.begin();
+  display.begin();
   Serial.begin(115200);
   UnoDcc::begin();
 }
 
 void loop() {
   serviceBridge();
+  serviceCab();
   if (ledEdges && int32_t(millis() - nextEdge) >= 0) {
     --ledEdges;
     digitalWrite(DIR_B, ledEdges ? !digitalRead(DIR_B) : LOW);
@@ -248,8 +282,10 @@ void loop() {
   // Service current and timeout checks while draining a burst of UART bytes.
   while (Serial.available()) {
     serviceBridge();
+    serviceCab();
     int c = Serial.read();
     if (c >= 0 && receiver.feed(char(c)))
       command();
   }
+  display.update(cab.address(), cab.step());
 }

@@ -16,8 +16,9 @@ a **Deek-Robot L298P motor shield** powers the rails, and a **DOIT ESP13 shield*
 hosts Wi-Fi, the panel and firmware updates. These three stacked boards are the
 supported build.
 
-**Current firmware in this repository is ESP13 0.6.5 / Uno 0.6.1.** The panel
-controls functions and direction with speed fixed at zero.
+**Current firmware in this repository is ESP13 0.7.0 / Uno 0.7.0.** The panel controls
+functions, direction and track power. The optional [encoder cab](firmware/uno-stack-test/CAB.md)
+adds short crawl moves and an address/speed display.
 
 [Español](README.es.md) · [Wiring and BOM](docs/hardware/README.md) ·
 [API](docs/API.md) · [Validation](docs/VALIDATION.md) · [UI review](docs/UI-REVIEW.md) · [Code structure](docs/CODE-STRUCTURE.md) · [Full review](docs/CODE-REVIEW.md)
@@ -43,7 +44,7 @@ survive ordinary ESP OTA with the same flash layout.
 
 <img src="assets/ui-desktop.png" alt="The locomotive panel with function favorites" width="840">
 
-Panel preview with simulated controller data. [Mobile preview](assets/ui-mobile.png).
+Panel preview from ESP13 0.6.5 with simulated controller data. [Mobile preview](assets/ui-mobile.png).
 
 ## Hardware
 
@@ -115,7 +116,7 @@ To upload from the terminal, run:
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.6.5
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.0
 ```
 
 OTA updates **only the ESP**. Uno updates still use USB with both ESP switches OFF
