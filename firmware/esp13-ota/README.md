@@ -1,6 +1,6 @@
 # ESP13 web controller
 
-**ESP13 0.7.1 / Uno 0.7.1.** This application hosts the panel, Wi-Fi setup,
+**ESP13 0.7.1 / Uno 0.7.2.** This application hosts the panel, Wi-Fi setup,
 persistent roster and ESP OTA updates. The Uno owns DCC and output timing.
 See the [main guide](../../README.md), [wiring](../../docs/hardware/README.md),
 [HTTP API](../../docs/API.md) and [stationary test](../uno-stack-test/FIRST-LOCO-TEST.md).

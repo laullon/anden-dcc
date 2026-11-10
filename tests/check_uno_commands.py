@@ -91,6 +91,7 @@ void prepare() { send("AD1,1,CONTROLX,1,1,3,0"); }
 void turnOn() { send("AD1,2,TRACKON");assert(pins[3]);send("AD1,3,BENCHSTOP");assert(!pins[3]); }
 int main() {
     setup();
+    assert(pins[7] == LOW);
     send("AD1,1,TRACKON");assert(!pins[3]);
     prepare();turnOn();
     // Rejected legacy roster requests must preserve the last valid control state.
@@ -131,13 +132,13 @@ int main() {
     };
     rotate(true); assert(cab.step() == 0);
     send("AD1,10,TRACKON");
-    assert(pins[3] && cab.address() == 3);
+    assert(pins[3] && cab.address() == 3 && pins[7] == LOW);
     for (int i = 0; i < 5; ++i) rotate(true);
-    assert(cab.step() == 3 && packetSpeed(0) == 4 && packetSpeed(1) == 0);
+    assert(cab.step() == 3 && packetSpeed(0) == 4 && packetSpeed(1) == 0 && pins[7] == HIGH);
     rotate(false); assert(cab.step() == 2 && packetSpeed(0) == 3);
     const unsigned starts = UnoDcc::broadcastStops;
     pins[2] = LOW; loop();
-    assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3]);
+    assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3] && pins[7] == LOW);
     assert(cab.address() == 3 && UnoDcc::broadcastStops == starts+1);
     rotate(true); assert(cab.step() == 0 && UnoDcc::broadcastStops == starts+1);
     pins[2] = HIGH; loop();
@@ -152,14 +153,14 @@ int main() {
     assert(cab.address() == 3 && cab.step() == 0 && packetSpeed(2) == 1);
     pins[6] = HIGH; clockMs += 25; loop();
     rotate(true);
-    clockMs += 800; loop(); assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3]);
+    clockMs += 800; loop(); assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3] && pins[7] == LOW);
     rotate(true);
     send("AD1,11,CONTROLX,3,5,3,1,4,0,6,8,4"); // Remove selected address 3.
     UnoDcc::schedule.active ^= 1;
-    assert(cab.step() == 0 && cab.address() == 6 && packetSpeed(0) == 0);
+    assert(cab.step() == 0 && cab.address() == 6 && packetSpeed(0) == 0 && pins[7] == LOW);
     rotate(true); assert(cab.step() == 1);
     clockMs += 2000; loop();
-    assert(cab.step() == 0 && !pins[3] && packetSpeed(2) == 1);
+    assert(cab.step() == 0 && !pins[3] && packetSpeed(2) == 1 && pins[7] == LOW);
     send("AD1,12,TRACKON");
     assert(pins[3] && cab.step() == 0 && packetSpeed(2) == 1);
     send("AD1,13,FIND,1,10,1,5");

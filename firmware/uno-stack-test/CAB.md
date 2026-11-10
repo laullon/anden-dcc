@@ -1,6 +1,6 @@
 # Encoder cab
 
-Uno and ESP13 0.7.1 provide local crawl control for one locomotive at a time.
+Uno 0.7.2 and ESP13 0.7.1 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
@@ -25,6 +25,8 @@ See the [base stack schematic](../../docs/hardware/schematic.svg) for motor powe
 | SSD1306 OLED | SCL | A5 / SCL |
 | SSD1306 OLED | GND | GND |
 | SSD1306 OLED | VCC | Uno 5 V, with a 5 V compatible breakout |
+| Optional movement LED | Anode (+) through a 470 Ω resistor | D7 |
+| Optional movement LED | Cathode (−) | GND |
 
 ![Encoder pinout. The three right pins go to D4, GND and D5 from top to bottom. The two switch contacts go to D6 and GND.](../../docs/hardware/encoder-pinout.png)
 
@@ -52,6 +54,11 @@ commanded step 1. The cab can run with the display disconnected.
 4. Press the separate **STOP** button to broadcast an emergency stop to all
    addresses on the powered track. Selection stays put and the track stays
    powered for lights and sound. Release STOP and turn the encoder again to move.
+
+The movement LED is steady while track power is on and the Uno commands a
+nonzero speed. It goes dark when the commanded speed returns to zero or track
+power is cut. It indicates the speed command, so the locomotive can still coast
+after the LED goes dark.
 
 An 800 ms motion limit starts with the first nonzero step. Turning the knob or
 receiving a web heartbeat cannot extend it. A fresh turn starts another move.

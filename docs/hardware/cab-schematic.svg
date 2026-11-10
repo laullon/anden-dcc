@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="815" viewBox="0 0 1000 815" role="img" aria-labelledby="title description">
   <title id="title">Anden DCC cab wiring</title>
-  <desc id="description">Connections on the ESP13 shield's Arduino side. Encoder A to D4, B to D5, switch to D6, and encoder common and switch return to ground. STOP switch between D2 and ground. OLED SDA to A4, SCL to A5, VCC to 5 V and ground to ground. The optional LED connects D7 through a 470 ohm resistor to its anode, with its cathode to ground. D7 firmware support is pending.</desc>
+  <desc id="description">Connections on the ESP13 shield's Arduino side. Encoder A to D4, B to D5, switch to D6, and encoder common and switch return to ground. STOP switch between D2 and ground. OLED SDA to A4, SCL to A5, VCC to 5 V and ground to ground. The optional LED connects D7 through a 470 ohm resistor to its anode, with its cathode to ground. The LED lights during a powered nonzero speed command.</desc>
   <style>
     text{font-family:Arial,Helvetica,sans-serif;fill:#193b3c}
     .title{font-size:33px;font-weight:700}.subtitle{font-size:17px}
@@ -76,7 +76,7 @@
 
   <rect x="30" y="681" width="940" height="101" rx="15" fill="#faf7ff" stroke="#a192b4" stroke-width="1.5"/>
   <text x="51" y="712" class="head">Optional movement LED</text>
-  <text x="51" y="741" class="small">Proposed wiring. Firmware support pending.</text>
+  <text x="51" y="741" class="small">On during a powered speed command.</text>
   <text x="420" y="744" class="label">D7</text>
   <path class="optional" d="M450 738H503 M615 738H682 M805 738H866"/>
   <rect x="503" y="724" width="112" height="28" rx="5" fill="#fff" stroke="#705b91" stroke-width="1.5"/>

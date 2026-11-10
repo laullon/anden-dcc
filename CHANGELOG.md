@@ -1,5 +1,10 @@
 # Changelog
 
+## Cab movement indicator · Uno 0.7.2
+
+- Drive the optional D7 LED while a nonzero cab speed is commanded on powered track.
+- Works with ESP13 0.7.1.
+
 ## Diorama selection and STOP · ESP13 / Uno 0.7.1
 
 - Save **On diorama** per loco. The cab only selects marked addresses.

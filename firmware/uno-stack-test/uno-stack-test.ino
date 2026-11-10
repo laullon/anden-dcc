@@ -8,8 +8,9 @@
 #include <stdio.h>
 #include <string.h>
 
-constexpr char VERSION[] = "0.7.1";
+constexpr char VERSION[] = "0.7.2";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
+constexpr uint8_t MOVEMENT_LED = 7;
 namespace {
 void serviceBridge(bool fresh = false);
 bool startBridge(uint8_t mode);
@@ -64,6 +65,8 @@ void serviceCab() {
                             digitalRead(ENABLE_A);
   if (!cab.poll(trackPowered))
     cabFault();
+  // Recheck the enable pin in case Timer1 cut power while publishing a speed.
+  digitalWrite(MOVEMENT_LED, trackPowered && cab.step() && digitalRead(ENABLE_A) ? HIGH : LOW);
 }
 
 bool startBridge(uint8_t mode) {
@@ -265,7 +268,7 @@ void command() {
 } // namespace
 
 void setup() {
-  const uint8_t pins[] = {ENABLE_A, ENABLE_B, BRAKE_A, BRAKE_B, DIR_A, DIR_B};
+  const uint8_t pins[] = {ENABLE_A, ENABLE_B, BRAKE_A, BRAKE_B, DIR_A, DIR_B, MOVEMENT_LED};
   for (uint8_t pin : pins) {
     digitalWrite(pin, LOW); // Set the latch before switching the pin to output.
     pinMode(pin, OUTPUT);
@@ -286,11 +289,11 @@ void loop() {
   }
   // Service current and timeout checks while draining a burst of UART bytes.
   while (Serial.available()) {
-    serviceBridge();
-    serviceCab();
     int c = Serial.read();
     if (c >= 0 && receiver.feed(char(c)))
       command();
+    serviceBridge();
+    serviceCab();
   }
   display.update(cab.address(), cab.step());
 }
