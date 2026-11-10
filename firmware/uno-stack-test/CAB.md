@@ -22,6 +22,8 @@ on the shield headers.
 | SSD1306 OLED | GND | GND |
 | SSD1306 OLED | VCC | Uno 5 V, with a 5 V compatible breakout |
 
+![Encoder pinout. The three right pins go to D4, GND and D5 from top to bottom. The two switch contacts go to D6 and GND.](../../docs/hardware/encoder-pinout.png)
+
 The encoder and STOP inputs have pull-ups and expect contacts that close to ground. Use
 the pin labels on your module. Swap A and B if clockwise decreases speed. The
 decoder counts four valid quadrature transitions per step.
