@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="815" viewBox="0 0 1000 815" role="img" aria-labelledby="title description">
+  <title id="title">Anden DCC cab wiring</title>
+  <desc id="description">Connections on the ESP13 shield's Arduino side. Encoder A to D4, B to D5, switch to D6, and encoder common and switch return to ground. STOP switch between D2 and ground. OLED SDA to A4, SCL to A5, VCC to 5 V and ground to ground. The optional LED connects D7 through a 470 ohm resistor to its anode, with its cathode to ground. D7 firmware support is pending.</desc>
+  <style>
+    text{font-family:Arial,Helvetica,sans-serif;fill:#193b3c}
+    .title{font-size:33px;font-weight:700}.subtitle{font-size:17px}
+    .head{font-size:21px;font-weight:700}.label{font-size:17px}
+    .pin{font-size:17px;font-weight:700;text-anchor:end}
+    .small{font-size:15px;fill:#425854}
+    .panel{fill:#fff;stroke:#a3b2a6;stroke-width:1.5}
+    .wire,.ground,.power,.optional{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+    .wire{stroke:#28735e}.ground{stroke:#425854}.power{stroke:#a85d23}
+    .optional{stroke:#705b91;stroke-dasharray:6 5}
+    .dot{fill:#fff;stroke-width:2.5;stroke:#28735e}.ground-dot{stroke:#425854}.power-dot{stroke:#a85d23}
+  </style>
+  <rect width="1000" height="815" rx="22" fill="#f5f2eb"/>
+  <text x="30" y="47" class="title">Encoder cab wiring</text>
+  <text x="30" y="76" class="subtitle">Connect to the Arduino-side pins on the ESP13 shield.</text>
+
+  <!-- Uno connections. Repeated GND labels refer to the same common ground. -->
+  <rect x="30" y="106" width="276" height="558" rx="15" class="panel"/>
+  <text x="51" y="140" class="head">Uno header</text>
+  <text x="51" y="163" class="small">All GND pins share ground.</text>
+  <text x="285" y="196" class="pin">D4</text>
+  <text x="285" y="229" class="pin">D5</text>
+  <text x="285" y="262" class="pin">D6</text>
+  <text x="285" y="295" class="pin">GND</text>
+  <text x="285" y="393" class="pin">D2</text>
+  <text x="285" y="426" class="pin">GND</text>
+  <text x="285" y="532" class="pin">A4 / SDA</text>
+  <text x="285" y="565" class="pin">A5 / SCL</text>
+  <text x="285" y="598" class="pin">5 V</text>
+  <text x="285" y="631" class="pin">GND</text>
+
+  <rect x="603" y="106" width="367" height="213" rx="15" class="panel"/>
+  <text x="625" y="140" class="head">Rotary encoder</text>
+  <text x="625" y="163" class="small">Three rotary pins and two switch contacts</text>
+  <text x="625" y="196" class="label">A / CLK</text>
+  <text x="625" y="229" class="label">B / DT</text>
+  <text x="625" y="262" class="label">Switch contact (select next loco)</text>
+  <text x="625" y="295" class="label">C (common) + other switch contact</text>
+
+  <rect x="603" y="335" width="367" height="112" rx="15" class="panel"/>
+  <text x="625" y="366" class="head">Momentary STOP button</text>
+  <text x="625" y="393" class="label">One contact</text>
+  <text x="625" y="426" class="label">Other contact (closes on press)</text>
+
+  <rect x="603" y="463" width="367" height="201" rx="15" class="panel"/>
+  <text x="625" y="492" class="head">SSD1306 OLED</text>
+  <text x="793" y="492" class="small">128×32 I²C · 0x3C</text>
+  <text x="625" y="532" class="label">SDA</text>
+  <text x="625" y="565" class="label">SCL</text>
+  <text x="625" y="598" class="label">VCC (5 V compatible breakout)</text>
+  <text x="625" y="631" class="label">GND</text>
+
+  <!-- Each horizontal wire joins the two labels on its row. -->
+  <path class="wire" d="M306 190H603 M306 223H603 M306 256H603 M306 387H603 M306 526H603 M306 559H603"/>
+  <path class="ground" d="M306 289H603 M306 420H603 M306 625H603"/>
+  <path class="power" d="M306 592H603"/>
+  <g class="dot">
+    <circle cx="306" cy="190" r="4"/><circle cx="603" cy="190" r="4"/>
+    <circle cx="306" cy="223" r="4"/><circle cx="603" cy="223" r="4"/>
+    <circle cx="306" cy="256" r="4"/><circle cx="603" cy="256" r="4"/>
+    <circle cx="306" cy="387" r="4"/><circle cx="603" cy="387" r="4"/>
+    <circle cx="306" cy="526" r="4"/><circle cx="603" cy="526" r="4"/>
+    <circle cx="306" cy="559" r="4"/><circle cx="603" cy="559" r="4"/>
+  </g>
+  <g class="dot ground-dot">
+    <circle cx="306" cy="289" r="4"/><circle cx="603" cy="289" r="4"/>
+    <circle cx="306" cy="420" r="4"/><circle cx="603" cy="420" r="4"/>
+    <circle cx="306" cy="625" r="4"/><circle cx="603" cy="625" r="4"/>
+  </g>
+  <g class="dot power-dot">
+    <circle cx="306" cy="592" r="4"/><circle cx="603" cy="592" r="4"/>
+  </g>
+
+  <rect x="30" y="681" width="940" height="101" rx="15" fill="#faf7ff" stroke="#a192b4" stroke-width="1.5"/>
+  <text x="51" y="712" class="head">Optional movement LED</text>
+  <text x="51" y="741" class="small">Proposed wiring. Firmware support pending.</text>
+  <text x="420" y="744" class="label">D7</text>
+  <path class="optional" d="M450 738H503 M615 738H682 M805 738H866"/>
+  <rect x="503" y="724" width="112" height="28" rx="5" fill="#fff" stroke="#705b91" stroke-width="1.5"/>
+  <text x="559" y="744" text-anchor="middle" class="label">470 Ω</text>
+  <rect x="682" y="724" width="123" height="28" rx="5" fill="#fff" stroke="#705b91" stroke-width="1.5"/>
+  <text x="743.5" y="744" text-anchor="middle" class="label">+ LED −</text>
+  <text x="877" y="744" class="label">GND</text>
+</svg>

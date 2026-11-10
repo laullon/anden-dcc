@@ -10,6 +10,10 @@ page's power session alive while using the knob. Motion commands run on the Uno.
 Disconnect motor VIN and track before wiring or uploading. Use the **Uno** pins
 on the shield headers.
 
+![Cab wiring from the Uno headers to the encoder, STOP button, OLED and optional movement LED.](../../docs/hardware/cab-schematic.svg)
+
+See the [base stack schematic](../../docs/hardware/schematic.svg) for motor power and track wiring.
+
 | Part | Signal | Uno |
 | --- | --- | --- |
 | Mechanical encoder | A / CLK | D4 |
