@@ -9,7 +9,9 @@ in either direction; B stays disabled. Keep normal track mode OFF for this check
 
 The Deek-Robot shield normally joins its motor VIN terminal to the Arduino VIN
 header. Isolate that connection **before connecting the separate 15 V motor supply**.
-Our stack keeps the Uno/ESP logic powered from Uno USB.
+This bench sequence keeps the Uno/ESP logic powered from Uno USB.
+The [cab board power plan](CAB.md#cab-board-and-power) uses an MP1584 instead.
+Disconnect the cab's external 5 V feed before following this USB-powered sequence.
 
 1. With the PD output disconnected from every board, select 15 V using the PD
    module's own table. Verify its output voltage and polarity with a meter.

@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="815" viewBox="0 0 1000 815" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1250" viewBox="0 0 1000 1250" role="img" aria-labelledby="title description">
   <title id="title">Anden DCC cab wiring</title>
-  <desc id="description">Connections on the ESP13 shield's Arduino side. Encoder A to D4, B to D5, switch to D6, and encoder common and switch return to ground. STOP switch between D2 and ground. OLED SDA to A4, SCL to A5, VCC to 5 V and ground to ground. The optional LED connects D7 through a 470 ohm resistor to its anode, with its cathode to ground. The LED lights during a powered nonzero speed command.</desc>
+  <desc id="description">Connections on the ESP13 shield's Arduino side. Encoder A to D4, B to D5, switch to D6, and encoder common and switch return to ground. STOP switch between D2 and ground. OLED SDA to A4, SCL to A5, VCC to 5 V and ground to ground. The optional LED connects D7 through a 470 ohm resistor to its anode, with its cathode to ground. The LED lights during a powered nonzero speed command. On the cab board, a USB-C PD trigger supplies 15 V to motor VIN and MP1584 input. The MP1584 supplies verified 5.0 V to the ESP13 Arduino-side 5V header and OLED VCC. All grounds are common. Disconnect external 5 V before Uno USB. Motor VIN CONNECT stays open.</desc>
   <style>
     text{font-family:Arial,Helvetica,sans-serif;fill:#193b3c}
     .title{font-size:33px;font-weight:700}.subtitle{font-size:17px}
@@ -13,7 +13,7 @@
     .optional{stroke:#705b91;stroke-dasharray:6 5}
     .dot{fill:#fff;stroke-width:2.5;stroke:#28735e}.ground-dot{stroke:#425854}.power-dot{stroke:#a85d23}
   </style>
-  <rect width="1000" height="815" rx="22" fill="#f5f2eb"/>
+  <rect width="1000" height="1250" rx="22" fill="#f5f2eb"/>
   <text x="30" y="47" class="title">Encoder cab wiring</text>
   <text x="30" y="76" class="subtitle">Connect to the Arduino-side pins on the ESP13 shield.</text>
 
@@ -84,4 +84,25 @@
   <rect x="682" y="724" width="123" height="28" rx="5" fill="#fff" stroke="#705b91" stroke-width="1.5"/>
   <text x="743.5" y="744" text-anchor="middle" class="label">+ LED −</text>
   <text x="877" y="744" class="label">GND</text>
+  <!-- Cab power is separate from the signal wiring above. -->
+  <rect x="30" y="807" width="940" height="413" rx="15" class="panel"/>
+  <text x="51" y="841" class="head">Power modules on the cab board</text>
+  <text x="51" y="870" class="small">One USB-C PD input · motor VIN CONNECT OPEN · confirm 5V header continuity to Uno</text>
+  <text x="55" y="909" class="label">USB-C PD charger</text>
+  <rect x="55" y="925" width="245" height="80" rx="10" fill="#f5f2eb" stroke="#a3b2a6"/>
+  <text x="75" y="953" class="head">PD trigger</text>
+  <text x="75" y="982" class="label">Verify 15 V output</text>
+  <path class="power" d="M300 950H775 M395 950V1055H455 M685 1055H775"/>
+  <circle cx="395" cy="950" r="4" fill="#a85d23"/>
+  <text x="795" y="954" class="pin" style="text-anchor:start">15 V MOTOR</text>
+  <text x="795" y="979" class="small">Shield VIN terminal</text>
+  <rect x="455" y="1015" width="230" height="85" rx="10" fill="#f5f2eb" stroke="#a3b2a6"/>
+  <text x="475" y="1044" class="head">MP1584</text>
+  <text x="475" y="1076" class="label">IN+       OUT+ 5.0 V</text>
+  <text x="795" y="1059" class="pin" style="text-anchor:start">5 V LOGIC</text>
+  <text x="795" y="1084" class="small">ESP13 5V + OLED VCC</text>
+  <path class="ground" d="M175 1005V1140H875 M570 1100V1140"/>
+  <circle cx="570" cy="1140" r="4" fill="#425854"/>
+  <text x="51" y="1170" class="small">Common GND: PD − / MP1584 IN− and OUT− / shield GND / OLED / encoder / buttons / LED</text>
+  <text x="51" y="1198" class="small">Set and measure 5.0 V first. Disconnect external 5 V before Uno USB. Hardware validation pending.</text>
 </svg>

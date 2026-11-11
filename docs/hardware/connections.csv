@@ -1,5 +1,17 @@
 source,destination,purpose
-Uno USB,Uno and shield 5V logic,Logic power
+Uno USB,Uno and shield 5V logic,Bench or upload only; disconnect cab external 5 V first
+PD +15V,MP1584 IN+,Cab board step-down input
+PD GND,MP1584 IN-,Common ground
+MP1584 OUT+ 5.0V,ESP13 Arduino-side 5V header and OLED VCC,Verified regulated logic supply; disconnect before Uno USB
+MP1584 OUT-,ESP13 Arduino-side GND header and OLED GND,Common ground
+Uno D4,Encoder A,Rotary input
+Uno D5,Encoder B,Rotary input
+Uno D6,Encoder switch contact,Select next on-diorama loco
+Uno D2,STOP switch contact,Stop movement
+Uno GND,Encoder common and switch returns and STOP return,Contacts close to ground
+Uno D7,470 ohm resistor then LED anode,Commanded movement indicator; LED cathode to GND
+Uno A4,OLED SDA,I2C data
+Uno A5,OLED SCL,I2C clock
 PD +15V,Motor shield VIN terminal,Motor power; VIN CONNECT open
 PD GND,Motor shield GND,Common ground
 ESP13 TX via shield,Uno D0 RX,Checked UART request

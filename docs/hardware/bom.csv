@@ -2,8 +2,14 @@ quantity,item,notes
 1,Arduino Uno R3 ATmega328P,16 MHz 5 V
 1,Deek-Robot L298P motor shield,Rev3 pinout; CD4077 installed; VIN CONNECT opened
 1,DOIT ESP13 shield,Soldered stacking headers
-1,USB logic supply and cable,Adequate for Uno and both shields
-1,USB-C PD charger cable and trigger,Verified 15 V profile for motor VIN
+1,Uno USB cable,Bench and upload only; disconnect external 5 V feed first
+1,MP1584 step-down module,Cab board; 15 V input; adjust and verify 5.0 V output
+1,Mechanical encoder with push button,D4 and D5 rotary contacts; D6 select; common GND
+1,Normally open momentary STOP button,D2 to GND
+1 optional,LED and 470 ohm resistor,D7 through resistor to LED anode; cathode to GND
+1 optional,128x32 SSD1306 OLED,0x3C I2C; 5 V compatible power and inputs
+As needed,Cab board and connectors,Separate labelled 15 V MOTOR and 5 V LOGIC outputs
+1,USB-C PD charger cable and trigger,Cab board; verified 15 V for motor VIN and MP1584 input
 As needed,Track wiring,A+ and A- to both tracks; B unused
 1,3.3 V logic USB-UART adapter,First ESP upload or recovery only
 1,Multimeter,Voltage polarity and VIN isolation checks

@@ -54,10 +54,15 @@ Panel preview from ESP13 0.6.5 with simulated controller data. [Mobile preview](
 | Arduino Uno R3 / ATmega328P, 16 MHz, 5 V | Timer1 DCC, checked serial commands, output timeout |
 | Deek-Robot L298P motor shield, Uno Rev3-style pinout | Bridge A powers the track; bridge B stays disabled |
 | DOIT ESP13 / ESP-WROOM-02 Wi-Fi shield | Web UI, Wi-Fi, saved roster, OTA |
-| USB power for Uno | Supplies the stack's 5 V rail |
-| USB-C PD trigger + compatible charger/cable, verified 15 V output | Separate motor VIN supply |
+| MP1584 on the cab board, adjusted to 5.0 V | Supplies stack logic and OLED through the ESP13 shield 5V/GND headers |
+| USB-C PD trigger + compatible charger/cable, verified 15 V output | Cab input supplies motor VIN and MP1584 input |
 
-**Open the motor shield's VIN CONNECT link** before using separate motor power.
+The [cab board power plan](firmware/uno-stack-test/CAB.md#cab-board-and-power)
+uses one USB-C input; physical validation is pending. The original bench setup
+uses Uno USB for logic power. Disconnect the cab's external 5 V feed before Uno
+USB uploads.
+
+**Open the motor shield's VIN CONNECT link** before connecting motor power.
 Verify VIN terminal → Arduino VIN header is isolated and GND remains connected.
 Leave the CD4077 installed; the Uno uses the shield's normal 5 V signals. No added
 level shifter is required for this stack. A+ and A− feed both tracks in parallel;

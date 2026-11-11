@@ -5,14 +5,48 @@ Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
 
+## Cab board and power
+
+The cab board carries the USB-C PD trigger, MP1584 step-down module, encoder,
+STOP button, movement LED and OLED. One USB-C PD charger supplies the assembly.
+The trigger requests **15 V**. Its output splits between the motor shield VIN
+and the MP1584 input. The MP1584 supplies **regulated 5.0 V** to the stack and OLED.
+
+| Source on cab board | Destination |
+| --- | --- |
+| PD trigger positive, verified 15 V | Motor shield VIN terminal and MP1584 IN+ |
+| PD trigger negative | Motor shield GND terminal and MP1584 IN− |
+| MP1584 OUT+, verified 5.0 V | ESP13 shield Arduino-side 5V header and OLED VCC |
+| MP1584 OUT− | ESP13 shield Arduino-side GND header and cab ground |
+
+All grounds are common, including the encoder and button returns. Use separate,
+clearly labelled **15 V MOTOR** and **5 V LOGIC** connectors to the stack.
+The track rails connect only to bridge A outputs, A+ and A−.
+
+Keep the motor shield's **VIN CONNECT open** and verify that its VIN terminal
+is isolated from the Uno VIN header. With the stack unpowered, also confirm
+continuity from the chosen ESP13 5V/GND pins to the matching Uno header pins.
+Feeding 5 V here bypasses the Uno's regulator.
+
+Before connecting the stack or OLED, power the PD trigger and MP1584 alone.
+Measure the PD output and adjust the MP1584 to **5.0 V**, checking polarity.
+Unplug the charger before completing the wiring. Check that the 5 V rail stays
+stable when the ESP connects to Wi-Fi. This cab supply arrangement still needs
+physical validation; the earlier bench checks used Uno USB and separate motor power.
+
+For a Uno USB upload, unplug the cab's PD charger and disconnect its **5 V LOGIC**
+feed and the track before connecting Uno USB. Both ESP13 UART switches must be
+OFF for the upload. Disconnect Uno USB before reconnecting the cab power feeds.
+This prevents the external 5 V rail and Mac USB supply from feeding each other.
+
 ## Connections
 
-Disconnect motor VIN and track before wiring or uploading. Use the **Uno** pins
-on the shield headers.
+Disconnect all power and the track before wiring. Use the **Uno** pins
+on the shield headers. Follow the power isolation steps above for USB uploads.
 
 ![Cab wiring from the Uno headers to the encoder, STOP button, OLED and optional movement LED.](../../docs/hardware/cab-schematic.svg)
 
-See the [base stack schematic](../../docs/hardware/schematic.svg) for motor power and track wiring.
+The [base stack schematic](../../docs/hardware/schematic.svg) shows the original USB-powered bench arrangement and the bridge A track connections.
 
 | Part | Signal | Uno |
 | --- | --- | --- |

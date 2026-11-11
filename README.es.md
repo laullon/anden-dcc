@@ -33,10 +33,14 @@ pulsadores momentáneos. El significado de cada función depende del decodificad
 Apila un Uno R3 de 5 V / 16 MHz, un Deek-Robot L298P con conexiones tipo Rev3 y un
 DOIT ESP13. Mantén instalado el CD4077. Abre y verifica el enlace **VIN CONNECT**
 del motor shield para separar sus 15 V de la entrada VIN del Uno. Alimenta la
-lógica por USB y el motor shield mediante una fuente USB-C PD verificada a 15 V.
+placa del mando con USB-C PD verificado a 15 V. Esa salida alimenta el VIN del
+motor shield y la entrada del MP1584. Ajusta y mide su salida a **5,0 V** antes de
+conectarla a 5V/GND del ESP13 y al OLED. Todas las masas son comunes.
+El [plan del mando](firmware/uno-stack-test/CAB.md#cab-board-and-power) requiere
+validación física; las pruebas anteriores usaron USB del Uno para la lógica.
 A+ y A− alimentan las dos vías en paralelo; ninguna vía es GND.
 
-Para cargar el Uno: fuente del motor y vía desconectadas, USB conectado y ambos
+Para cargar el Uno: cargador PD, alimentación externa de 5 V y vía desconectados, USB conectado y ambos
 interruptores del ESP13 en OFF. Para uso normal, ambos en ON. El ESP necesita una
 primera carga serie; después se actualiza por OTA. OTA no actualiza el Uno.
 
