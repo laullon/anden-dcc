@@ -1,6 +1,6 @@
 # Encoder cab
 
-Uno 0.7.2 and ESP13 0.7.1 provide local crawl control for one locomotive at a time.
+Uno 0.7.3 and ESP13 0.7.1 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
@@ -55,10 +55,10 @@ The [base stack schematic](../../docs/hardware/schematic.svg) shows the original
 | Encoder button | SW (select next loco) | D6 |
 | Momentary STOP button | Contact to GND when pressed | D2 |
 | Encoder contacts | Common and button return | GND |
-| SSD1306 OLED | SDA | A4 / SDA |
-| SSD1306 OLED | SCL | A5 / SCL |
-| SSD1306 OLED | GND | GND |
-| SSD1306 OLED | VCC | Uno 5 V, with a 5 V compatible breakout |
+| SSD1315 OLED | SDA | A4 / SDA |
+| SSD1315 OLED | SCL | A5 / SCL |
+| SSD1315 OLED | GND | GND |
+| SSD1315 OLED | VCC | Uno 5 V, with a 5 V compatible breakout |
 | Optional movement LED | Anode (+) through a 470 Ω resistor | D7 |
 | Optional movement LED | Cathode (−) | GND |
 
@@ -68,11 +68,20 @@ The encoder and STOP inputs have pull-ups and expect contacts that close to grou
 the pin labels on your module. Swap A and B if clockwise decreases speed. The
 decoder counts four valid quadrature transitions per step.
 
-Use a 128×32 I²C SSD1306 breakout at address `0x3C` with 5 V compatible power
-and I²C inputs and onboard reset circuitry. A bare SSD1306 uses 3.3 V logic.
-The display is probed at Uno boot. It shows `A 003` for address 3 and `S 01` for
-commanded step 1. The cab can run with the display disconnected.
-[5 V compatible 128×32 breakout](https://www.adafruit.com/product/4440)
+Use a 0.96-inch 128×64 I²C SSD1315 Arduino-compatible breakout at address
+`0x3C`, with 5 V compatible power and I²C inputs and onboard reset circuitry.
+Follow the module's printed pin labels. The cab's MP1584 supplies its VCC at 5.0 V.
+
+The display is probed at Uno boot. It shows `A 003` for address 3 in the top
+16 rows and `S 01` for commanded step 1 in rows 32–47. On the yellow/blue
+panel these occupy the yellow and blue regions respectively. Colours are fixed
+by the panel. Rendering uses short I²C writes without a full framebuffer to
+preserve Uno RAM and keep servicing the controls. The cab also runs with the
+display disconnected.
+
+SSD1315 Arduino modules can use the SSD1306 128×64 command configuration.
+The exact module and its colour split still need checking on the cab hardware.
+[SSD1315 Arduino example](https://wiki.seeedstudio.com/Grove-OLED-Yellow%26Blue-Display-0.96-SSD1315_V1.0/)
 
 ## Operation
 

@@ -52,9 +52,9 @@ void CabDisplay::begin() {
   Wire.begin();
   Wire.setClock(400000);
   Wire.setWireTimeout(2000, true);
-  // SSD1306, 32 rows, internal charge pump and page addressing.
-  const uint8_t init[] = {0xAE, 0xD5, 0x80, 0xA8, 31,   0xD3, 0,    0x40, 0x8D,
-                          0x14, 0x20, 2,    0xA1, 0xC8, 0xDA, 0x02, 0x81, 0x8F,
+  // SSD1315/SSD1306, 64 rows, internal charge pump and page addressing.
+  const uint8_t init[] = {0xAE, 0xD5, 0x80, 0xA8, 63,   0xD3, 0,    0x40, 0x8D,
+                          0x14, 0x20, 2,    0xA1, 0xC8, 0xDA, 0x12, 0x81, 0x8F,
                           0xD9, 0xF1, 0xDB, 0x40, 0xA4, 0xA6, 0x2E};
   Wire.beginTransmission(OLED);
   Wire.write(uint8_t(0));
@@ -62,7 +62,7 @@ void CabDisplay::begin() {
   if (Wire.endTransmission())
     return; // An absent display has no effect on cab operation.
 
-  for (uint8_t row = 0; row < 4; ++row) {
+  for (uint8_t row = 0; row < 8; ++row) {
     for (uint8_t x = 0; x < WIDTH; x += CHUNK) {
       startPage(row, x);
       for (uint8_t i = 0; i < CHUNK && x + i < WIDTH; ++i)
@@ -102,7 +102,9 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed) {
     glyphs[3] = address / 10 % 10;
     glyphs[4] = address % 10;
   }
-  startPage(page, column);
+  // Address uses rows 0–15; speed uses rows 32–47 in the blue region.
+  // Only the four text pages need refreshing after the full startup clear.
+  startPage(page < 2 ? page : page + 2, column);
   for (uint8_t i = 0; i < CHUNK && column < TEXT_WIDTH; ++i, ++column)
     Wire.write(textColumn(glyphs[column / 12], column % 12 / 2, page & 1));
   if (Wire.endTransmission())

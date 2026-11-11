@@ -1,5 +1,11 @@
 # Changelog
 
+## 128×64 cab display · Uno 0.7.3
+
+- Configure the SSD1315 OLED for 64 rows and clear all eight display pages.
+- Show the address in the top band and speed in the blue region of a yellow/blue panel.
+- Keep bounded I²C writes and rendering without a full framebuffer.
+
 ## Cab movement indicator · Uno 0.7.2
 
 - Drive the optional D7 LED while a nonzero cab speed is commanded on powered track.

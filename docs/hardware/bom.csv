@@ -7,7 +7,7 @@ quantity,item,notes
 1,Mechanical encoder with push button,D4 and D5 rotary contacts; D6 select; common GND
 1,Normally open momentary STOP button,D2 to GND
 1 optional,LED and 470 ohm resistor,D7 through resistor to LED anode; cathode to GND
-1 optional,128x32 SSD1306 OLED,0x3C I2C; 5 V compatible power and inputs
+1 optional,0.96-inch 128x64 SSD1315 OLED,0x3C I2C; 5 V compatible power and inputs
 As needed,Cab board and connectors,Separate labelled 15 V MOTOR and 5 V LOGIC outputs
 1,USB-C PD charger cable and trigger,Cab board; verified 15 V for motor VIN and MP1584 input
 As needed,Track wiring,A+ and A- to both tracks; B unused

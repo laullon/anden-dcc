@@ -46,8 +46,8 @@
   <text x="625" y="426" class="label">Other contact (closes on press)</text>
 
   <rect x="603" y="463" width="367" height="201" rx="15" class="panel"/>
-  <text x="625" y="492" class="head">SSD1306 OLED</text>
-  <text x="793" y="492" class="small">128×32 I²C · 0x3C</text>
+  <text x="625" y="492" class="head">SSD1315 OLED</text>
+  <text x="793" y="492" class="small">128×64 I²C · 0x3C</text>
   <text x="625" y="532" class="label">SDA</text>
   <text x="625" y="565" class="label">SCL</text>
   <text x="625" y="598" class="label">VCC (5 V compatible breakout)</text>

@@ -10,7 +10,7 @@
 | 1, cab board | Mechanical rotary encoder with push button | A/B on D4/D5; select on D6; contacts to GND |
 | 1, cab board | Normally open momentary STOP button | D2 to GND |
 | 1, optional | LED and 470 Ω series resistor | D7 through resistor to anode; cathode to GND |
-| 1, optional | 128×32 SSD1306 I²C OLED breakout | Address 0x3C; 5 V compatible supply and I²C |
+| 1, optional | 0.96-inch 128×64 SSD1315 I²C OLED breakout | Address 0x3C; 5 V compatible supply and I²C |
 | As needed | Cab board and connectors | Separate labelled 15 V MOTOR and 5 V LOGIC outputs; common GND |
 | 1 | USB-C PD charger, compatible cable and voltage trigger | Must offer the selected 15 V profile; verify output |
 | As needed | Track wire and terminal connections | A+/A− to both tracks in parallel; B unused |
