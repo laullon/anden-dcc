@@ -1,6 +1,6 @@
 # Encoder cab
 
-Uno 0.7.4 and ESP13 0.7.2 provide local crawl control for one locomotive at a time.
+Uno 0.7.5 and ESP13 0.7.2 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
@@ -87,8 +87,10 @@ Labels use the first 16 characters in uppercase, folding Latin-1 accents;
 unsupported characters become a question mark. Full UTF-8 names remain saved
 unchanged in the web panel. Name metadata never enables track output.
 
-Rendering uses short I²C writes without a full framebuffer to preserve Uno RAM
-and keep servicing the controls. The cab also runs with the display disconnected.
+Rendering uses short, polled I²C writes without a full framebuffer to preserve
+Uno RAM and keep servicing the controls. The OLED transport leaves TWI
+interrupts disabled so Timer1 can preempt display transfers. A stalled transfer
+times out and disables further display writes while the cab continues running. The cab also runs with the display disconnected.
 
 SSD1315 Arduino modules can use the SSD1306 128×64 command configuration.
 Static output on the actual module was confirmed on 12 November 2026 with

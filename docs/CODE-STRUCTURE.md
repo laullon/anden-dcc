@@ -14,6 +14,7 @@ on a particular include order or on globals declared by a sketch.
 | `CabLabel.h/.cpp` | Bounded display-name folding and hex transport codec |
 | `CabControl.h/.cpp` | Local encoder/STOP state and cached eligible loco labels |
 | `CabDisplay.h/.cpp` | OLED pixel rendering through bounded I²C transactions |
+| `CabI2c.h/.cpp` | Polled AVR TWI transport that leaves Timer1 interrupts available |
 | `HttpSupport.h/.cpp` | JSON serialization/replies; server and Uno dependencies are explicit parameters |
 | `BrowserLease`, `StatusLed`, `FavoriteFunctions`, `WifiValidation` | Separately compiled policies and models |
 | `RosterStorage.h/.cpp` | Mount existing storage; initialize only verified erased flash |

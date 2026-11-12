@@ -1,6 +1,6 @@
 #include "CabDisplay.h"
 #include <Arduino.h>
-#include <Wire.h>
+#include "CabI2c.h"
 #include <avr/pgmspace.h>
 #include <stdio.h>
 #include <string.h>
@@ -71,15 +71,14 @@ const uint8_t FONT[][5] PROGMEM = {
     {0x61, 0x51, 0x49, 0x45, 0x43}, // 'Z'
 };
 
-void startPage(uint8_t page, uint8_t column) {
-  Wire.beginTransmission(OLED);
-  Wire.write(0x80); // One command follows each continuation control byte.
-  Wire.write(0xB0 | page);
-  Wire.write(0x80);
-  Wire.write(column & 0x0F);
-  Wire.write(0x80);
-  Wire.write(0x10 | (column >> 4));
-  Wire.write(0x40); // Remaining bytes are display data.
+void pageHeader(uint8_t* bytes, uint8_t page, uint8_t column) {
+  bytes[0] = 0x80; // One command follows each continuation control byte.
+  bytes[1] = 0xB0 | page;
+  bytes[2] = 0x80;
+  bytes[3] = column & 0x0F;
+  bytes[4] = 0x80;
+  bytes[5] = 0x10 | (column >> 4);
+  bytes[6] = 0x40; // Remaining bytes are display data.
 }
 
 // Produce one column of a scaled text page without allocating a framebuffer.
@@ -105,32 +104,25 @@ uint8_t textColumn(const char* text, uint8_t x, uint8_t scale, uint8_t part = 0)
 } // namespace
 
 void CabDisplay::begin() {
-  Wire.begin();
-  Wire.setClock(400000);
-  Wire.setWireTimeout(2000, true);
+  CabI2c::begin();
   // SSD1315/SSD1306, 64 rows, internal charge pump and page addressing.
-  const uint8_t init[] = {0xAE, 0xD5, 0x80, 0xA8, 63,   0xD3, 0,    0x40, 0x8D,
+  const uint8_t init[] = {0, 0xAE, 0xD5, 0x80, 0xA8, 63,   0xD3, 0,    0x40, 0x8D,
                           0x14, 0x20, 2,    0xA1, 0xC8, 0xDA, 0x12, 0x81, 0x8F,
                           0xD9, 0xF1, 0xDB, 0x40, 0xA4, 0xA6, 0x2E};
-  Wire.beginTransmission(OLED);
-  Wire.write(uint8_t(0));
-  Wire.write(init, sizeof(init));
-  if (Wire.endTransmission())
+  if (!CabI2c::write(OLED, init, sizeof(init)))
     return; // An absent display has no effect on cab operation.
 
   for (uint8_t row = 0; row < 8; ++row) {
     for (uint8_t x = 0; x < WIDTH; x += CHUNK) {
-      startPage(row, x);
-      for (uint8_t i = 0; i < CHUNK && x + i < WIDTH; ++i)
-        Wire.write(uint8_t(0));
-      if (Wire.endTransmission())
+      uint8_t bytes[CabI2c::MAX_BYTES] = {};
+      pageHeader(bytes, row, x);
+      const uint8_t count = WIDTH - x < CHUNK ? WIDTH - x : CHUNK;
+      if (!CabI2c::write(OLED, bytes, 7 + count))
         return;
     }
   }
-  Wire.beginTransmission(OLED);
-  Wire.write(uint8_t(0));
-  Wire.write(0xAF);
-  ready = Wire.endTransmission() == 0;
+  const uint8_t on[] = {0, 0xAF};
+  ready = CabI2c::write(OLED, on, sizeof(on));
 }
 
 void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* nextName,
@@ -160,9 +152,11 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* next
   const uint8_t labelScale = strlen(label) <= 10 ? 2 : 1;
   const uint8_t labelStart = (WIDTH - strlen(label) * 6 * labelScale) / 2;
 
-  // One transaction fits Wire's 32-byte buffer, with headroom for commands.
+  // Build one bounded transaction. Polling its transfer leaves Timer1 free.
   // A redraw clears every column, so shorter names cannot leave old pixels.
-  startPage(page, column);
+  uint8_t bytes[CabI2c::MAX_BYTES];
+  pageHeader(bytes, page, column);
+  uint8_t count = 7;
   for (uint8_t i = 0; i < CHUNK && column < WIDTH; ++i, ++column) {
     uint8_t pixels = 0;
     if (page < 2) {
@@ -188,9 +182,9 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* next
       if (x < 30)
         pixels = speed > segment || x == 0 || x == 29 ? 0x3C : 0x24;
     }
-    Wire.write(pixels);
+    bytes[count++] = pixels;
   }
-  if (Wire.endTransmission())
+  if (!CabI2c::write(OLED, bytes, count))
     ready = false;
   if (column == WIDTH) {
     column = 0;

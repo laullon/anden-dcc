@@ -1,5 +1,14 @@
 # Changelog
 
+## OLED / DCC interrupt isolation · Uno 0.7.5
+
+- Replace Wire's interrupt-driven OLED transfers with bounded, polled TWI
+  writes so the DCC Timer1 ISR can preempt display traffic.
+- Keep the existing DCC deadlines and fault shutdown. Missing/stalled OLEDs
+  disable display updates after a bounded timeout.
+- Remove Wire buffers and callbacks from the Uno image, freeing 216 bytes
+  of static RAM. ESP13 0.7.2 remains compatible.
+
 ## Named OLED cab · ESP13 0.7.2 / Uno 0.7.4
 
 - Show the saved loco name with a yellow address/power header, large speed

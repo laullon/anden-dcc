@@ -3,6 +3,35 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## OLED / DCC timing correction · Uno 0.7.5 · 12 November 2026
+
+After the named display update, the live Uno 0.7.4 reported one timing fault
+during track mode and stopped DCC with both output enables LOW. Wire's
+non-preemptible TWI ISR competes with the D12 mirror's fixed 20 µs phase.
+The display transport was changed to poll the AVR TWI peripheral with TWIE
+clear, allowing Timer1 to preempt OLED transfers. The existing DCC deadline
+checks and fault shutdown are unchanged.
+
+The native transport model verifies 400 kHz configuration, interrupt-free TWI
+commands, ACK validation, invalid-input rejection and bounded START/STOP
+timeouts. The display rendering and Uno/DCC regression suites pass.
+Uno 0.7.5 builds to 17,420 bytes of flash and 1,307 bytes of static RAM
+(741 bytes left for stack/local variables).
+
+Uno 0.7.5 was uploaded and flash-verified. With USB logic power only, external
+cab 5 V and motor power disconnected, track disconnected and ESP UART switches
+OFF, a 120-second live UART test ran DCC while repeatedly changing display
+labels and cycling output enable. It completed 132 label redraw requests,
+21 output-enable cycles and 16,386 DCC packets with zero timing faults.
+Both output enables were verified LOW afterward. The user confirmed that the
+OLED still displayed correctly and reconnected both ESP UART switches.
+
+A further six web power-on/heartbeat/power-off cycles exercised the complete
+ESP13 0.7.2 to Uno 0.7.5 path with repeated OLED power-status redraws.
+The final snapshot reported 47,615 DCC packets, zero timing faults and both
+output enables LOW. All tests used USB logic power with motor power and track
+disconnected; powered track operation still requires hardware validation.
+
 ## Named cab software · ESP13 0.7.2 / Uno 0.7.4
 
 Both targets build. The native OLED harness checks full 64-row clearing,

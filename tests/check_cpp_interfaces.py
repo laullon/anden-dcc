@@ -8,7 +8,8 @@ from native_support import ROOT, library_sources
 
 headers = [p.name for p in (ROOT / 'libraries/AndenStackLink/src').glob('*.h')]
 headers += ['BrowserLease.h', 'FavoriteFunctions.h', 'StatusLed.h', 'WifiValidation.h',
-            'BridgeBench.h', 'UnoDcc.h', 'FirmwareImage.h', 'RosterStorage.h']
+            'BridgeBench.h', 'UnoDcc.h', 'CabI2c.h', 'CabDisplay.h', 'CabControl.h',
+            'FirmwareImage.h', 'RosterStorage.h']
 includes = ['-I', str(ROOT / 'libraries/AndenStackLink/src'),
             '-I', str(ROOT / 'firmware/esp13-ota'),
             '-I', str(ROOT / 'firmware/uno-stack-test')]
