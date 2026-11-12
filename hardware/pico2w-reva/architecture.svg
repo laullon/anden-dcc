@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850" role="img" aria-labelledby="title desc">
+<title id="title">anden-dcc Pico 2 W Rev A functional architecture</title>
+<desc id="desc">A USB-C PD controller requests 15 volts. Input protection feeds a DRV8874 DCC bridge and a separate 5 volt logic regulator. A socketed Pico 2 W supplies DCC phase and a watchdog-gated enable, and connects to the cab controls and OLED. This is an architecture diagram with electrical design and manufacturing release pending.</desc>
+<defs>
+<style>
+text{font-family:Arial,Helvetica,sans-serif;fill:#193b3c}.title{font-size:30px;font-weight:700}.head{font-size:21px;font-weight:700}.body{font-size:17px}.small{font-size:15px;fill:#425854}.box{fill:#fff;stroke:#91a89b;stroke-width:1.6}.power{fill:none;stroke:#a85d23;stroke-width:3}.signal{fill:none;stroke:#28735e;stroke-width:2.5}.sense{fill:none;stroke:#3665a0;stroke-width:2.5}.line{stroke-linejoin:round;stroke-linecap:round}
+</style>
+<marker id="power" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#a85d23" stroke-width="1.5"/></marker>
+<marker id="signal" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#28735e" stroke-width="1.5"/></marker>
+<marker id="sense" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#3665a0" stroke-width="1.5"/></marker>
+</defs>
+<rect width="1200" height="850" rx="20" fill="#f5f2eb"/>
+<text x="30" y="48" class="title">anden-dcc · Pico 2 W cab board</text>
+<text x="30" y="79" class="body">Rev A architecture · mixed hand / factory assembly · one shared DCC district</text>
+
+<rect x="30" y="150" width="220" height="120" rx="12" class="box"/>
+<text x="48" y="184" class="head">USB-C PD input</text>
+<text x="48" y="214" class="body">CH224K · 15 V request</text>
+<text x="48" y="244" class="small">Through-hole USB-C inlet</text>
+
+<rect x="300" y="150" width="220" height="120" rx="12" class="box"/>
+<text x="318" y="184" class="head">Input protection</text>
+<text x="318" y="214" class="body">Fuse / transient control</text>
+<text x="318" y="244" class="small">PD inrush + voltage sensing</text>
+
+<rect x="680" y="130" width="280" height="150" rx="12" fill="#fff4e6" stroke="#bd9a6e" stroke-width="1.6"/>
+<text x="700" y="166" class="head">DRV8874 bridge</text>
+<text x="700" y="197" class="body">HTSSOP-16 · thermal pad</text>
+<text x="700" y="228" class="body">3.3 V control + current sense</text>
+<text x="700" y="258" class="small">2 A total target · validate thermals</text>
+
+<rect x="1010" y="150" width="160" height="120" rx="12" class="box"/>
+<text x="1027" y="184" class="head">Two tracks</text>
+<text x="1027" y="214" class="body">RAIL A / RAIL B</text>
+<text x="1027" y="244" class="small">Parallel outputs</text>
+<path d="M250 210H300 M520 210H680 M960 210H1010" class="power line" marker-end="url(#power)"/>
+<text x="550" y="195" class="small">15 V rail</text>
+
+<rect x="300" y="420" width="220" height="200" rx="12" fill="#fff4e6" stroke="#bd9a6e" stroke-width="1.6"/>
+<text x="318" y="455" class="head">5 V logic supply</text>
+<text x="318" y="486" class="body">LMR51420 · SOT-23</text>
+<text x="318" y="520" class="small">Buck support components</text>
+<text x="318" y="548" class="small">USB / external source ORing</text>
+<text x="318" y="576" class="small">Pico USB accessible</text>
+<text x="318" y="604" class="small">All grounds common</text>
+<path d="M410 270V420" class="power line" marker-end="url(#power)"/>
+
+<rect x="680" y="320" width="280" height="80" rx="12" class="box"/>
+<text x="700" y="352" class="head">Watchdog + EN gate</text>
+<text x="700" y="381" class="small">Default-off hardware path</text>
+
+<rect x="680" y="440" width="280" height="180" rx="12" fill="#eaf5ed" stroke="#91a89b" stroke-width="1.6"/>
+<text x="700" y="476" class="head">Socketed Pico 2 W</text>
+<text x="700" y="508" class="body">PIO / packets / local cab</text>
+<text x="700" y="539" class="body">Wi-Fi / web / firmware update</text>
+<text x="700" y="570" class="small">Antenna clear at board edge</text>
+<text x="700" y="600" class="small">Two 1×20 through-hole sockets</text>
+<path d="M520 510H680" class="power line" marker-end="url(#power)"/>
+<text x="551" y="495" class="small">VSYS</text>
+<path d="M875 440V400 M875 320V280" class="signal line" marker-end="url(#signal)"/>
+<path d="M740 440V425H635V235H680" class="signal line" marker-end="url(#signal)"/>
+<text x="541" y="323" class="small">PIO phase</text>
+<text x="885" y="426" class="small">Enable</text>
+
+<path d="M944 280H985V600H960" class="sense line" marker-end="url(#sense)"/>
+<text x="1003" y="402" transform="rotate(-90 1003 402)" class="small">Current / fault</text>
+
+<rect x="1010" y="440" width="160" height="180" rx="12" class="box"/>
+<text x="1027" y="476" class="head">Cab controls</text>
+<text x="1027" y="507" class="body">Encoder + select</text>
+<text x="1027" y="537" class="body">Movement STOP</text>
+<text x="1027" y="567" class="body">OLED + LED</text>
+<text x="1027" y="599" class="small">Headers + cab wiring</text>
+<path d="M960 500H1010" class="signal line" marker-end="url(#signal)"/>
+
+<rect x="30" y="660" width="1140" height="132" rx="12" class="box"/>
+<text x="50" y="694" class="head">Assembly sequence</text>
+<text x="50" y="728" class="body">1 · SMD power and small logic</text>
+<text x="50" y="757" class="small">Paste + hot plate / hot air or factory reflow</text>
+<text x="445" y="728" class="body">2 · Through-hole parts</text>
+<text x="445" y="757" class="small">Sockets, controls, terminals and bulk capacitors</text>
+<text x="855" y="728" class="body">3 · Fit Pico and OLED</text>
+<text x="855" y="757" class="small">Inspect, program and validate in stages</text>
+<text x="30" y="824" class="small">Design brief · electrical values, footprint review, circuit capture and PCB layout remain pending.</text>
+</svg>

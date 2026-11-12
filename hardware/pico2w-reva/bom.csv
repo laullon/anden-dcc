@@ -1,0 +1,29 @@
+refs,quantity_or_groups,function,candidate,package,assembly,status,notes,source
+A1,1,Controller,Raspberry Pi Pico 2 W,40-pin module,THT sockets,Chosen,Antenna keep-out and USB/BOOTSEL access,https://datasheets.raspberrypi.com/picow/pico-2-w-datasheet.pdf
+J1 J2,2,Pico sockets,1x20 female socket 2.54 mm,THT,THT,MPN pending,Match Pico header height and enclosure,
+J3,1,PD power inlet,GCT USB4750-GF-C candidate,6-contact vertical USB-C,THT,Mechanical review,CC1 and CC2 required. Entry orientation to confirm,https://gct.co/connector/usb4750
+U1,1,USB PD controller,CH224K,ESSOP-10 with ground pad,Top SMD reflow,Candidate,15 V request. Strap and VDD network pending,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
+U2,1,5 V buck regulator,LMR51420XDDCR,SOT-23-THIN-6,Top SMD,Candidate,4.5-36 V input. Exact land pattern to verify,https://www.ti.com/lit/ds/symlink/lmr51420.pdf
+L1,1,Buck inductor,Shielded power inductor,Large-pad SMD,Top SMD,Value and MPN pending,Select inductance and saturation current from regulator design,
+RFB1 RFB2,2,5 V feedback divider,1 percent resistors,1206,Top SMD,Values pending,Select nominal output including regulator tolerance,
+CBUCK_IN CBUCK_OUT CBOOT,3,Regulator capacitor groups,X7R ceramic,0805 or 1206,Top SMD,Values and quantities pending,Voltage derating and effective capacitance must be calculated,
+U3,1,Track H-bridge,DRV8874PWPR,HTSSOP-16 PowerPAD,Top SMD reflow,Candidate,Thermal pad required. Validate DCC switching and current limit,https://www.ti.com/lit/ds/symlink/drv8874.pdf
+CCP CFLY CDRV,3,Driver charge-pump and bypass capacitors,X7R ceramic,0805 or 1206,Top SMD,Values pending schematic,Use manufacturer placement and voltage requirements,
+RSENSE RVREF1 RVREF2,3,Current feedback and limit,1 percent resistors,1206,Top SMD,Values pending,Size for safe ADC range and intended current trip,
+CBULK,1,Bridge reservoir,Radial electrolytic,THT radial,THT,Value and voltage pending,Coordinate PD inrush and load transients,
+F1,1,Input fuse and holder,Replaceable fuse,THT,THT,Rating pending,Coordinate track current and wiring rating,
+DTVS,1,Input transient suppression,TVS diode,Axial or large-pad SMD,TBD,MPN pending,Coordinate standoff and clamp with all rail ratings,
+U4,1,External watchdog,TPS3435 leaded variant,SOT-23-THIN-8,Top SMD,Exact order code pending,Select timeout and reset/re-arm behavior,https://www.ti.com/product/TPS3435
+U5,1,Bridge enable AND gate,SN74LVC1G08DBVR,SOT-23-5,Top SMD,Candidate,3.3 V. Gate MCU enable with watchdog healthy output,https://www.ti.com/product/SN74LVC1G08
+PWR_OR,1,USB and external 5 V isolation,Diode or ideal-diode circuit,THT or leaded SMD,TBD,Circuit pending,Feed VSYS and validate reverse current in both directions,
+RMON1 RMON2 CMON,3,Input voltage measurement,Divider and RC filter,Axial or 1206 plus ceramic,Mixed,Values pending,ADC protection over the entire input range,
+ADC_PROTECT,1,ADC input protection group,Resistors and clamps,THT or leaded SMD,TBD,Circuit pending,Check IPROPI faults as well as rail-sense faults,
+J4 J5,2,Parallel track outputs,2-way 5.08 mm terminal block,THT,THT,MPN pending,Same DCC district. Both connectors carry RAIL A and RAIL B,
+A2 J6,1,OLED and cable connector,Existing SSD1315 128x64 display,4-pin 2.54 mm connector,THT connector,Module retained,Measure pin order and mounting. Verify supply and pull-up voltage,
+U6,0,Conditional OLED level translator,PCA9306 leaded variant,Lead-visible package,Top SMD if required,Conditional,Populate only after actual OLED voltage check,https://www.ti.com/product/PCA9306
+ENC1,1,Speed encoder and select button,Existing mechanical encoder,THT or panel wired,THT,Mechanical dimensions pending,Confirm exact pin order and footprint,
+SW1,1,Movement STOP button,Normally open momentary switch,THT or panel wired,THT,MPN pending,Local DCC emergency-stop input,
+LED1 RLED,1,Movement indicator and series resistor,3 mm LED and axial resistor,THT,THT,Resistor value pending LED choice,Budget current from 3.3 V rail,
+JPDBG,1,SWD test/debug connector,SWDIO SWCLK GND,2.54 mm THT,THT,Layout pending,Wire to Pico debug access with module installed,
+BYPASS CONFIG,1,Logic bypass pull-up and configuration groups,Individual resistors and capacitors,Axial plus 0805 or 1206,Mixed,Count and values pending,Includes PD support and watchdog configuration,
+MECH,1,Mounting hardware,M3 screws and spacers,Mechanical,Mechanical,Dimensions pending,Keep fasteners clear of Pico antenna and track copper,

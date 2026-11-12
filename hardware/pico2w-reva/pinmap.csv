@@ -1,0 +1,17 @@
+gpio,physical_pin,signal,direction,notes
+2,4,DCC_PH,Output,PIO DCC waveform to DRV8874 PH
+3,5,TRACK_EN_REQUEST,Output,PIO-aligned request through external watchdog gate
+4,6,OLED_SDA,Bidirectional,I2C0. 3.3 V side of any required translator
+5,7,OLED_SCL,Output,I2C0. 3.3 V side of any required translator
+6,9,ENC_A,Input pull-up,Encoder contact to GND
+7,10,ENC_B,Input pull-up,Encoder contact to GND
+8,11,SELECT_N,Input pull-up,Encoder push button to GND
+9,12,STOP_N,Input pull-up,Movement stop button to GND
+10,14,MOVEMENT_LED,Output,Series resistor and LED to GND
+11,15,DRIVER_FAULT_N,Input,3.3 V pull-up on open-drain driver fault
+12,16,WATCHDOG_HEARTBEAT,Output,Pulse only after application and DCC health checks
+13,17,PD_PG_N,Input,3.3 V pull-up on active-low PD PG
+14,19,DRIVER_WAKE,Output,Driver nSLEEP with default-off pull-down
+15,20,WATCHDOG_CONTROL,Output,Enable/re-arm semantics depend on final watchdog variant
+26,31,RAIL_SENSE,ADC input,Divider filter and clamp values pending
+27,32,CURRENT_SENSE,ADC input,Filtered protected IPROPI sense voltage
