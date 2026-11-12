@@ -12,3 +12,8 @@ Use results measured on this hardware when making claims about its operation.
 Follow the supported-baseline and promotion boundaries in the repository's
 root AGENTS.md. Continue user-requested development while retaining the
 experimental designation until the user explicitly changes that status.
+
+Schematic/PCB workflow (D18): the assistant captures schematic sections for
+user review. The user owns PCB placement and routing; the assistant reviews
+the resulting layout. Preserve user PCB edits and record review status.
+Current schematic status is documented in kicad/README.md and kicad/review/.

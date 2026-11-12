@@ -9,14 +9,15 @@ results here. Supporting drawings and tables are linked below.
 ## Current state
 
 **EXPERIMENTAL / DESIGN ONLY.** The supported hardware remains the Uno +
-L298P motor shield + ESP13 stack. Schematic, board layout, firmware and
+L298P motor shield + ESP13 stack. USB-C PD negotiation core 01A is captured
+and awaiting user review. The remaining circuits, board layout, firmware and
 hardware qualification for this Pico 2 W design are pending.
 
 
 The project has a design brief, functional diagram, preliminary component list
 and proposed GPIO allocation. A native [KiCad project scaffold](kicad/README.md) now provides six hierarchical
 design sheets and a two-layer board. Detailed circuit capture, verified
-footprints and PCB routing are pending. Component ratings and package
+footprints and PCB routing are pending beyond the captured PD core. Component ratings and package
 candidates in this record require circuit and layout review before an order.
 
 Work uses the main anden-dcc repository and its `main` branch. The experiment
@@ -71,6 +72,8 @@ sections have a separate status.
 | D15 | Keep setup and control free of application passwords | This is the earlier user preference for the local project |
 | D16 | Keep this effort explicitly experimental | User requested clear status so other agents distinguish it from supported hardware |
 | D17 | Work in the same repository checkout on main | User requested one path and no separate worktree or branch. Keep the experiment under hardware/pico2w-reva with explicit status labels |
+
+| D18 | Assistant captures schematics section by section; user reviews them and lays out the PCB; assistant reviews PCB work | User requested this division of work. Do not advance an unreviewed section as accepted or change the user's layout without a request |
 
 Future changes should retain these IDs. Mark a changed decision as superseded
 and identify its replacement, so the reason for an old design remains visible.
@@ -253,6 +256,7 @@ their sources here before promoting a candidate into the released BOM.
 - [Functional architecture](architecture.svg) illustrates the blocks and assembly sequence.
 - [Preliminary BOM](bom.csv) holds component candidates and unresolved values.
 - [Proposed GPIO allocation](pinmap.csv) holds signal names and physical pin choices.
+- [PD core review 01A](kicad/review/01a-usb-pd.md) records the first captured circuit and its pending input protection.
 - [KiCad project](kicad/README.md) holds the experimental CAD scaffold and validation status.
 - [Repository license](../../LICENSE) is MIT.
 - [Project README](../../README.md) contains the existing magic-smoke notice.
@@ -272,3 +276,4 @@ previously confirmed requirement.
 | 12 November 2026 | Followed D17 by consolidating work into the main checkout and main branch, removing the clean extra worktree and retiring the merged experimental branch. D16 experiment labels remain in effect. |
 
 | 12 November 2026 | Prepared KiCad 10 native project scaffold with six planning sheets, local library tables and a two-layer 1.6 mm PCB. Project loads and all seven pages export. ERC is empty-circuit only; DRC retains the pending-outline error. Electrical capture and layout remain open under O11/O12. |
+| 12 November 2026 | Recorded D18. Captured USB-C PD negotiation core 01A using CH224K, 56 kΩ request resistor, 1 kΩ supply feed, 1 µF bypass and 10 kΩ PG pull-up. ERC 0 errors / 1 expected missing-interface warning; XML netlist and rendered SVG checked. Awaiting user review. Input protection/load path 01B, connector mapping and all footprints remain open. PCB untouched. |

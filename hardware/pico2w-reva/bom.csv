@@ -2,7 +2,7 @@ project_status,refs,quantity_or_groups,function,candidate,package,assembly,statu
 EXPERIMENT_DESIGN_ONLY,A1,1,Controller,Raspberry Pi Pico 2 W,40-pin module,THT sockets,Chosen,Antenna keep-out and USB/BOOTSEL access,https://datasheets.raspberrypi.com/picow/pico-2-w-datasheet.pdf
 EXPERIMENT_DESIGN_ONLY,J1 J2,2,Pico sockets,1x20 female socket 2.54 mm,THT,THT,MPN pending,Match Pico header height and enclosure,
 EXPERIMENT_DESIGN_ONLY,J3,1,PD power inlet,GCT USB4750-GF-C candidate,6-contact vertical USB-C,THT,Mechanical review,CC1 and CC2 required. Entry orientation to confirm,https://gct.co/connector/usb4750
-EXPERIMENT_DESIGN_ONLY,U1,1,USB PD controller,CH224K,ESSOP-10 with ground pad,Top SMD reflow,Candidate,15 V request. Strap and VDD network pending,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
+EXPERIMENT_DESIGN_ONLY,U1,1,USB PD controller,CH224K,ESSOP-10 with ground pad,Top SMD reflow,Captured / awaiting review,"01A captured for review: 15 V resistor configuration, PD only; protection and footprint pending",https://www.wch-ic.com/downloads/CH224DS1_PDF.html
 EXPERIMENT_DESIGN_ONLY,U2,1,5 V buck regulator,LMR51420XDDCR,SOT-23-THIN-6,Top SMD,Candidate,4.5-36 V input. Exact land pattern to verify,https://www.ti.com/lit/ds/symlink/lmr51420.pdf
 EXPERIMENT_DESIGN_ONLY,L1,1,Buck inductor,Shielded power inductor,Large-pad SMD,Top SMD,Value and MPN pending,Select inductance and saturation current from regulator design,
 EXPERIMENT_DESIGN_ONLY,RFB1 RFB2,2,5 V feedback divider,1 percent resistors,1206,Top SMD,Values pending,Select nominal output including regulator tolerance,
@@ -27,3 +27,7 @@ EXPERIMENT_DESIGN_ONLY,LED1 RLED,1,Movement indicator and series resistor,3 mm L
 EXPERIMENT_DESIGN_ONLY,JPDBG,1,SWD test/debug connector,SWDIO SWCLK GND,2.54 mm THT,THT,Layout pending,Wire to Pico debug access with module installed,
 EXPERIMENT_DESIGN_ONLY,BYPASS CONFIG,1,Logic bypass pull-up and configuration groups,Individual resistors and capacitors,Axial plus 0805 or 1206,Mixed,Count and values pending,Includes PD support and watchdog configuration,
 EXPERIMENT_DESIGN_ONLY,MECH,1,Mounting hardware,M3 screws and spacers,Mechanical,Mechanical,Dimensions pending,Keep fasteners clear of Pico antenna and track copper,
+EXPERIMENT_DESIGN_ONLY,R1,1,PD negotiation core,1 kohm 0.5 W minimum,THT axial candidate,THT,Proposed / review 01A,CH224K shunt supply feed; check ambient derating,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
+EXPERIMENT_DESIGN_ONLY,R2,1,PD negotiation core,56 kohm 1%,THT axial candidate,THT,Proposed / review 01A,15 V request CFG1 to GND; CFG2/3 open,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
+EXPERIMENT_DESIGN_ONLY,R3,1,PD negotiation core,10 kohm,THT axial candidate,THT,Proposed / review 01A,PG pull-up to eventual Pico 3V3,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
+EXPERIMENT_DESIGN_ONLY,C1,1,PD negotiation core,1 uF 10 V X7R,1206 candidate,Top SMD,Proposed / review 01A,VDD bypass; effective capacitance at 3.3 V to verify,https://www.wch-ic.com/downloads/CH224DS1_PDF.html

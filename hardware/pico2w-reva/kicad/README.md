@@ -17,7 +17,8 @@ root overview and six hierarchical sheets, a two-layer PCB with a nominal
 | 05-protection | Watchdog, enable gating, current and voltage sensing |
 | 06-cab | Encoder, selection button, STOP, LED and OLED |
 
-Each sheet contains design notes and outstanding tasks. Components, wires,
+Sheet 01 now contains the [PD negotiation core for review](review/01a-usb-pd.md).
+The remaining sheets contain design notes and outstanding tasks. Input protection,
 inter-sheet electrical interfaces and footprints have not been captured.
 The local libraries are intentionally empty until pin assignments and land
 patterns are checked against manufacturer drawings. The PCB contains a status
@@ -39,6 +40,12 @@ or purchasing outputs until the electrical and mechanical review is complete.
 - PCB DRC reported one expected violation: no Edge.Cuts outline. There are no
   footprints or routed nets yet. No exclusions were added to suppress this.
 
+## Schematic and PCB review workflow
+
+The assistant captures one schematic section at a time for user review. The
+user lays out the PCB, and the assistant reviews it. Review 01A covers the PD
+negotiation core; 01B will finish input protection and the load path before
+moving to the logic supply. The board was not modified during capture of 01A.
+
 Read [PROJECT.md](../PROJECT.md) for requirements, candidate parts, assumptions
-and open work. Next, capture and review the USB-C PD input circuit before moving
-through the remaining sheets.
+and open work. Review [01A](review/01a-usb-pd.md) before completing the rest of the USB-C input.

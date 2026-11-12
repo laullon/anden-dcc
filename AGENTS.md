@@ -14,8 +14,11 @@ The central record is hardware/pico2w-reva/PROJECT.md.
 Use the same checkout for both platforms, keeping their scope and status clear.
 
 The experiment currently contains a design brief, preliminary BOM, architecture
-diagram and proposed GPIO allocation. Electrical schematic, verified footprints,
-PCB routing, Pico firmware and prototype validation remain pending.
+diagram and proposed GPIO allocation. The first PD negotiation circuit is
+captured for user review. Remaining schematic capture, verified footprints,
+PCB routing, Pico firmware and prototype validation remain pending. The user
+reviews assistant-created schematic sections and owns PCB layout; the assistant
+reviews that layout (D18).
 
 Choose the platform from the user's task and read the relevant project record
 before editing. Keep Pico experimental artifacts and findings clearly labelled
