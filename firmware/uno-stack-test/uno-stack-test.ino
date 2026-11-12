@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-constexpr char VERSION[] = "0.7.3";
+constexpr char VERSION[] = "0.7.4";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
 constexpr uint8_t MOVEMENT_LED = 7;
 namespace {
@@ -108,9 +108,11 @@ void sendState(uint16_t sequence) {
   uint8_t flags = (digitalRead(ENABLE_A) ? 1 : 0) | (digitalRead(ENABLE_B) ? 2 : 0) |
                   (digitalRead(BRAKE_A) ? 4 : 0) | (digitalRead(BRAKE_B) ? 8 : 0) |
                   (digitalRead(DIR_A) ? 16 : 0) | (digitalRead(DIR_B) ? 32 : 0);
-  char body[AndenLink::MAX_BODY + 1], wire[AndenLink::MAX_BODY + 8];
+  // Build inside the output buffer to leave stack space for cached cab names.
+  char wire[AndenLink::MAX_BODY + 8];
+  char* body = wire + 1;
   auto dcc = UnoDcc::status();
-  snprintf(body, sizeof(body), "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,3",
+  snprintf(body, AndenLink::MAX_BODY + 1, "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,4",
            sequence, VERSION, unsigned(rawA), unsigned(analogRead(A1)), unsigned(flags),
            unsigned(ledEdges), unsigned(dcc.running), unsigned(dcc.count), unsigned(dcc.signature),
            unsigned(dcc.mask), static_cast<unsigned long>(dcc.packets), unsigned(dcc.faults),
@@ -162,6 +164,15 @@ void command() {
       return;
     cab.clearRoster();
     controlReady = true;
+    sendState(sequence);
+    return;
+  }
+  // Labels are metadata only: they never enable output or alter a DCC schedule.
+  if (!strcmp(parts[2], "CABNAME") && n == 5) {
+    uint16_t address;
+    if (!AndenLink::number(parts[3], address) || !address || address > 127 ||
+        !cab.setName(address, parts[4]))
+      return;
     sendState(sequence);
     return;
   }
@@ -295,5 +306,6 @@ void loop() {
     serviceBridge();
     serviceCab();
   }
-  display.update(cab.address(), cab.step());
+  display.update(cab.address(), cab.step(), cab.name(),
+                 bench.active() && bench.mode == BridgeBench::Track && digitalRead(ENABLE_A));
 }

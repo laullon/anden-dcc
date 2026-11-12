@@ -3,6 +3,35 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## Named cab software · ESP13 0.7.2 / Uno 0.7.4
+
+Both targets build. The native OLED harness checks full 64-row clearing,
+bounded I²C transactions, complete redraws after name/speed/power changes,
+shorter-name clearing and speed bar pixels. The label codec covers accented
+names, uppercase conversion, truncation, empty names and unsupported UTF-8.
+The Uno command harness checks malformed label rejection, eligible-address
+binding, immediate name selection and cache clearing after roster changes.
+The frame encoder also tests overlapping input/output buffers, used to save
+Uno stack space while replying.
+
+The OLED layout preview is rendered from the actual driver's captured I²C
+data. On 12 November 2026, ESP13 0.7.2 was installed by OTA with a verified
+reboot, and Uno 0.7.4 was uploaded and flash-verified over USB. The Uno reported
+capability 4 and acknowledged the display label for address 6. The user
+confirmed the actual OLED showed address 006, name 1608, the large zero-speed
+readout and STOP.
+
+With both UART switches ON, the ESP reported both firmware versions, online
+name support and zero timing faults. Temporarily marking saved loco 1608
+On diorama through /locos/save produced acknowledged CONTROLX and CABNAME
+transactions and a ready roster without additional timeouts. Its original
+presence setting was restored. Both output enables stayed LOW throughout.
+
+Uno uses 19,028 bytes of flash and 1,523 bytes of static RAM, leaving 525 bytes
+for stack/local variables. The STATE reply now uses one buffer in place to
+reduce peak stack usage. Moving operation and the MP1584 cab supply still need
+hardware validation. The earlier static display test is recorded below.
+
 ## SSD1315 cab display · 12 November 2026
 
 Uno 0.7.3 was uploaded and flash-verified over USB. A checked UART reply

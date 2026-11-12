@@ -49,7 +49,7 @@ private:
   uint16_t dccCount = 0, dccMask = 0, dccSignature = 0, faults = 0;
   uint32_t packets = 0;
   bool benchCapable = false, dccBenchCapable = false, trackCapable = false,
-       functionsCapable = false, cabFilterCapable = false;
+       functionsCapable = false, cabFilterCapable = false, cabNamesCapable = false;
   uint16_t benchRemaining = 0;
   uint8_t benchState = 0, mode = 0;
   bool accept(uint16_t expected);

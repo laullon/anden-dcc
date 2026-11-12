@@ -11,6 +11,9 @@ on a particular include order or on globals declared by a sketch.
 | `esp13-ota.ino` | Wi-Fi/web runtime, server, Uno link and controller instances |
 | `RosterControl.h/.cpp` | Roster, favorite metadata, finder, browser lease, storage and associated HTTP routes |
 | `UnoLink.h/.cpp` | Checked UART transactions and cached Uno status |
+| `CabLabel.h/.cpp` | Bounded display-name folding and hex transport codec |
+| `CabControl.h/.cpp` | Local encoder/STOP state and cached eligible loco labels |
+| `CabDisplay.h/.cpp` | OLED pixel rendering through bounded I²C transactions |
 | `HttpSupport.h/.cpp` | JSON serialization/replies; server and Uno dependencies are explicit parameters |
 | `BrowserLease`, `StatusLed`, `FavoriteFunctions`, `WifiValidation` | Separately compiled policies and models |
 | `RosterStorage.h/.cpp` | Mount existing storage; initialize only verified erased flash |

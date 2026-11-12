@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <CabLabel.h>
 
 class CabControl {
 public:
@@ -10,9 +11,12 @@ public:
   bool stop();
   uint8_t address() const;
   uint8_t step() const;
+  const char* name() const;
+  bool setName(uint8_t address, const char* hex);
 
 private:
   uint8_t addresses[8] = {};
+  char names[8][CabLabel::LENGTH + 1] = {};
   uint8_t count = 0, selected = 0, speed = 0, phase = 0;
   int8_t transitions = 0;
   bool selectLatched = false, stopLatched = false;

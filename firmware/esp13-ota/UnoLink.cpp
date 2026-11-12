@@ -1,5 +1,6 @@
 #include "UnoLink.h"
 #include <LocoRoster.h>
+#include <CabLabel.h>
 #include <UnoDccStream.h>
 void UnoLink::begin() {
   Serial.setRxBufferSize(256);
@@ -85,6 +86,21 @@ bool UnoLink::syncRoster(const LocoRoster& value) {
                : UnoDccStream::signature(value.count, addresses, mask))) {
     dirty = true;
     return false;
+  }
+  // The Uno caches labels for all eligible addresses, so a local button press
+  // changes the displayed name immediately without waiting for Wi-Fi.
+  if (cabNamesCapable) {
+    for (uint8_t i = 0; i < value.count; ++i) {
+      if (!value.entries[i].onDiorama)
+        continue;
+      char hex[CabLabel::LENGTH * 2 + 1];
+      CabLabel::encode(hex, value.entries[i].name);
+      command = "CABNAME," + String(value.entries[i].address) + "," + hex;
+      if (!query(command.c_str())) {
+        dirty = true;
+        return false;
+      }
+    }
   }
   dirty = false;
   return true;
@@ -227,6 +243,8 @@ String UnoLink::json() const {
   out += faults;
   out += F(",\"functionsSupported\":");
   out += functionsSupported() ? "true" : "false";
+  out += F(",\"cabNamesSupported\":");
+  out += online() && cabNamesCapable ? "true" : "false";
   out += F(",\"trackSupported\":");
   out += trackCapable ? "true" : "false";
   out += F(",\"trackActive\":");
@@ -289,7 +307,8 @@ bool UnoLink::accept(uint16_t expected) {
   // Publish the snapshot only after every field in this reply has passed validation.
   benchCapable = n >= 16;
   dccBenchCapable = n >= 17;
-  cabFilterCapable = n == 18 && !strcmp(parts[17], "3");
+  cabNamesCapable = n == 18 && !strcmp(parts[17], "4");
+  cabFilterCapable = cabNamesCapable || (n == 18 && !strcmp(parts[17], "3"));
   functionsCapable = cabFilterCapable || (n == 18 && !strcmp(parts[17], "2"));
   trackCapable = n == 18 && (!strcmp(parts[17], "1") || functionsCapable);
   benchRemaining = remaining;

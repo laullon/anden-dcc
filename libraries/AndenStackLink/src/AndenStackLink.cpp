@@ -75,8 +75,8 @@ size_t encode(char* output, size_t capacity, const char* body) {
     if (body[i] == '@' || body[i] == '*' || uint8_t(body[i]) < 32 || uint8_t(body[i]) > 126)
       return 0;
   uint16_t crc = crc16(body, size);
+  memmove(output + 1, body, size);
   output[0] = '@';
-  memcpy(output + 1, body, size);
   output[size + 1] = '*';
   const char digits[] = "0123456789ABCDEF";
   for (uint8_t i = 0; i < 4; ++i)

@@ -1,9 +1,13 @@
 # Encoder cab
 
-Uno 0.7.3 and ESP13 0.7.1 provide local crawl control for one locomotive at a time.
+Uno 0.7.4 and ESP13 0.7.2 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
+
+![OLED layout preview showing the yellow address and power header, loco name, large speed step and movement bar.](../../docs/hardware/cab-display.png)
+
+Preview rendered from the firmware's display output.
 
 ## Cab board and power
 
@@ -72,12 +76,19 @@ Use a 0.96-inch 128×64 I²C SSD1315 Arduino-compatible breakout at address
 `0x3C`, with 5 V compatible power and I²C inputs and onboard reset circuitry.
 Follow the module's printed pin labels. The cab's MP1584 supplies its VCC at 5.0 V.
 
-The display is probed at Uno boot. It shows `A 003` for address 3 in the top
-16 rows and `S 01` for commanded step 1 in rows 32–47. On the yellow/blue
-panel these occupy the yellow and blue regions respectively. Colours are fixed
-by the panel. Rendering uses short I²C writes without a full framebuffer to
-preserve Uno RAM and keep servicing the controls. The cab also runs with the
-display disconnected.
+The display is probed at Uno boot. The yellow header shows the selected address
+and track power status. The blue area shows the loco name saved in the web
+panel, a large two-digit speed step, STOP/MOVE status and a three-segment speed
+bar. An unnamed loco shows LOCOMOTIVE; with no eligible loco, SELECT A LOCO appears.
+
+The ESP sends display labels when synchronizing the roster. The Uno caches all
+eight eligible labels, so the encoder button changes the name immediately.
+Labels use the first 16 characters in uppercase, folding Latin-1 accents;
+unsupported characters become a question mark. Full UTF-8 names remain saved
+unchanged in the web panel. Name metadata never enables track output.
+
+Rendering uses short I²C writes without a full framebuffer to preserve Uno RAM
+and keep servicing the controls. The cab also runs with the display disconnected.
 
 SSD1315 Arduino modules can use the SSD1306 128×64 command configuration.
 Static output on the actual module was confirmed on 12 November 2026 with

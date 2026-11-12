@@ -51,6 +51,13 @@ int main() {
   assert(number("65535",numberValue)&&numberValue==65535);
   assert(!number("65536",numberValue));assert(!number("-1",numberValue));
   assert(!number("1x",numberValue));assert(!number("",numberValue));
+  char overlap[64] = "AD1,42,PING";
+  assert(encode(overlap, sizeof(overlap), overlap));
+  Receiver inPlace;
+  assert(receive(inPlace, overlap) && !std::strcmp(inPlace.body, "AD1,42,PING"));
+  std::strcpy(overlap + 1, "AD1,43,STATUS");
+  assert(encode(overlap, sizeof(overlap), overlap + 1));
+  assert(receive(inPlace, overlap) && !std::strcmp(inPlace.body, "AD1,43,STATUS"));
   char command[]="AD1,42,PING";char* parts[3];
   assert(fields(command,parts,3)==3);assert(!std::strcmp(parts[2],"PING"));
   char extra[]="AD1,42,PING,extra";assert(fields(extra,parts,3)==0);

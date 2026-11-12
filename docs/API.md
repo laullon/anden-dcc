@@ -83,3 +83,21 @@ retrying. Successful loco, function and search requests return the `dcc` object.
 Diagnostics return Uno status. See the table for other responses.
 
 [Protocol and timing](../firmware/uno-stack-test/FIRST-LOCO-TEST.md)
+
+
+## Cab display names
+
+ESP13 0.7.2 and Uno 0.7.4 synchronize names from the saved loco roster to the
+128×64 OLED. Names are sent after CONTROLX for addresses marked On diorama.
+The Uno STATE capability value `4` includes F0–F28, cab filtering and name
+metadata. Capabilities `1`, `2` and `3` retain their existing meanings.
+The ESP exposes `uno.cabNamesSupported` in `/api/status`.
+
+The checked UART command body is `AD1,sequence,CABNAME,address,hex`. The label
+contains 1–16 printable ASCII characters encoded as hexadecimal pairs, so
+commas and framing characters in a saved name cannot alter the command.
+The ESP uppercases and folds Latin-1 accents, truncates to 16 characters and
+uses LOCOMOTIVE for an empty name. The saved UTF-8 name is unchanged.
+The Uno rejects unknown/ineligible addresses and malformed labels without
+changing any existing label, DCC schedule or output state.
+CONTROLX clears cached labels before the new metadata is sent.

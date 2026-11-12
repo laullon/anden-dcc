@@ -1,5 +1,14 @@
 # Changelog
 
+## Named OLED cab · ESP13 0.7.2 / Uno 0.7.4
+
+- Show the saved loco name with a yellow address/power header, large speed
+  step, STOP/MOVE status and a three-segment speed bar.
+- Cache up to eight 16-character display labels on the Uno for immediate
+  encoder selection. Preserve original UTF-8 names in the saved roster.
+- Add capability-negotiated CABNAME metadata and bounded label encoding.
+- Reuse the UART reply buffer in place to retain stack headroom on the Uno.
+
 ## 128×64 cab display · Uno 0.7.3
 
 - Configure the SSD1315 OLED for 64 rows and clear all eight display pages.

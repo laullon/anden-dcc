@@ -1,6 +1,7 @@
 #include "CabControl.h"
 #include "UnoDcc.h"
 #include <Arduino.h>
+#include <string.h>
 
 namespace {
 constexpr uint8_t ENCODER_A = 4, ENCODER_B = 5, SELECT = 6, STOP = 2;
@@ -23,6 +24,7 @@ void CabControl::begin() {
 
 void CabControl::roster(uint8_t size, const uint8_t* values, uint8_t cabMask) {
   count = 0;
+  memset(names, 0, sizeof(names));
   uint8_t next = 0;
   for (uint8_t i = 0; i < size; ++i) {
     if (!(cabMask & (1 << i)))
@@ -46,6 +48,20 @@ uint8_t CabControl::address() const {
 
 uint8_t CabControl::step() const {
   return speed;
+}
+
+const char* CabControl::name() const {
+  for (uint8_t i = 0; i < count; ++i)
+    if (addresses[i] == selected)
+      return names[i];
+  return "";
+}
+
+bool CabControl::setName(uint8_t address, const char* hex) {
+  for (uint8_t i = 0; i < count; ++i)
+    if (addresses[i] == address)
+      return CabLabel::decode(names[i], hex);
+  return false;
 }
 
 bool CabControl::stop() {

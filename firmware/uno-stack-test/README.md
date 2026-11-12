@@ -1,6 +1,6 @@
 # Uno DCC controller
 
-**Uno 0.7.3**, paired with ESP13 0.7.1. Supported MCU: **ATmega328P, 16 MHz,
+**Uno 0.7.4**, paired with ESP13 0.7.2. Supported MCU: **ATmega328P, 16 MHz,
 5 V Arduino Uno R3**. It generates DCC, routes bridge A, checks the UART protocol
 and owns the output timeouts. The optional [encoder cab](CAB.md) controls
 crawl speed. Bridge B remains disabled.
@@ -48,6 +48,7 @@ remain available under Setup. None of these checks establishes loaded protection
 CRC-16/CCITT-FALSE over the body with initial value 0xFFFF. ESP boot noise and corrupt/partial frames are ignored.
 Commands carry a sequence number; replies acknowledge the matching request.
 
+- `CABNAME` caches a hex-encoded display label for one eligible cab address.
 - `CONTROLX` supplies the complete 29-bit function-mask roster and directions.
 - `TRACKON` explicitly starts output; `KEEP` renews existing track output only.
 - `BENCHSTOP` disables it immediately.
@@ -55,6 +56,6 @@ Commands carry a sequence number; replies acknowledge the matching request.
 - `PING`, `STATUS`, `LED`, `PULSE`, `DCCTEST` provide diagnostics.
 
 Older ROSTER/CONTROL messages remain accepted for compatibility. The eighteenth
-STATE field is capability `3` for F0–F28 and a cab eligibility mask. Install the
+STATE field is capability `4` for F0–F28 and a cab eligibility mask plus cached display names. Install the
 matching ESP13 release first. Details and measured limits are in the
 [first-locomotive guide](FIRST-LOCO-TEST.md) and [validation record](../../docs/VALIDATION.md).

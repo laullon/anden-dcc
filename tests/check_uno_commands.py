@@ -49,7 +49,7 @@ uint32_t clockMs = 0;
 uint8_t pins[20] = {};
 FakeSerial Serial;
 void CabDisplay::begin() {}
-void CabDisplay::update(uint8_t, uint8_t) {}
+void CabDisplay::update(uint8_t, uint8_t, const char*, bool) {}
 namespace UnoDcc {
 UnoDccStream schedule;
 bool running = false;
@@ -118,6 +118,15 @@ int main() {
     // Only slots 0 and 2 are on the diorama. Reject bits beyond the roster.
     send("AD1,8,CONTROLX,3,7,3,1,4,0,6,8,8",false);
     send("AD1,9,CONTROLX,3,7,3,1,4,0,6,8,5");
+    send("AD1,90,CABNAME,3,53414E5441204645");
+    send("AD1,91,CABNAME,6,44494553454C");
+    assert(!strcmp(cab.name(), "SANTA FE"));
+    send("AD1,92,CABNAME,3,GG", false);
+    send("AD1,93,CABNAME,3,00", false);
+    send("AD1,94,CABNAME,3,414", false);
+    send("AD1,95,CABNAME,3,4141414141414141414141414141414141", false);
+    send("AD1,96,CABNAME,4,4E4F", false); // Address 4 is outside the cab list.
+    assert(!strcmp(cab.name(), "SANTA FE") && !pins[3]);
     UnoDcc::schedule.active ^= 1;
     auto rotate = [](bool clockwise) {
         const int phases[] = {2,0,1};
@@ -146,6 +155,7 @@ int main() {
     clockMs += 25; loop();
 
     pins[6] = LOW; loop(); assert(cab.address() == 6 && cab.step() == 0);
+    assert(!strcmp(cab.name(), "DIESEL"));
     clockMs += 50; loop(); assert(cab.address() == 6); // One change per press.
     pins[6] = HIGH; clockMs += 25; loop();
     rotate(true); assert(cab.step() == 1 && packetSpeed(2) == 2);
@@ -158,6 +168,7 @@ int main() {
     send("AD1,11,CONTROLX,3,5,3,1,4,0,6,8,4"); // Remove selected address 3.
     UnoDcc::schedule.active ^= 1;
     assert(cab.step() == 0 && cab.address() == 6 && packetSpeed(0) == 0 && pins[7] == LOW);
+    assert(!*cab.name());
     rotate(true); assert(cab.step() == 1);
     clockMs += 2000; loop();
     assert(cab.step() == 0 && !pins[3] && packetSpeed(2) == 1 && pins[7] == LOW);

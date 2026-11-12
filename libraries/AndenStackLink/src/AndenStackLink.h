@@ -8,7 +8,7 @@ constexpr size_t MAX_BODY = 144;
 uint16_t crc16(const char* data, size_t size);
 
 // Frames use @body*CCCC followed by LF. CRC covers the body bytes only.
-// Return the wire length, or zero if the body or output capacity is invalid.
+// Body may overlap output. Return the wire length, or zero for invalid input.
 size_t encode(char* output, size_t capacity, const char* body);
 
 class Receiver {
