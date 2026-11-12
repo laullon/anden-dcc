@@ -1,5 +1,9 @@
 # Pico 2 W cab board · Rev A design brief
 
+The [project record](PROJECT.md) keeps the requirements, decisions, alternatives,
+prototype evidence and open work together. Update it whenever an important
+design choice or hardware result changes.
+
 This is the experimental single-board successor to the Uno, motor shield and
 ESP13 stack. It integrates USB-C PD, the track power stage and the cab around a
 socketed Pico 2 W. The Pico and existing OLED are the retained assemblies.
@@ -11,7 +15,7 @@ review before fabrication.
 
 ![Functional architecture and assembly zones](architecture.svg)
 
-## Agreed requirements
+## Requirements and initial design targets
 
 - Pico 2 W on two 1×20, 2.54 mm through-hole sockets.
 - One DCC channel feeding the two diorama tracks in parallel.
