@@ -3,6 +3,21 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## Direct card presence control · ESP13 0.7.3 · 12 November 2026
+
+The ESP build and all eight browser suites pass. Roster tests cover toggling
+presence directly from a card without opening the editor, saved pressed state,
+failed-save recovery, output locks and 320 px layout.
+
+ESP13 0.7.3 was installed by OTA after switching track output off. The initial
+attempt while output was on was rejected by the existing update guard.
+The reboot and version were verified. Live /locos/presence requests changed
+and synchronized only the requested eligibility flag; extra stale name/address
+fields were ignored and invalid presence values returned HTTP 400.
+The original selection was restored. A live browser verified that both loco
+cards show enabled On diorama buttons with track power off. Track output
+remained off and Uno 0.7.5 reported zero timing faults.
+
 ## OLED / DCC timing correction · Uno 0.7.5 · 12 November 2026
 
 After the named display update, the live Uno 0.7.4 reported one timing fault

@@ -486,6 +486,31 @@ void RosterControl::rosterRoutes() {
     roster = changed;
     HttpSupport::sendJson(server, 200, dccStatus());
   });
+  server.on("/locos/presence", HTTP_POST, [this] {
+    if (finder.active() || !uno.outputsDisabled()) {
+      HttpSupport::sendUnoError(server, uno, 409,
+                                F("Finish the search and turn track power off before changing the diorama selection."));
+      return;
+    }
+    const int id = rosterNumber(server.arg("id"), 8);
+    const int index = id > 0 ? roster.findId(id) : -1;
+    const String presence = server.arg("onDiorama");
+    if (index < 0 || (presence != "0" && presence != "1")) {
+      HttpSupport::sendJson(server, 400, F("{\"error\":\"Choose an existing loco and onDiorama 0 or 1.\"}"));
+      return;
+    }
+    // Change only presence; a stale browser cannot overwrite a renamed loco.
+    LocoRoster changed = roster;
+    changed.entries[index].onDiorama = presence == "1";
+    if (!saveRoster(changed)) {
+      HttpSupport::sendJson(server, 500, F("{\"error\":\"Could not save roster\"}"));
+      return;
+    }
+    roster = changed;
+    uno.invalidate();
+    uno.syncRoster(roster);
+    HttpSupport::sendJson(server, 200, dccStatus());
+  });
   server.on("/locos/save", HTTP_POST, [this] {
     if (finder.active()) {
       HttpSupport::sendUnoError(server, uno, 409, F("Finish or cancel the address search first."));

@@ -17,6 +17,7 @@ success. Starting a search and answering a question also require a checked reply
 | POST | `/dcc/function` | `address`, `function` (0–28), `on` (0/1) |
 | POST | `/dcc/direction` | `address`, `forward` (0/1). Stops cab motion before changing direction. |
 | POST | `/locos/save` | Required `address`. Optional `id` (omit to add), `name` `type` (`electric`, `diesel`, `steam`) and `onDiorama` (0/1). |
+| POST | `/locos/presence` | `id`, `onDiorama` (0/1); updates only cab eligibility, requires outputs off and no active search |
 | POST | `/locos/remove` | `id` |
 | POST | `/locos/favorite` | `id`, `function`, `name`; pin or rename |
 | POST | `/locos/favorite/remove` | `id`, `function`; remove pin only |

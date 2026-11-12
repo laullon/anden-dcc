@@ -1,5 +1,12 @@
 # Changelog
 
+## Direct diorama selection · ESP13 0.7.3
+
+- Toggle On diorama directly on each loco card, with immediate saving.
+- Change only cab eligibility through /locos/presence, preserving other saved
+  fields even if the browser has older loco details.
+- Keep selection changes locked during track output and address search.
+
 ## OLED / DCC interrupt isolation · Uno 0.7.5
 
 - Replace Wire's interrupt-driven OLED transfers with bounded, polled TWI
