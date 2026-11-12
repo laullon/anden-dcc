@@ -11,9 +11,9 @@
 
 Una pequeña central para un diorama H0: luces, sonido y funciones desde el navegador.
 El Uno genera DCC, el motor shield alimenta las vías y el ESP13 ofrece Wi-Fi,
-panel web, almacenamiento y OTA. **ESP 0.7.3 / Uno 0.7.5.** El [mando con encoder](firmware/uno-stack-test/CAB.md)
+panel web, almacenamiento y OTA. **ESP 0.7.4 / Uno 0.7.5.** El [mando con encoder](firmware/uno-stack-test/CAB.md)
 opcional permite movimientos cortos, selección de locomotoras marcadas en
-**On diorama**, parada con un botón separado y lectura de dirección y velocidad.
+**On track**, parada con un botón separado y lectura de dirección y velocidad.
 
 - Hasta ocho locomotoras, direcciones cortas 1–127, con nombre e ilustración.
 - F0–F28 con un único botón por función; F0 siempre aparece en cada locomotora.

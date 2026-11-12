@@ -3,6 +3,19 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## On-track control gating · ESP13 0.7.4 · 12 November 2026
+
+The ESP build and all eight browser suites pass. Unmarked card tests verify
+disabled function/direction buttons and disabled function-editor fields while
+On track and Edit stay available with output off. Marking a loco re-enables
+its supported controls; failed presence saves preserve the previous state.
+
+ESP13 0.7.4 was installed by OTA with a verified reboot. A live browser confirmed
+the renamed On track button, all off-track control restrictions and re-enabled
+function/direction controls after marking a loco. The original selection was
+restored. Track output remained off and Uno 0.7.5 reported zero timing faults.
+The API/storage field remains onDiorama, preserving existing records.
+
 ## Direct card presence control · ESP13 0.7.3 · 12 November 2026
 
 The ESP build and all eight browser suites pass. Roster tests cover toggling

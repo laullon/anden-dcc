@@ -489,7 +489,7 @@ void RosterControl::rosterRoutes() {
   server.on("/locos/presence", HTTP_POST, [this] {
     if (finder.active() || !uno.outputsDisabled()) {
       HttpSupport::sendUnoError(server, uno, 409,
-                                F("Finish the search and turn track power off before changing the diorama selection."));
+                                F("Finish the search and turn track power off before changing the track selection."));
       return;
     }
     const int id = rosterNumber(server.arg("id"), 8);
@@ -528,7 +528,7 @@ void RosterControl::rosterRoutes() {
     const bool setPresence = server.hasArg("onDiorama");
     const String presence = server.arg("onDiorama");
     if (setPresence && presence != "0" && presence != "1") {
-      HttpSupport::sendJson(server, 400, F("{\"error\":\"On diorama must be 0 or 1.\"}"));
+      HttpSupport::sendJson(server, 400, F("{\"error\":\"On track must be 0 or 1.\"}"));
       return;
     }
     if (id < 0 || address < 0) {

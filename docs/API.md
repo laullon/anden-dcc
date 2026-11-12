@@ -89,10 +89,13 @@ Diagnostics return Uno status. See the table for other responses.
 ## Cab display names
 
 ESP13 0.7.2 and Uno 0.7.4 synchronize names from the saved loco roster to the
-128×64 OLED. Names are sent after CONTROLX for addresses marked On diorama.
+128×64 OLED. Names are sent after CONTROLX for addresses marked On track.
 The Uno STATE capability value `4` includes F0–F28, cab filtering and name
 metadata. Capabilities `1`, `2` and `3` retain their existing meanings.
 The ESP exposes `uno.cabNamesSupported` in `/api/status`.
+
+The saved/API field remains `onDiorama` for compatibility with existing rosters.
+The web panel labels it On track.
 
 The checked UART command body is `AD1,sequence,CABNAME,address,hex`. The label
 contains 1–16 printable ASCII characters encoded as hexadecimal pairs, so

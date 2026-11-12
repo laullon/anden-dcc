@@ -1,6 +1,6 @@
 # ESP13 web controller
 
-**ESP13 0.7.3 / Uno 0.7.5.** This application hosts the panel, Wi-Fi setup,
+**ESP13 0.7.4 / Uno 0.7.5.** This application hosts the panel, Wi-Fi setup,
 persistent roster and ESP OTA updates. The Uno owns DCC and output timing.
 See the [main guide](../../README.md), [wiring](../../docs/hardware/README.md),
 [HTTP API](../../docs/API.md) and [stationary test](../uno-stack-test/FIRST-LOCO-TEST.md).
@@ -67,7 +67,7 @@ boot ID. The CLI helper also checks the version against `--expect-version`.
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.3
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.4
 ```
 
 Add `--dry-run` to check the image and target before uploading. Reload the panel
@@ -89,7 +89,7 @@ steady when joined, 120 ms dip on user requests. Automatic status polling is qui
 The Uno L LED is a separate test, blocked whenever an output is enabled.
 The [encoder cab](../uno-stack-test/CAB.md) controls speed locally while the
 web page keeps the track power session alive. With track power off, save
-**On diorama** in each loco's editor to include it in cab selection.
+**On track** in each loco's editor to include it in cab selection.
 
 ## Function explorer and favorites
 

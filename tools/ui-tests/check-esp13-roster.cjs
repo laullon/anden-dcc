@@ -17,23 +17,35 @@ const make=(id,address,name='',type='electric',f0=false,onDiorama=false)=>({id,a
  const card=id=>page.locator('.loco[data-id="'+id+'"]');
  const on=id=>card(id).locator('.favorite-strip [data-function="0"]');
  const a=await card(1).boundingBox(),b=await card(2).boundingBox();assert.equal(a.y,b.y);
+ // Unmarked cards keep selection/edit available but disable all loco controls.
+ const offCard=card(1);
+ assert(await on(1).isDisabled());assert(await offCard.locator('[data-forward="1"]').isDisabled());
+ assert.equal(await offCard.locator('.edit-loco').isDisabled(),false);
+ await offCard.locator('summary').click();
+ assert(await offCard.locator('.function-select').isDisabled());assert(await offCard.locator('.function-name').isDisabled());assert(await offCard.locator('.pin-function').isDisabled());
+ await offCard.locator('summary').click();
  // Presence is saved directly from the card, with no editor and no optimistic
  // state left behind if saving fails.
  const presence=card(1).locator('.presence-toggle');
  await presence.click();await page.waitForFunction(()=>document.querySelector('.loco[data-id="1"] .presence-toggle').getAttribute('aria-pressed')==='true');
  assert.equal(presenceSaves,1);assert.equal(state.dcc.locos[0].onDiorama,true);assert.equal(await page.locator('#loco-dialog').evaluate(node=>node.open),false);
+ assert.equal(await on(1).isDisabled(),false);
  assert.equal(state.dcc.locos[0].address,3);assert.equal(state.dcc.locos[0].name,'');
  await presence.click();await page.waitForFunction(()=>document.querySelector('.loco[data-id="1"] .presence-toggle').getAttribute('aria-pressed')==='false');
  failPresence=true;await presence.click();await page.waitForFunction(()=>document.getElementById('roster-message').textContent.includes('Could not save roster'));
  assert.equal(await presence.getAttribute('aria-pressed'),'false');assert.equal(presenceSaves,2);
+ assert(await on(1).isDisabled());
+ await presence.click();await page.waitForFunction(()=>document.querySelector('.loco[data-id="1"] .presence-toggle').getAttribute('aria-pressed')==='true');
+ assert.equal(await on(1).isDisabled(),false);
  // A delayed old poll must not undo an acknowledged F0 command.
  holdNext=true;await page.evaluate(()=>{window.oldPoll=refreshStatus()});await page.waitForTimeout(20);
  await on(1).click();await page.waitForFunction(()=>document.querySelector('.loco[data-id="1"] .favorite-strip [data-function="0"]').getAttribute('aria-pressed')==='true');
  release();await page.evaluate(()=>window.oldPoll);assert.equal(await on(1).getAttribute('aria-pressed'),'true');assert.equal(await on(2).getAttribute('aria-pressed'),'false');
- await card(1).locator('.edit-loco').click();await page.locator('#loco-name').fill('Night express');await page.getByLabel('On diorama').check();await page.locator('#loco-type').selectOption('steam');assert.equal(await page.locator('#loco-preview svg').getAttribute('data-model'),'santa-fe');await page.locator('#save-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);assert.equal(state.dcc.locos[0].f0,true);assert.equal(state.dcc.locos[0].onDiorama,true);assert((await card(1).textContent()).includes('On diorama'));
- await card(1).locator('.edit-loco').click();assert(await page.getByLabel('On diorama').isChecked());await page.getByLabel('On diorama').uncheck();await page.locator('#loco-address').fill('4');await page.locator('#save-loco').click();assert.equal(saves,1);assert((await page.locator('#editor-message').textContent()).includes('already'));await page.locator('#loco-address').fill('37');await page.locator('#save-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);assert.equal(state.dcc.locos[0].f0,false);assert.equal(state.dcc.locos[0].onDiorama,false);assert.equal(await card(1).locator('.presence-toggle').getAttribute('aria-pressed'),'false');
+ await card(1).locator('.edit-loco').click();await page.locator('#loco-name').fill('Night express');await page.getByLabel('On track').check();await page.locator('#loco-type').selectOption('steam');assert.equal(await page.locator('#loco-preview svg').getAttribute('data-model'),'santa-fe');await page.locator('#save-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);assert.equal(state.dcc.locos[0].f0,true);assert.equal(state.dcc.locos[0].onDiorama,true);assert((await card(1).textContent()).includes('On track'));
+ await card(1).locator('.edit-loco').click();assert(await page.getByLabel('On track').isChecked());await page.getByLabel('On track').uncheck();await page.locator('#loco-address').fill('4');await page.locator('#save-loco').click();assert.equal(saves,1);assert((await page.locator('#editor-message').textContent()).includes('already'));await page.locator('#loco-address').fill('37');await page.locator('#save-loco').click();await page.waitForFunction(()=>!document.getElementById('loco-dialog').open);assert.equal(state.dcc.locos[0].f0,false);assert.equal(state.dcc.locos[0].onDiorama,false);assert.equal(await card(1).locator('.presence-toggle').getAttribute('aria-pressed'),'false');
  await page.locator('#add-loco').click();await page.locator('#loco-name').fill('<img src=x onerror=alert(1)>');await page.locator('#save-loco').click();await page.waitForFunction(()=>document.querySelectorAll('.loco').length===3);assert.equal(await page.locator('.loco-name img').count(),0);
  page.on('dialog',d=>d.accept());await card(3).locator('.edit-loco').click();await page.locator('#remove-loco').click();await page.waitForFunction(()=>document.querySelectorAll('.loco').length===2);
+ await presence.click();await page.waitForFunction(()=>document.querySelector('.loco[data-id="1"] .presence-toggle').getAttribute('aria-pressed')==='true');
  state.uno.enableA=true;state.uno.bench={supported:true,active:true,state:1,remainingMs:2000};await page.evaluate(()=>refreshStatus());
  assert(await on(1).isDisabled());assert(await card(1).locator('.edit-loco').isDisabled());assert(await presence.isDisabled());assert(await page.locator('#add-loco').isDisabled());
  state.uno.enableA=false;state.uno.bench={supported:true,active:false,state:2,remainingMs:0};await page.evaluate(()=>refreshStatus());assert.equal(await on(1).isDisabled(),false);assert.equal(await presence.isDisabled(),false);

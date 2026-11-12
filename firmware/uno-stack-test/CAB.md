@@ -1,6 +1,6 @@
 # Encoder cab
 
-Uno 0.7.5 and ESP13 0.7.3 provide local crawl control for one locomotive at a time.
+Uno 0.7.5 and ESP13 0.7.4 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
@@ -99,10 +99,11 @@ USB logic power: `A 003` in yellow and `S 00` in blue.
 
 ## Operation
 
-1. With power off, click **On diorama** directly on each loco card that is
+1. With power off, click **On track** directly on each loco card that is
    physically on the diorama. A highlighted button with a check mark includes
    that loco in encoder selection. Click it again to remove it. The setting
-   saves immediately. Existing rosters start with all cards unchecked.
+   saves immediately. Unmarked loco cards have their direction and function
+   controls disabled. Existing rosters start with all cards unchecked.
    Set direction in the panel, then turn track power on.
 2. Turn clockwise to increase the selected loco's speed and counterclockwise
    to reduce it. The initial cap is three DCC crawl steps. All other loco

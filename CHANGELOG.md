@@ -1,5 +1,12 @@
 # Changelog
 
+## On-track card controls · ESP13 0.7.4
+
+- Rename the presence control to On track.
+- Disable direction, function toggles and the function editor for unmarked
+  locos. Keep On track and Edit available while output is off.
+- Preserve the saved onDiorama field and existing roster selections.
+
 ## Direct diorama selection · ESP13 0.7.3
 
 - Toggle On diorama directly on each loco card, with immediate saving.

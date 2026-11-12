@@ -4,7 +4,7 @@ const root=path.resolve(__dirname,'../..'),out=process.env.UI_ARTIFACTS||path.jo
 fs.mkdirSync(out,{recursive:true});
 const state={name:'anden-esp13',appId:'ANDEN_ESP13_OTA_V1',version:'0.2.3',connected:true,configured:true,ssid:'Workshop',ip:'192.168.1.43',apIp:'192.168.13.1',apReady:true,mdnsReady:true,otaMaxBytes:458752,freeHeap:40000,storageReady:true,
  uno:{online:true,version:'0.2.0',enableA:false,enableB:false,adcA:0,adcB:0,rxFrames:5,roundTripMs:8},
- dcc:{ready:true,running:true,pin:10,packets:100,timingFaults:0,locos:[{id:1,address:3,name:'Morning express',type:'electric',f0:true,bytes:['03','90','93']},{id:2,address:4,name:'Depot diesel',type:'diesel',f0:false,bytes:['04','80','84']}]}};
+ dcc:{ready:true,running:true,pin:10,packets:100,timingFaults:0,locos:[{onDiorama:true,id:1,address:3,name:'Morning express',type:'electric',f0:true,bytes:['03','90','93']},{onDiorama:true,id:2,address:4,name:'Depot diesel',type:'diesel',f0:false,bytes:['04','80','84']}]}};
 function luminance(color){
  const rgb=color.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});
  return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;

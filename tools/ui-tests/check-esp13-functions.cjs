@@ -2,7 +2,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
 const root=path.resolve(__dirname,'../..');
 (async()=>{const browser=await chromium.launch({...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),headless:true});try{
  const page=await browser.newPage({viewport:{width:1180,height:1100}}),errors=[],calls=[];page.on('pageerror',e=>errors.push(e.message));
- const loco=(id,address,type)=>({id,address,name:id===1?'Night express':'Freight',type,forward:true,f0:false,functions:0,favorites:[],bytes:['03','80','83']});
+ const loco=(id,address,type)=>({onDiorama:true,id,address,name:id===1?'Night express':'Freight',type,forward:true,f0:false,functions:0,favorites:[],bytes:['03','80','83']});
  const state={appId:'ANDEN_ESP13_OTA_V1',version:'0.6.0',connected:true,configured:true,ssid:'Workshop',ip:'192.168.1.43',apIp:'192.168.13.1',apReady:true,mdnsReady:true,otaMaxBytes:458752,freeHeap:40000,storageReady:true,uno:{online:true,version:'0.6.0',enableA:true,enableB:false,trackActive:true,trackSupported:true,adcA:0,adcB:0,rxFrames:5,roundTripMs:8},dcc:{ready:true,running:true,functionsSupported:true,packets:100,timingFaults:0,finder:{active:false,stage:'idle',first:1,last:100,step:0},locos:[loco(1,3,'electric'),loco(2,6,'diesel')]}};
  let failSave=false;
  await page.route('http://functions.test/**',async route=>{const req=route.request(),url=new URL(req.url()),data=new URLSearchParams(req.postData());
