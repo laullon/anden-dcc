@@ -13,8 +13,13 @@ no-selection state. The documentation preview uses captured production-driver
 pixels.
 
 The build uses 17,296 bytes of flash and 1,283 bytes of static RAM, leaving
-765 bytes for stack/local variables. Hardware upload and the new layout's
-physical check are pending.
+765 bytes for stack/local variables. Uno 0.7.6 was uploaded and flash-verified
+over USB. Checked UART replies confirmed the version, zero timing faults and
+both output enables LOW. A temporary address-6 roster and label 1608 were
+accepted at speed zero. The user confirmed that the OLED showed 1608, a large
+zero and an empty rounded gauge. After both ESP UART switches were turned ON,
+ESP13 0.7.4 reported Uno 0.7.6 online, DCC running, zero timing faults and
+track output off. The user's saved roster selection resumed automatically.
 
 ## On-track control gating · ESP13 0.7.4 · 12 November 2026
 
