@@ -10,6 +10,10 @@ capture unless requested.
 
 ![PD negotiation core](01a-usb-pd.svg)
 
+U1 is a **WCH CH224K**, ESSOP-10 with exposed ground pad. The drawing shows
+only its reference and part name; manufacturer/package details stay in these
+notes, and the datasheet link is a hidden property.
+
 ## Captured circuit
 
 | Reference | Proposed value | Purpose |
