@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850" role="img" aria-labelledby="title desc">
-<title id="title">anden-dcc Pico 2 W Rev A functional architecture</title>
+<title id="title">EXPERIMENT · anden-dcc Pico 2 W Rev A functional architecture</title>
 <desc id="desc">A USB-C PD controller requests 15 volts. Input protection feeds a DRV8874 DCC bridge and a separate 5 volt logic regulator. A socketed Pico 2 W supplies DCC phase and a watchdog-gated enable, and connects to the cab controls and OLED. This is an architecture diagram with electrical design and manufacturing release pending.</desc>
 <defs>
 <style>
@@ -10,7 +10,7 @@ text{font-family:Arial,Helvetica,sans-serif;fill:#193b3c}.title{font-size:30px;f
 <marker id="sense" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 6 3 0 6" fill="none" stroke="#3665a0" stroke-width="1.5"/></marker>
 </defs>
 <rect width="1200" height="850" rx="20" fill="#f5f2eb"/>
-<text x="30" y="48" class="title">anden-dcc · Pico 2 W cab board</text>
+<text x="30" y="48" class="title">EXPERIMENT · Pico 2 W cab board</text>
 <text x="30" y="79" class="body">Rev A architecture · mixed hand / factory assembly · one shared DCC district</text>
 
 <rect x="30" y="150" width="220" height="120" rx="12" class="box"/>
@@ -81,5 +81,5 @@ text{font-family:Arial,Helvetica,sans-serif;fill:#193b3c}.title{font-size:30px;f
 <text x="445" y="757" class="small">Sockets, controls, terminals and bulk capacitors</text>
 <text x="855" y="728" class="body">3 · Fit Pico and OLED</text>
 <text x="855" y="757" class="small">Inspect, program and validate in stages</text>
-<text x="30" y="824" class="small">Design brief · electrical values, footprint review, circuit capture and PCB layout remain pending.</text>
+<text x="30" y="824" class="small">EXPERIMENT / DESIGN ONLY · electrical values, schematic, footprint verification and PCB layout remain pending.</text>
 </svg>

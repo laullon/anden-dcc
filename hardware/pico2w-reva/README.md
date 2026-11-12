@@ -1,11 +1,14 @@
-# Pico 2 W cab board · Rev A design brief
+# EXPERIMENT · Pico 2 W cab board · Rev A
 
 The [project record](PROJECT.md) keeps the requirements, decisions, alternatives,
 prototype evidence and open work together. Update it whenever an important
 design choice or hardware result changes.
 
-This is the experimental single-board successor to the Uno, motor shield and
-ESP13 stack. It integrates USB-C PD, the track power stage and the cab around a
+This experiment explores a self-contained Pico 2 W cab PCB.
+
+**Status is EXPERIMENTAL / DESIGN ONLY.** The supported anden-dcc platform is
+the Uno + L298P motor shield + ESP13 stack. This design remains a separate
+hardware investigation. It integrates USB-C PD, the track power stage and the cab around a
 socketed Pico 2 W. The Pico and existing OLED are the retained assemblies.
 The PD, regulator, driver and protection circuits use individual components.
 

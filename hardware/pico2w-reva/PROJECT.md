@@ -1,4 +1,4 @@
-# anden-dcc · Pico 2 W project record
+# EXPERIMENT · anden-dcc Pico 2 W project record
 
 Last updated 12 November 2026, Europe/Madrid.
 
@@ -7,6 +7,11 @@ requirements, engineering proposals, assumptions, open questions and validation
 results here. Supporting drawings and tables are linked below.
 
 ## Current state
+
+**EXPERIMENTAL / DESIGN ONLY.** The supported hardware remains the Uno +
+L298P motor shield + ESP13 stack. Schematic, board layout, firmware and
+hardware qualification for this Pico 2 W design are pending.
+
 
 The project has a design brief, functional diagram, preliminary component list
 and proposed GPIO allocation. Detailed electrical design, KiCad schematic,
@@ -60,6 +65,7 @@ sections have a separate status.
 | D13 | Keep this exploration separate from the established project | The new hardware work uses its own Git branch and worktree |
 | D14 | Keep the existing project open and permissively licensed | The repository uses MIT and retains its magic-smoke notice |
 | D15 | Keep setup and control free of application passwords | This is the earlier user preference for the local project |
+| D16 | Keep this effort explicitly experimental | User requested clear status so other agents distinguish it from supported hardware |
 
 Future changes should retain these IDs. Mark a changed decision as superseded
 and identify its replacement, so the reason for an old design remains visible.
@@ -256,3 +262,4 @@ previously confirmed requirement.
 | Date | Update |
 | --- | --- |
 | 12 November 2026 | Created the central record from this exploration and the existing validated prototype. Classified confirmed decisions, engineering proposals and unresolved assumptions. |
+| 12 November 2026 | Added explicit experimental status, agent instructions and standalone artifact labels following D16. |

@@ -10,6 +10,13 @@
 
 ---
 
+> **Experimental branch**
+>
+> This branch contains a Pico 2 W hardware experiment under
+> [hardware/pico2w-reva](hardware/pico2w-reva/PROJECT.md).
+> Its status is **design only**. The supported platform described below is
+> Arduino Uno + L298P motor shield + ESP13.
+
 **anden-dcc** is a small controller for an H0 railway diorama: give your trains
 light, sound and character from a web panel. An **Arduino Uno** generates DCC,
 a **Deek-Robot L298P motor shield** powers the rails, and a **DOIT ESP13 shield**
