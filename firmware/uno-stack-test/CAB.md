@@ -1,11 +1,11 @@
 # Encoder cab
 
-Uno 0.7.5 and ESP13 0.7.4 provide local crawl control for one locomotive at a time.
+Uno 0.7.6 and ESP13 0.7.4 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
 
-![OLED layout preview showing the yellow address and power header, loco name, large speed step and movement bar.](../../docs/hardware/cab-display.png)
+![OLED layout preview showing the loco name in yellow, a large speed number and a continuous speed gauge.](../../docs/hardware/cab-display.png)
 
 Preview rendered from the firmware's display output.
 
@@ -76,10 +76,11 @@ Use a 0.96-inch 128×64 I²C SSD1315 Arduino-compatible breakout at address
 `0x3C`, with 5 V compatible power and I²C inputs and onboard reset circuitry.
 Follow the module's printed pin labels. The cab's MP1584 supplies its VCC at 5.0 V.
 
-The display is probed at Uno boot. The yellow header shows the selected address
-and track power status. The blue area shows the loco name saved in the web
-panel, a large two-digit speed step, STOP/MOVE status and a three-segment speed
-bar. An unnamed loco shows LOCOMOTIVE; with no eligible loco, SELECT A LOCO appears.
+The display is probed at Uno boot. It shows the selected loco name in yellow,
+a large speed number in blue and a rounded, continuous speed gauge. The gauge
+is empty at zero and fills to one third, two thirds or full at crawl steps
+1, 2 or 3. Small notches mark the thirds. An unnamed loco shows LOCOMOTIVE;
+with no eligible loco, SELECT A LOCO appears.
 
 The ESP sends display labels when synchronizing the roster. The Uno caches all
 eight eligible labels, so the encoder button changes the name immediately.
@@ -93,8 +94,8 @@ interrupts disabled so Timer1 can preempt display transfers. A stalled transfer
 times out and disables further display writes while the cab continues running. The cab also runs with the display disconnected.
 
 SSD1315 Arduino modules can use the SSD1306 128×64 command configuration.
-Static output on the actual module was confirmed on 12 November 2026 with
-USB logic power: `A 003` in yellow and `S 00` in blue.
+Panel bring-up and live timing tests are recorded in the
+[validation notes](../../docs/VALIDATION.md).
 [SSD1315 Arduino example](https://wiki.seeedstudio.com/Grove-OLED-Yellow%26Blue-Display-0.96-SSD1315_V1.0/)
 
 ## Operation

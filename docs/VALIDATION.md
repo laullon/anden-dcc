@@ -3,6 +3,19 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## Minimal OLED layout · Uno 0.7.6
+
+The Uno build and its native regression suite pass. The display now renders the
+selected name in the yellow band, a four-times-size speed number and one rounded
+speed gauge. Pixel tests check an empty gauge at zero, one-third/two-thirds/full
+fills at steps 1–3, cleared speed-label margins, shorter-name clearing and the
+no-selection state. The documentation preview uses captured production-driver
+pixels.
+
+The build uses 17,296 bytes of flash and 1,283 bytes of static RAM, leaving
+765 bytes for stack/local variables. Hardware upload and the new layout's
+physical check are pending.
+
 ## On-track control gating · ESP13 0.7.4 · 12 November 2026
 
 The ESP build and all eight browser suites pass. Unmarked card tests verify

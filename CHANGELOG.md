@@ -1,5 +1,12 @@
 # Changelog
 
+## Minimal cab display · Uno 0.7.6
+
+- Keep the selected loco name and a larger speed number.
+- Replace separate speed boxes with one rounded gauge that fills continuously,
+  with small third markers matching crawl steps 1–3.
+- Remove address, power and STEP/STOP/MOVE labels from the OLED.
+
 ## On-track card controls · ESP13 0.7.4
 
 - Rename the presence control to On track.

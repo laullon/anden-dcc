@@ -49,7 +49,7 @@ uint32_t clockMs = 0;
 uint8_t pins[20] = {};
 FakeSerial Serial;
 void CabDisplay::begin() {}
-void CabDisplay::update(uint8_t, uint8_t, const char*, bool) {}
+void CabDisplay::update(uint8_t, uint8_t, const char*) {}
 namespace UnoDcc {
 UnoDccStream schedule;
 bool running = false;

@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-constexpr char VERSION[] = "0.7.5";
+constexpr char VERSION[] = "0.7.6";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
 constexpr uint8_t MOVEMENT_LED = 7;
 namespace {
@@ -306,6 +306,5 @@ void loop() {
     serviceBridge();
     serviceCab();
   }
-  display.update(cab.address(), cab.step(), cab.name(),
-                 bench.active() && bench.mode == BridgeBench::Track && digitalRead(ENABLE_A));
+  display.update(cab.address(), cab.step(), cab.name());
 }

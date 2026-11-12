@@ -1,6 +1,7 @@
 #include "CabDisplay.h"
 #include <Arduino.h>
 #include "CabI2c.h"
+#include "UnoDcc.h"
 #include <avr/pgmspace.h>
 #include <stdio.h>
 #include <string.h>
@@ -125,15 +126,13 @@ void CabDisplay::begin() {
   ready = CabI2c::write(OLED, on, sizeof(on));
 }
 
-void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* nextName,
-                        bool nextPowered) {
+void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* nextName) {
   if (!ready)
     return;
-  if (nextAddress != address || nextSpeed != speed || nextPowered != powered ||
+  if (nextAddress != address || nextSpeed != speed ||
       strncmp(nextName, name, CabLabel::LENGTH)) {
     address = nextAddress;
     speed = nextSpeed;
-    powered = nextPowered;
     strncpy(name, nextName, CabLabel::LENGTH);
     name[CabLabel::LENGTH] = 0;
     page = column = 0;
@@ -143,14 +142,14 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* next
     return;
   lastWrite = now;
 
-  char number[6];
-  if (address)
-    snprintf(number, sizeof(number), "A %03u", unsigned(address));
-  else
-    strcpy(number, "A ---");
   const char* label = address ? (*name ? name : "LOCOMOTIVE") : "SELECT A LOCO";
   const uint8_t labelScale = strlen(label) <= 10 ? 2 : 1;
   const uint8_t labelStart = (WIDTH - strlen(label) * 6 * labelScale) / 2;
+  char number[4];
+  snprintf(number, sizeof(number), "%u", unsigned(speed));
+  const uint8_t numberStart = (WIDTH - strlen(number) * 24) / 2;
+  const uint8_t level = speed > UnoDcc::MAX_CRAWL_STEP ? UnoDcc::MAX_CRAWL_STEP : speed;
+  const uint8_t filled = uint16_t(level) * 106 / UnoDcc::MAX_CRAWL_STEP;
 
   // Build one bounded transaction. Polling its transfer leaves Timer1 free.
   // A redraw clears every column, so shorter names cannot leave old pixels.
@@ -159,28 +158,30 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* next
   uint8_t count = 7;
   for (uint8_t i = 0; i < CHUNK && column < WIDTH; ++i, ++column) {
     uint8_t pixels = 0;
-    if (page < 2) {
-      pixels = textColumn(number, column, 2, page);
-      if (page == 0 && column >= 104)
-        pixels |= textColumn(powered ? "ON" : "OFF", column - 104, 1);
-    } else if (page == 2 || (page == 3 && labelScale == 2)) {
-      if (column >= labelStart)
-        pixels = textColumn(label, column - labelStart, labelScale, page - 2);
-    } else if (page == 3 && column >= 8 && column < 120) {
-      pixels = 0x08; // Divider separates the name from the throttle.
-    } else if (page >= 4 && page <= 6) {
-      char step[3] = {char('0' + speed / 10), char('0' + speed % 10), 0};
-      if (column >= 46 && column < 82)
-        pixels = textColumn(step, column - 46, 3, page - 4);
-      if (page == 5 && column >= 8 && column < 32)
-        pixels |= textColumn("STEP", column - 8, 1);
-      if (page == 5 && column >= 94)
-        pixels |= textColumn(speed ? "MOVE" : "STOP", column - 94, 1);
-    } else if (page == 7 && column >= 13 && column < 115) {
-      const uint8_t segment = (column - 13) / 36;
-      const uint8_t x = (column - 13) % 36;
-      if (x < 30)
-        pixels = speed > segment || x == 0 || x == 29 ? 0x3C : 0x24;
+    if (page < 2 && column >= labelStart) {
+      if (labelScale == 2) {
+        pixels = textColumn(label, column - labelStart, 2, page);
+      } else {
+        // Centre a long, single-height name vertically in the yellow band.
+        const uint16_t text = uint16_t(textColumn(label, column - labelStart, 1)) << 4;
+        pixels = text >> (page * 8);
+      }
+    } else if (page >= 2 && page <= 5 && column >= numberStart) {
+      pixels = textColumn(number, column - numberStart, 4, page - 2);
+    } else if (page >= 6 && column >= 8 && column < 120) {
+      // One rounded gauge, with third markers matching the three crawl steps.
+      // The outline stays visible at zero; only the commanded portion fills.
+      const uint8_t x = column - 8;
+      uint16_t bar = 0x2010;
+      if (x == 0 || x == 111)
+        bar = 0x0780;
+      else if (x == 1 || x == 110)
+        bar = 0x1860;
+      if (x >= 3 && x < 3 + filled)
+        bar |= 0x0FC0;
+      if (x == 37 || x == 74)
+        bar |= 0x1020;
+      pixels = bar >> ((page - 6) * 8);
     }
     bytes[count++] = pixels;
   }
