@@ -9,8 +9,9 @@ documented in the root README and docs/VALIDATION.md.
 ## Pico 2 W experiment
 
 The work under hardware/pico2w-reva is EXPERIMENTAL and DESIGN ONLY.
-Its working branch is hardware/pico2w-reva. The central record is
-hardware/pico2w-reva/PROJECT.md.
+It lives in the main repository and main branch alongside the supported code.
+The central record is hardware/pico2w-reva/PROJECT.md.
+Use the same checkout for both platforms, keeping their scope and status clear.
 
 The experiment currently contains a design brief, preliminary BOM, architecture
 diagram and proposed GPIO allocation. Electrical schematic, verified footprints,

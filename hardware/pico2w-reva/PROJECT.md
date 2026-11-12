@@ -18,9 +18,12 @@ and proposed GPIO allocation. Detailed electrical design, KiCad schematic,
 verified footprints and PCB routing are pending. Component ratings and package
 candidates in this record require circuit and layout review before an order.
 
-Work is isolated on branch `hardware/pico2w-reva`, based on the tested Uno
-baseline at `f3f9ec8`. The first hardware planning commit is `645c72a`.
-The project name remains anden-dcc.
+Work uses the main anden-dcc repository and its `main` branch. The experiment
+is distinguished by its directory, explicit status labels and agent instructions.
+The user requested the shared checkout instead of a separate worktree or branch.
+
+The tested Uno starting point is `f3f9ec8`. The first hardware planning commit
+is `645c72a`. The project name remains anden-dcc.
 
 ## Purpose and inherited requirements
 
@@ -62,10 +65,11 @@ sections have a separate status.
 | D10 | Put the presence toggle directly on each loco card | Selection should save without opening Edit |
 | D11 | Disable direction and function controls on unmarked cards | On track and Edit remain accessible when the normal edit guards permit |
 | D12 | Show name, speed and an improved gauge on the OLED | Address, power and STEP/STOP/MOVE labels were removed from the current display |
-| D13 | Keep this exploration separate from the established project | The new hardware work uses its own Git branch and worktree |
+| D13 | Initially isolate work on a separate Git branch and worktree | Superseded by D17 for the Git/workspace workflow. Experimental status remains governed by D16 |
 | D14 | Keep the existing project open and permissively licensed | The repository uses MIT and retains its magic-smoke notice |
 | D15 | Keep setup and control free of application passwords | This is the earlier user preference for the local project |
 | D16 | Keep this effort explicitly experimental | User requested clear status so other agents distinguish it from supported hardware |
+| D17 | Work in the same repository checkout on main | User requested one path and no separate worktree or branch. Keep the experiment under hardware/pico2w-reva with explicit status labels |
 
 Future changes should retain these IDs. Mark a changed decision as superseded
 and identify its replacement, so the reason for an old design remains visible.
@@ -263,3 +267,4 @@ previously confirmed requirement.
 | --- | --- |
 | 12 November 2026 | Created the central record from this exploration and the existing validated prototype. Classified confirmed decisions, engineering proposals and unresolved assumptions. |
 | 12 November 2026 | Added explicit experimental status, agent instructions and standalone artifact labels following D16. |
+| 12 November 2026 | Followed D17 by consolidating work into the main checkout and main branch, removing the clean extra worktree and retiring the merged experimental branch. D16 experiment labels remain in effect. |

@@ -10,9 +10,9 @@
 
 ---
 
-> **Experimental branch**
+> **Pico 2 W experiment**
 >
-> This branch contains a Pico 2 W hardware experiment under
+> This repository contains a Pico 2 W hardware experiment under
 > [hardware/pico2w-reva](hardware/pico2w-reva/PROJECT.md).
 > Its status is **design only**. The supported platform described below is
 > Arduino Uno + L298P motor shield + ESP13.
