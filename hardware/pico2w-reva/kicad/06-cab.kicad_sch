@@ -1,13 +1,82 @@
-(kicad_sch (version 20250114) (generator "eeschema")
- (uuid 5669a80b-472b-49bb-b986-afa1fb54f9f5) (paper "A4")
- (title_block (title "EXPERIMENT - Cab controls and OLED") (date "2026-11-12") (rev "A - scaffold")
- (company "anden-dcc") (comment 1 "EXPERIMENTAL / DESIGN ONLY - NOT FOR FABRICATION")
- (comment 2 "Circuit capture and footprint verification pending"))
- (lib_symbols)
-(text "CIRCUIT CAPTURE PENDING" (at 20 22 0) (effects (font (size 2 2)) (justify left)) (uuid 3251edd4-fb68-4e38-86c0-385b6f35abc3))
-(text "Encoder A/B adjusts speed; encoder push selects among On track locos." (at 20 36 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid be1e492a-a5a8-4769-a8c8-15601d24da5b))
-(text "Separate STOP button stops movement; movement LED indicates nonzero speed." (at 20 46 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 97323693-66d6-4eaf-9260-c8515249b9b1))
-(text "Existing SSD1315 128x64 I2C OLED, address 0x3C; confirm module pin order." (at 20 56 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid d2dbecb9-336c-4492-a7da-8d462d21b2fc))
-(text "Pending: supply/pull-up measurements, optional translator and mechanical footprints." (at 20 66 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 451bb51e-9f0b-4d42-9c7b-2b73daae30b8))
-(text "Read ../PROJECT.md before making electrical or mechanical decisions." (at 20 90 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 3f282481-b7e3-49ac-8cb5-39976f52f549))
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "5669a80b-472b-49bb-b986-afa1fb54f9f5")
+	(paper "A4")
+	(title_block
+		(title "EXPERIMENT - Cab controls and OLED")
+		(date "2026-11-12")
+		(rev "A - scaffold")
+		(company "anden-dcc")
+		(comment 1 "EXPERIMENTAL / DESIGN ONLY - NOT FOR FABRICATION")
+		(comment 2 "Circuit capture and footprint verification pending")
+	)
+	(lib_symbols)
+	(text "CIRCUIT CAPTURE PENDING"
+		(exclude_from_sim no)
+		(at 20 22 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left)
+		)
+		(uuid "3251edd4-fb68-4e38-86c0-385b6f35abc3")
+	)
+	(text "Read ../PROJECT.md before making electrical or mechanical decisions."
+		(exclude_from_sim no)
+		(at 20 90 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "3f282481-b7e3-49ac-8cb5-39976f52f549")
+	)
+	(text "Pending: supply/pull-up measurements, optional translator and mechanical footprints."
+		(exclude_from_sim no)
+		(at 20 66 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "451bb51e-9f0b-4d42-9c7b-2b73daae30b8")
+	)
+	(text "Separate STOP button stops movement; movement LED indicates nonzero speed."
+		(exclude_from_sim no)
+		(at 20 46 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "97323693-66d6-4eaf-9260-c8515249b9b1")
+	)
+	(text "Encoder A/B adjusts speed; encoder push selects among On track locos."
+		(exclude_from_sim no)
+		(at 20 36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "be1e492a-a5a8-4769-a8c8-15601d24da5b")
+	)
+	(text "Existing SSD1315 128x64 I2C OLED, address 0x3C; confirm module pin order."
+		(exclude_from_sim no)
+		(at 20 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d2dbecb9-336c-4492-a7da-8d462d21b2fc")
+	)
 )

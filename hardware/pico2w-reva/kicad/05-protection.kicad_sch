@@ -1,13 +1,82 @@
-(kicad_sch (version 20250114) (generator "eeschema")
- (uuid 097bfbcc-044b-4943-b9fd-588d94ef8c5f) (paper "A4")
- (title_block (title "EXPERIMENT - Watchdog and sensing") (date "2026-11-12") (rev "A - scaffold")
- (company "anden-dcc") (comment 1 "EXPERIMENTAL / DESIGN ONLY - NOT FOR FABRICATION")
- (comment 2 "Circuit capture and footprint verification pending"))
- (lib_symbols)
-(text "CIRCUIT CAPTURE PENDING" (at 20 22 0) (effects (font (size 2 2)) (justify left)) (uuid 40104464-0468-4aed-ad52-bfb726b10e85))
-(text "Candidates: TPS3435 leaded watchdog and SN74LVC1G08DBVR enable gate." (at 20 36 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 9f5096e0-3966-44b3-aaec-0d1faf8f422f))
-(text "Define timeout, fault polarity, startup, latch and deliberate re-arm behavior." (at 20 46 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 2ca9440b-8e1f-454b-b262-2a2c38d3dd45))
-(text "Protect 3.3 V ADC inputs for rail voltage and DRV8874 IPROPI current sense." (at 20 56 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 351b6351-b11a-4bfc-839e-365ce417ffe2))
-(text "Pending: exact watchdog suffix, divider/filter/clamp values and fault truth table." (at 20 66 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid bdcb165f-7e46-484f-856e-ae75ad20dfaf))
-(text "Read ../PROJECT.md before making electrical or mechanical decisions." (at 20 90 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 9ba00164-23e5-4ba4-bede-c727188b1785))
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "097bfbcc-044b-4943-b9fd-588d94ef8c5f")
+	(paper "A4")
+	(title_block
+		(title "EXPERIMENT - Watchdog and sensing")
+		(date "2026-11-12")
+		(rev "A - scaffold")
+		(company "anden-dcc")
+		(comment 1 "EXPERIMENTAL / DESIGN ONLY - NOT FOR FABRICATION")
+		(comment 2 "Circuit capture and footprint verification pending")
+	)
+	(lib_symbols)
+	(text "Define timeout, fault polarity, startup, latch and deliberate re-arm behavior."
+		(exclude_from_sim no)
+		(at 20 46 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2ca9440b-8e1f-454b-b262-2a2c38d3dd45")
+	)
+	(text "Protect 3.3 V ADC inputs for rail voltage and DRV8874 IPROPI current sense."
+		(exclude_from_sim no)
+		(at 20 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "351b6351-b11a-4bfc-839e-365ce417ffe2")
+	)
+	(text "CIRCUIT CAPTURE PENDING"
+		(exclude_from_sim no)
+		(at 20 22 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left)
+		)
+		(uuid "40104464-0468-4aed-ad52-bfb726b10e85")
+	)
+	(text "Read ../PROJECT.md before making electrical or mechanical decisions."
+		(exclude_from_sim no)
+		(at 20 90 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9ba00164-23e5-4ba4-bede-c727188b1785")
+	)
+	(text "Candidates: TPS3435 leaded watchdog and SN74LVC1G08DBVR enable gate."
+		(exclude_from_sim no)
+		(at 20 36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9f5096e0-3966-44b3-aaec-0d1faf8f422f")
+	)
+	(text "Pending: exact watchdog suffix, divider/filter/clamp values and fault truth table."
+		(exclude_from_sim no)
+		(at 20 66 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "bdcb165f-7e46-484f-856e-ae75ad20dfaf")
+	)
 )

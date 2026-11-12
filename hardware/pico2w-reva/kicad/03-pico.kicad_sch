@@ -1,13 +1,82 @@
-(kicad_sch (version 20250114) (generator "eeschema")
- (uuid 270491df-c490-4b45-ab10-0f69b63dfaa1) (paper "A4")
- (title_block (title "EXPERIMENT - Pico 2 W controller") (date "2026-11-12") (rev "A - scaffold")
- (company "anden-dcc") (comment 1 "EXPERIMENTAL / DESIGN ONLY - NOT FOR FABRICATION")
- (comment 2 "Circuit capture and footprint verification pending"))
- (lib_symbols)
-(text "CIRCUIT CAPTURE PENDING" (at 20 22 0) (effects (font (size 2 2)) (justify left)) (uuid 0164be0d-5b4b-411d-aa1c-0c4f893e660a))
-(text "Pico 2 W on two 1x20, 2.54 mm through-hole sockets." (at 20 36 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 57aa0296-8309-4c77-924c-02663445caee))
-(text "Proposed GPIO allocation is recorded in ../pinmap.csv." (at 20 46 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid a088f120-7f6b-4a74-9dc2-2923e2283429))
-(text "Reserve antenna keepout and access to USB, BOOTSEL and SWD." (at 20 56 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 33230464-e4ba-42a2-b840-cee446bbe40c))
-(text "Pending: verified symbol/socket footprint, reset defaults and decoupling." (at 20 66 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 0155f093-1810-4c7c-849e-a9d14d08e235))
-(text "Read ../PROJECT.md before making electrical or mechanical decisions." (at 20 90 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 1ffed963-6984-40df-a989-973bed343c09))
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "270491df-c490-4b45-ab10-0f69b63dfaa1")
+	(paper "A4")
+	(title_block
+		(title "EXPERIMENT - Pico 2 W controller")
+		(date "2026-11-12")
+		(rev "A - scaffold")
+		(company "anden-dcc")
+		(comment 1 "EXPERIMENTAL / DESIGN ONLY - NOT FOR FABRICATION")
+		(comment 2 "Circuit capture and footprint verification pending")
+	)
+	(lib_symbols)
+	(text "Pending: verified symbol/socket footprint, reset defaults and decoupling."
+		(exclude_from_sim no)
+		(at 20 66 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "0155f093-1810-4c7c-849e-a9d14d08e235")
+	)
+	(text "CIRCUIT CAPTURE PENDING"
+		(exclude_from_sim no)
+		(at 20 22 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left)
+		)
+		(uuid "0164be0d-5b4b-411d-aa1c-0c4f893e660a")
+	)
+	(text "Read ../PROJECT.md before making electrical or mechanical decisions."
+		(exclude_from_sim no)
+		(at 20 90 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "1ffed963-6984-40df-a989-973bed343c09")
+	)
+	(text "Reserve antenna keepout and access to USB, BOOTSEL and SWD."
+		(exclude_from_sim no)
+		(at 20 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "33230464-e4ba-42a2-b840-cee446bbe40c")
+	)
+	(text "Pico 2 W on two 1x20, 2.54 mm through-hole sockets."
+		(exclude_from_sim no)
+		(at 20 36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "57aa0296-8309-4c77-924c-02663445caee")
+	)
+	(text "Proposed GPIO allocation is recorded in ../pinmap.csv."
+		(exclude_from_sim no)
+		(at 20 46 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a088f120-7f6b-4a74-9dc2-2923e2283429")
+	)
 )

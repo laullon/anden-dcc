@@ -1,13 +1,82 @@
-(kicad_sch (version 20250114) (generator "eeschema")
- (uuid 2fe51076-22e6-4100-b91e-83890a62c58d) (paper "A4")
- (title_block (title "EXPERIMENT - DCC bridge and track outputs") (date "2026-11-12") (rev "A - scaffold")
- (company "anden-dcc") (comment 1 "EXPERIMENTAL / DESIGN ONLY - NOT FOR FABRICATION")
- (comment 2 "Circuit capture and footprint verification pending"))
- (lib_symbols)
-(text "CIRCUIT CAPTURE PENDING" (at 20 22 0) (effects (font (size 2 2)) (justify left)) (uuid 42326f38-fa32-412f-a0e2-bfa60c881e52))
-(text "Candidate: DRV8874PWPR, HTSSOP-16 with exposed thermal pad." (at 20 36 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid e2783279-2964-4d56-abee-cbeb8576aeea))
-(text "One DCC district, two parallel track connectors; 2 A combined target is provisional." (at 20 46 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 66b19e6f-b317-4bf4-b3fc-f88bc4922c8c))
-(text "PH from PIO; enable must default off and pass through health gating." (at 20 56 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid a55b92aa-34ee-4b32-befc-7f2397576205))
-(text "Pending: current limit, mode straps, support values, thermal design and connectors." (at 20 66 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid 3c4a8339-6ecb-46dc-8254-9487e190a440))
-(text "Read ../PROJECT.md before making electrical or mechanical decisions." (at 20 90 0) (effects (font (size 1.27 1.27)) (justify left)) (uuid a20cdac1-ac8f-4d16-8917-316c73bcd08d))
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "2fe51076-22e6-4100-b91e-83890a62c58d")
+	(paper "A4")
+	(title_block
+		(title "EXPERIMENT - DCC bridge and track outputs")
+		(date "2026-11-12")
+		(rev "A - scaffold")
+		(company "anden-dcc")
+		(comment 1 "EXPERIMENTAL / DESIGN ONLY - NOT FOR FABRICATION")
+		(comment 2 "Circuit capture and footprint verification pending")
+	)
+	(lib_symbols)
+	(text "Pending: current limit, mode straps, support values, thermal design and connectors."
+		(exclude_from_sim no)
+		(at 20 66 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "3c4a8339-6ecb-46dc-8254-9487e190a440")
+	)
+	(text "CIRCUIT CAPTURE PENDING"
+		(exclude_from_sim no)
+		(at 20 22 0)
+		(effects
+			(font
+				(size 2 2)
+			)
+			(justify left)
+		)
+		(uuid "42326f38-fa32-412f-a0e2-bfa60c881e52")
+	)
+	(text "One DCC district, two parallel track connectors; 2 A combined target is provisional."
+		(exclude_from_sim no)
+		(at 20 46 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "66b19e6f-b317-4bf4-b3fc-f88bc4922c8c")
+	)
+	(text "Read ../PROJECT.md before making electrical or mechanical decisions."
+		(exclude_from_sim no)
+		(at 20 90 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a20cdac1-ac8f-4d16-8917-316c73bcd08d")
+	)
+	(text "PH from PIO; enable must default off and pass through health gating."
+		(exclude_from_sim no)
+		(at 20 56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a55b92aa-34ee-4b32-befc-7f2397576205")
+	)
+	(text "Candidate: DRV8874PWPR, HTSSOP-16 with exposed thermal pad."
+		(exclude_from_sim no)
+		(at 20 36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e2783279-2964-4d56-abee-cbeb8576aeea")
+	)
 )
