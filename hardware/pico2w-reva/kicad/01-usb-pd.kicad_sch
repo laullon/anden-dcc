@@ -2332,7 +2332,7 @@
 				(justify left)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.wch-ic.com/downloads/CH224DS1_PDF.html"
 			(at 124.46 76.2 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2342,7 +2342,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "WCH CH224K USB-C PD sink controller, ESSOP-10 exposed pad"
 			(at 124.46 76.2 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2352,6 +2352,12 @@
 				)
 			)
 		)
+		(property "Manufacturer" "WCH (Nanjing Qinheng Microelectronics)" (at 124.46 76.2 0) (hide yes) (effects (font (size 1.27 1.27))))
+
+		(property "MPN" "CH224K" (at 124.46 76.2 0) (hide yes) (effects (font (size 1.27 1.27))))
+
+		(property "Package" "ESSOP-10 with exposed GND pad" (at 124.46 76.2 0) (hide yes) (effects (font (size 1.27 1.27))))
+
 		(pin "5"
 			(uuid "9114a170-3a4f-46a8-be5d-ea902cbe2b5b")
 		)
