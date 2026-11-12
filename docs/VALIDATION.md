@@ -3,6 +3,20 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## SSD1315 cab display · 12 November 2026
+
+Uno 0.7.3 was uploaded and flash-verified over USB. A checked UART reply
+confirmed version 0.7.3. With motor/cab power and track disconnected, and
+both ESP13 UART switches OFF, a CONTROLX snapshot selected address 3 at
+zero speed. Both output enables remained LOW. The user confirmed
+`A 003` in the yellow band and `S 00` in the blue region of the 0.96-inch
+128×64 SSD1315 display.
+
+This verifies static display output with USB logic power. Display updates
+during movement, encoder/STOP wiring and MP1584 cab power still need hardware
+checks. The ESP13 was observed running 0.6.4; filtered cab selection requires
+ESP13 0.7.1.
+
 ## Software checks
 
 - Build both boards with `tools/build.sh`; generated ESP assets are checked.

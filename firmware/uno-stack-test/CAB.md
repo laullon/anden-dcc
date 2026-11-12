@@ -80,7 +80,8 @@ preserve Uno RAM and keep servicing the controls. The cab also runs with the
 display disconnected.
 
 SSD1315 Arduino modules can use the SSD1306 128×64 command configuration.
-The exact module and its colour split still need checking on the cab hardware.
+Static output on the actual module was confirmed on 12 November 2026 with
+USB logic power: `A 003` in yellow and `S 00` in blue.
 [SSD1315 Arduino example](https://wiki.seeedstudio.com/Grove-OLED-Yellow%26Blue-Display-0.96-SSD1315_V1.0/)
 
 ## Operation
@@ -118,5 +119,5 @@ address and speed and use D10/D12 to verify the prioritized speed and stop
 packets. Then test one locomotive on a test track and measure its actual
 stopping distance at step 1 in both directions before using the diorama.
 The display reports the commanded step. Decoder settings, drivetrain and load
-determine travel and stopping distance. The OLED and powered motion require
+determine travel and stopping distance. OLED updates during motion and powered movement still require
 physical validation.
