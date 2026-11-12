@@ -1,0 +1,1 @@
+(sym_lib_table (version 7) (lib (name "anden-dcc")(type "KiCad")(uri "${KIPRJMOD}/anden-dcc.kicad_sym")(options "")(descr "Experimental project-local verified symbols")))

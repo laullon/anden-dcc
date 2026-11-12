@@ -168,3 +168,10 @@ through-hole completion separately so either assembly route can use the board.
    heating and stopping distance with appropriate loads.
 
 [Preliminary BOM](bom.csv)
+
+## Native KiCad project
+
+Open [the KiCad project](kicad/anden-dcc-pico2w-reva.kicad_pro). See the
+[CAD status and sheet map](kicad/README.md) before editing. This is an
+experimental scaffold with planning notes; circuit capture and PCB layout
+remain pending.

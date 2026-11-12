@@ -7,3 +7,14 @@ __pycache__/
 *.pyc
 *.sal
 captures/
+
+# KiCad local state and generated recovery files
+*.kicad_prl
+*.kicad_pcb.lck
+*.kicad_sch.lck
+*.kicad_pro.lck
+~*.lck
+*-backups/
+*.kicad_sch-bak
+*.kicad_pcb-bak
+fp-info-cache

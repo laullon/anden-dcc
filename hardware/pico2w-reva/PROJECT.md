@@ -14,8 +14,9 @@ hardware qualification for this Pico 2 W design are pending.
 
 
 The project has a design brief, functional diagram, preliminary component list
-and proposed GPIO allocation. Detailed electrical design, KiCad schematic,
-verified footprints and PCB routing are pending. Component ratings and package
+and proposed GPIO allocation. A native [KiCad project scaffold](kicad/README.md) now provides six hierarchical
+design sheets and a two-layer board. Detailed circuit capture, verified
+footprints and PCB routing are pending. Component ratings and package
 candidates in this record require circuit and layout review before an order.
 
 Work uses the main anden-dcc repository and its `main` branch. The experiment
@@ -252,6 +253,7 @@ their sources here before promoting a candidate into the released BOM.
 - [Functional architecture](architecture.svg) illustrates the blocks and assembly sequence.
 - [Preliminary BOM](bom.csv) holds component candidates and unresolved values.
 - [Proposed GPIO allocation](pinmap.csv) holds signal names and physical pin choices.
+- [KiCad project](kicad/README.md) holds the experimental CAD scaffold and validation status.
 - [Repository license](../../LICENSE) is MIT.
 - [Project README](../../README.md) contains the existing magic-smoke notice.
 
@@ -268,3 +270,5 @@ previously confirmed requirement.
 | 12 November 2026 | Created the central record from this exploration and the existing validated prototype. Classified confirmed decisions, engineering proposals and unresolved assumptions. |
 | 12 November 2026 | Added explicit experimental status, agent instructions and standalone artifact labels following D16. |
 | 12 November 2026 | Followed D17 by consolidating work into the main checkout and main branch, removing the clean extra worktree and retiring the merged experimental branch. D16 experiment labels remain in effect. |
+
+| 12 November 2026 | Prepared KiCad 10 native project scaffold with six planning sheets, local library tables and a two-layer 1.6 mm PCB. Project loads and all seven pages export. ERC is empty-circuit only; DRC retains the pending-outline error. Electrical capture and layout remain open under O11/O12. |

@@ -1,0 +1,1 @@
+(fp_lib_table (version 7) (lib (name "anden-dcc")(type "KiCad")(uri "${KIPRJMOD}/anden-dcc.pretty")(options "")(descr "Experimental project-local verified footprints")))
