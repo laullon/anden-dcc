@@ -24,7 +24,7 @@
 		)
 		(uuid "8d66c7da-4e53-456b-ba7d-2eb7828ddbd9")
 	)
-	(text "Rev A - sheet 01 PD core captured for review; other circuits and layout pending."
+	(text "Rev A - PD core, protected input and 5 V supply captured for review; layout pending."
 		(exclude_from_sim no)
 		(at 20 28 0)
 		(effects
@@ -220,6 +220,51 @@
 		)
 	)
 	(sheet
+		(at 20 174)
+		(size 115 22)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "87861115-c953-4754-90de-aacad14f1ef2")
+		(property "Sheetname" "Protected main supply"
+			(at 20 173 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "01b-power-entry.kicad_sch"
+			(at 20 197 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "anden-dcc-pico2w-reva"
+				(path "/b0ca1a06-73ec-434b-8ebb-746cd9c83d3e"
+					(page "8")
+				)
+			)
+		)
+	)
+	(sheet
 		(at 20 42)
 		(size 115 32)
 		(exclude_from_sim no)
@@ -316,4 +361,5 @@
 			(page "1")
 		)
 	)
+	(embedded_fonts no)
 )

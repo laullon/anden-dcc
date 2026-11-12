@@ -9,13 +9,13 @@ results here. Supporting drawings and tables are linked below.
 ## Current state
 
 **EXPERIMENTAL / DESIGN ONLY.** The supported hardware remains the Uno +
-L298P motor shield + ESP13 stack. USB-C PD negotiation core 01A is captured
+L298P motor shield + ESP13 stack. USB-C PD core 01A, protected main supply 01B and 5 V supply 02 are captured
 and awaiting user review. The remaining circuits, board layout, firmware and
 hardware qualification for this Pico 2 W design are pending.
 
 
 The project has a design brief, functional diagram, preliminary component list
-and proposed GPIO allocation. A native [KiCad project scaffold](kicad/README.md) now provides six hierarchical
+and proposed GPIO allocation. A native [KiCad project scaffold](kicad/README.md) now provides seven hierarchical
 design sheets and a two-layer board. Detailed circuit capture, verified
 footprints and PCB routing are pending beyond the captured PD core. Component ratings and package
 candidates in this record require circuit and layout review before an order.
@@ -74,6 +74,8 @@ sections have a separate status.
 | D17 | Work in the same repository checkout on main | User requested one path and no separate worktree or branch. Keep the experiment under hardware/pico2w-reva with explicit status labels |
 
 | D18 | Assistant captures schematics section by section; user reviews them and lays out the PCB; assistant reviews PCB work | User requested this division of work. Do not advance an unreviewed section as accepted or change the user's layout without a request |
+
+| D19 | Add red input-fault and green main-supply indicators | User approved both LEDs; exact parts and drive values remain engineering proposals |
 
 Future changes should retain these IDs. Mark a changed decision as superseded
 and identify its replacement, so the reason for an old design remains visible.
@@ -143,6 +145,7 @@ BOM is released.
 | 5 V regulator | LMR51420XDDCR | SOT-23-THIN-6, regulator support network required |
 | Track bridge | DRV8874PWPR | HTSSOP-16 with underside thermal pad, 3.3 V control and current sense |
 | Watchdog | TPS3435, leaded variant | SOT-23-THIN-8, full order code and timeout pending |
+| Input eFuse | TPS26631PWPR | Proposed in power review; HTSSOP-20 exposed pad, voltage window and slew/current limiting |
 | Enable gate | SN74LVC1G08DBVR | SOT-23-5, 3.3 V logic |
 | USB-C inlet | GCT USB4750-GF-C | Six-contact through-hole, vertical-entry candidate |
 | Conditional OLED translator | PCA9306 leaded variant | Populate only if the actual OLED needs a 5 V I²C bus |
@@ -256,6 +259,7 @@ their sources here before promoting a candidate into the released BOM.
 - [Functional architecture](architecture.svg) illustrates the blocks and assembly sequence.
 - [Preliminary BOM](bom.csv) holds component candidates and unresolved values.
 - [Proposed GPIO allocation](pinmap.csv) holds signal names and physical pin choices.
+- [Power review 01B/02](kicad/review/02-power.md) holds the proposed protected input and 5 V supply, calculations and unresolved checks.
 - [PD core review 01A](kicad/review/01a-usb-pd.md) records the first captured circuit and its pending input protection.
 - [KiCad project](kicad/README.md) holds the experimental CAD scaffold and validation status.
 - [Repository license](../../LICENSE) is MIT.
@@ -278,3 +282,8 @@ previously confirmed requirement.
 | 12 November 2026 | Prepared KiCad 10 native project scaffold with six planning sheets, local library tables and a two-layer 1.6 mm PCB. Project loads and all seven pages export. ERC is empty-circuit only; DRC retains the pending-outline error. Electrical capture and layout remain open under O11/O12. |
 | 12 November 2026 | Recorded D18. Captured USB-C PD negotiation core 01A using CH224K, 56 kΩ request resistor, 1 kΩ supply feed, 1 µF bypass and 10 kΩ PG pull-up. ERC 0 errors / 1 expected missing-interface warning; XML netlist and rendered SVG checked. Awaiting user review. Input protection/load path 01B, connector mapping and all footprints remain open. PCB untouched. |
 | 12 November 2026 | Converted all seven schematic files and the local symbol library using KiCad 10.0.8 native upgrade commands after an old-format warning. Compared exported netlists: all 12 net groups unchanged. ERC remains 0 errors / 1 documented pending-interface warning. PCB unchanged. |
+| 12 November 2026 | User requested direct internal wiring and labels only for cross-section interfaces, each explained beside the label. Applied to PD core: CC lines and VBUS feed wired directly; three external-interface labels explained; common return uses GND symbols. Exported netlist retains identical component-node connectivity. Changes remain local pending explicit commit/push instruction. |
+| 12 November 2026 | Downloaded nine local reference PDFs, including CH224 English v1F/Chinese v2.1 and GCT USB4750 drawing. Added provenance and SHA-256 manifest; switched review/design/BOM links and U1 datasheet property to local PDFs. Connector footprint review remains open. No commit or push requested. |
+| 12 November 2026 | User requested English PDFs only. Removed the uncommitted Chinese CH224 v2.1 PDF and its active links; retained English CH224 v1F. Eight reference PDFs remain. Use English references for subsequent review sections. |
+| 13 November 2026 | Captured proposed protected supply 01B and buck/USB isolation 02 for review. Added TPS26631PWPR candidate, series SB560 and 1N5819 isolation, 13.20/17.04 V nominal input window, ~2.52 A sustained limit and calculated buck network. Added English PDFs and local symbol. ERC 0 errors / 2 pending Pico-interface warnings; checked critical XML node groups and rendered sheets. No hardware validation, footprints or PCB changes. Input surge/CC ESD, regenerative clamp, source-current coordination and exact passive MPNs remain open. User review pending; no commit/push. |
+| 13 November 2026 | Added D19 power indicators to 01B: red LED2 from U7 input through R30 4.7 kΩ / 0.25 W into FLT, and green LED3 from VMAIN through R31 6.8 kΩ / 0.25 W to GND. Green means voltage present and can fade after shutdown; red requires U7 input power. Through-hole high-efficiency LED MPNs pending. Verified polarity and resistor/FLT paths in XML; original component connectivity retained. ERC unchanged at 0 errors / 2 pending Pico-interface warnings. No PCB, commit or push. |

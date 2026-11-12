@@ -2,8 +2,8 @@
 
 **EXPERIMENTAL / DESIGN ONLY — awaiting user schematic review.**
 
-This is the first review block within sheet 01. Input protection and the
-high-current load path are still pending. The other five sheets remain planning
+This is the first review block within sheet 01. The proposed high-current load path is now captured in the
+[power review](02-power.md). Raw-input surge and CC ESD work remain pending. The other five sheets remain planning
 notes. The user owns PCB placement/routing; the assistant captures schematics
 and reviews the user's PCB work. Do not alter board layout as part of schematic
 capture unless requested.
@@ -31,20 +31,22 @@ The final resistor must retain adequate rated power at the enclosure's design
 ambient temperature. The 0.5 W value is a proposed minimum, not a measured
 thermal qualification.
 
-CC1 and CC2 go to their corresponding U1 pins. DP/DM are shorted locally
+Internal connections use direct wires, including CC1/CC2 and the VBUS supply
+feed. Named signal labels are reserved for the four external interfaces,
+with an explanation beside each. Standard GND symbols identify the shared 0 V
+return. CC1 and CC2 go to their corresponding U1 pins. DP/DM are shorted locally
 for PD-only operation. VBUS sense pin 8 is deliberately unconnected in that
 mode. CFG2 and CFG3 are deliberately open for resistor configuration.
 U1's exposed ground pad uses pin **11** in KiCad and **0** in WCH's drawing.
 The selected footprint must preserve that mapping and provide a solderable pad.
 These connections follow WCH's CH224 datasheet v1F, sections 4.3, 5.2.1, 5.5
-and 6.1. The later v2.1 document also confirms the CH224K pin assignment,
-1 kΩ supply feed and internal shunt regulator. CH224A/Q are different variants;
+and 6.1. Use the English v1F PDF linked below for this review. CH224A/Q are different variants;
 do not substitute their supply circuit or voltage-selection table.
 
 ## Boundaries and pending work
 
-- Net labels on this sheet are **local**. Inter-sheet ports will be added with
-  the protection/load-path circuit and the downstream sheets.
+- Net labels are now **global cross-sheet interfaces**. `PD_BIAS_3V3` was added
+  from U1 VDD to bias U7 enable in the [power review](02-power.md).
 - `USB_VBUS_RAW` is the connector voltage. It initially starts at 5 V and must
   not be treated as a guaranteed 15 V rail. This block does not establish the
   source's available current or enforce the proposed 2 A track budget.
@@ -53,12 +55,12 @@ do not substitute their supply circuit or voltage-selection table.
 - `PICO_3V3` has no source yet. R3 does not use U1 VDD to power or pull up a Pico pin.
 - The GCT USB4750-GF-C is still the mechanical candidate. J3 presently uses
   standard USB contact names, **not a verified GCT physical pad mapping**.
-  The GCT drawing download returned HTTP 403 during this review; assigning its
-  footprint requires obtaining and checking that drawing.
+  The [GCT drawing PDF](../../datasheets/USB4750-drawing.pdf) is now stored
+  locally; its physical mapping and footprint still require review.
 - No footprints or exact purchasing MPNs are assigned in this block.
 - Fuse selection, CC protection, overvoltage handling, controlled inrush,
   reverse-current behavior and bulk capacitance belong to review **01B**.
-  No load should be connected on the strength of this partial drawing.
+  The proposed load branch is captured in [01B/02](02-power.md); it is awaiting review.
 
 ## Checks · 12 November 2026
 
@@ -73,8 +75,8 @@ The exported XML netlist was checked against the following intended groups:
 
 | Net | Nodes |
 | --- | --- |
-| USB_CC1 | J3 A5, U1 7 |
-| USB_CC2 | J3 B5, U1 6 |
+| CC1 wire (unnamed) | J3 A5, U1 7 |
+| CC2 wire (unnamed) | J3 B5, U1 6 |
 | USB_VBUS_RAW | J3 A9/B9, R1 1 |
 | U1 VDD | R1 2, C1 1, U1 1 |
 | GND | J3 A12/B12/SH, C1 2, R2 2, U1 11 |
@@ -87,10 +89,9 @@ made on this custom circuit. PCB geometry remains unchanged.
 
 ## Review references
 
-- [WCH manufacturer datasheet page](https://www.wch-ic.com/downloads/CH224DS1_PDF.html)
-- [WCH datasheet v1F English copy](https://www.laskakit.cz/user/related_files/ch224ds1.pdf)
-- [WCH datasheet v2.1 copy hosted by LCSC](https://datasheet.lcsc.com/datasheet/pdf/4f12eebccb4eda2c0038806df0155265.pdf?productCode=C970725)
-- [GCT USB4750 manufacturer page](https://gct.co/connector/usb4750)
+- [CH224K datasheet PDF](../../datasheets/CH224-v1F-EN.pdf)
+- [WCH datasheet v1F English copy](../../datasheets/CH224-v1F-EN.pdf)
+- [GCT USB4750 drawing PDF](../../datasheets/USB4750-drawing.pdf)
 
-Review status: **not reviewed by the user yet**. After reviewing 01A, complete
-01B on the same sheet before treating the USB-C input section as complete.
+Review status: **not reviewed by the user yet**. The follow-up [01B/02 power review](02-power.md) is captured on separate sheets
+and awaiting review. Raw-input surge and CC ESD still need completion.

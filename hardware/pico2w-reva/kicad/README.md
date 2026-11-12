@@ -3,7 +3,7 @@
 **EXPERIMENTAL / DESIGN ONLY — not for fabrication.**
 
 Open `anden-dcc-pico2w-reva.kicad_pro` in KiCad 10. The project contains a
-root overview and six hierarchical sheets, a two-layer PCB with a nominal
+root overview and seven hierarchical sheets, a two-layer PCB with a nominal
 1.6 mm thickness, and project-local symbol/footprint library tables.
 
 ## Schematic organization
@@ -11,17 +11,20 @@ root overview and six hierarchical sheets, a two-layer PCB with a nominal
 | Sheet | Scope |
 | --- | --- |
 | 01-usb-pd | USB-C connector, PD negotiation, input protection |
+| 01b-power-entry | Proposed fuse, reverse-current diode, eFuse, voltage window and inrush |
 | 02-logic-power | 5 V buck, source isolation, Pico USB coexistence |
 | 03-pico | Pico 2 W sockets, GPIO, debug and antenna constraints |
 | 04-track-output | DCC bridge, support network, parallel track connectors |
 | 05-protection | Watchdog, enable gating, current and voltage sensing |
 | 06-cab | Encoder, selection button, STOP, LED and OLED |
 
-Sheet 01 now contains the [PD negotiation core for review](review/01a-usb-pd.md).
-The remaining sheets contain design notes and outstanding tasks. Input protection,
-inter-sheet electrical interfaces and footprints have not been captured.
-The local libraries are intentionally empty until pin assignments and land
-patterns are checked against manufacturer drawings. The PCB contains a status
+The [PD core](review/01a-usb-pd.md), protected input and 5 V buck
+([power review](review/02-power.md)) are captured for user review. The remaining
+sheets contain planning notes. Interfaces between captured sections use named
+global labels with nearby explanations. Pico and bridge endpoints are pending.
+The local symbol library contains LMR51420X with its pin assignment checked
+against the English datasheet. Footprints remain unassigned and the local
+footprint library is empty pending land-pattern review. The PCB contains a status
 note on User.Drawings. Its outline, placement, routing, copper weight and
 manufacturing clearances remain pending. Do not treat KiCad defaults as reviewed
 power-routing constraints.
@@ -43,9 +46,8 @@ or purchasing outputs until the electrical and mechanical review is complete.
 ## Schematic and PCB review workflow
 
 The assistant captures one schematic section at a time for user review. The
-user lays out the PCB, and the assistant reviews it. Review 01A covers the PD
-negotiation core; 01B will finish input protection and the load path before
-moving to the logic supply. The board was not modified during capture of 01A.
+user lays out the PCB, and the assistant reviews it. Review 01A covers the PD core. Review 01B/02 now covers the proposed main
+input branch and logic supply. Raw-input surge/CC ESD work remains open. The board was not modified during capture of 01A.
 
 Read [PROJECT.md](../PROJECT.md) for requirements, candidate parts, assumptions
-and open work. Review [01A](review/01a-usb-pd.md) before completing the rest of the USB-C input.
+and open work. Review [01A](review/01a-usb-pd.md) and [01B/02](review/02-power.md) before accepting the power section.

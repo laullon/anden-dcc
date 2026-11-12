@@ -1,33 +1,52 @@
 project_status,refs,quantity_or_groups,function,candidate,package,assembly,status,notes,source
-EXPERIMENT_DESIGN_ONLY,A1,1,Controller,Raspberry Pi Pico 2 W,40-pin module,THT sockets,Chosen,Antenna keep-out and USB/BOOTSEL access,https://datasheets.raspberrypi.com/picow/pico-2-w-datasheet.pdf
+EXPERIMENT_DESIGN_ONLY,A1,1,Controller,Raspberry Pi Pico 2 W,40-pin module,THT sockets,Chosen,Antenna keep-out and USB/BOOTSEL access,datasheets/Pico-2-W.pdf
 EXPERIMENT_DESIGN_ONLY,J1 J2,2,Pico sockets,1x20 female socket 2.54 mm,THT,THT,MPN pending,Match Pico header height and enclosure,
-EXPERIMENT_DESIGN_ONLY,J3,1,PD power inlet,GCT USB4750-GF-C candidate,6-contact vertical USB-C,THT,Mechanical review,CC1 and CC2 required. Entry orientation to confirm,https://gct.co/connector/usb4750
-EXPERIMENT_DESIGN_ONLY,U1,1,USB PD controller,CH224K,ESSOP-10 with ground pad,Top SMD reflow,Captured / awaiting review,"01A captured for review: 15 V resistor configuration, PD only; protection and footprint pending",https://www.wch-ic.com/downloads/CH224DS1_PDF.html
-EXPERIMENT_DESIGN_ONLY,U2,1,5 V buck regulator,LMR51420XDDCR,SOT-23-THIN-6,Top SMD,Candidate,4.5-36 V input. Exact land pattern to verify,https://www.ti.com/lit/ds/symlink/lmr51420.pdf
-EXPERIMENT_DESIGN_ONLY,L1,1,Buck inductor,Shielded power inductor,Large-pad SMD,Top SMD,Value and MPN pending,Select inductance and saturation current from regulator design,
-EXPERIMENT_DESIGN_ONLY,RFB1 RFB2,2,5 V feedback divider,1 percent resistors,1206,Top SMD,Values pending,Select nominal output including regulator tolerance,
-EXPERIMENT_DESIGN_ONLY,CBUCK_IN CBUCK_OUT CBOOT,3,Regulator capacitor groups,X7R ceramic,0805 or 1206,Top SMD,Values and quantities pending,Voltage derating and effective capacitance must be calculated,
-EXPERIMENT_DESIGN_ONLY,U3,1,Track H-bridge,DRV8874PWPR,HTSSOP-16 PowerPAD,Top SMD reflow,Candidate,Thermal pad required. Validate DCC switching and current limit,https://www.ti.com/lit/ds/symlink/drv8874.pdf
+EXPERIMENT_DESIGN_ONLY,J3,1,PD power inlet,GCT USB4750-GF-C candidate,6-contact vertical USB-C,THT,Mechanical review,CC1 and CC2 required. Entry orientation to confirm,datasheets/USB4750-drawing.pdf
+EXPERIMENT_DESIGN_ONLY,U1,1,USB PD controller,CH224K,ESSOP-10 with ground pad,Top SMD reflow,Captured / awaiting review,"01A captured for review: 15 V resistor configuration, PD only; protection and footprint pending",datasheets/CH224-v1F-EN.pdf
+EXPERIMENT_DESIGN_ONLY,U2,1,5 V buck regulator,LMR51420XDDCR,SOT-23-THIN-6,Top SMD,Captured / power review,500 kHz PFM; 4.980 V nominal. Footprint and layout pending.,datasheets/LMR51420.pdf
+EXPERIMENT_DESIGN_ONLY,L1,1,Buck inductor,10 uH shielded; Isat >=6 A; Irms >=2.5 A; DCR <=100 mohm,Large-pad SMD,Top SMD,Proposed / MPN pending,"Check inductance tolerance, saturation at temperature and loss; not a released part.",
+EXPERIMENT_DESIGN_ONLY,U3,1,Track H-bridge,DRV8874PWPR,HTSSOP-16 PowerPAD,Top SMD reflow,Candidate,Thermal pad required. Validate DCC switching and current limit,datasheets/DRV8874.pdf
 EXPERIMENT_DESIGN_ONLY,CCP CFLY CDRV,3,Driver charge-pump and bypass capacitors,X7R ceramic,0805 or 1206,Top SMD,Values pending schematic,Use manufacturer placement and voltage requirements,
 EXPERIMENT_DESIGN_ONLY,RSENSE RVREF1 RVREF2,3,Current feedback and limit,1 percent resistors,1206,Top SMD,Values pending,Size for safe ADC range and intended current trip,
-EXPERIMENT_DESIGN_ONLY,CBULK,1,Bridge reservoir,Radial electrolytic,THT radial,THT,Value and voltage pending,Coordinate PD inrush and load transients,
-EXPERIMENT_DESIGN_ONLY,F1,1,Input fuse and holder,Replaceable fuse,THT,THT,Rating pending,Coordinate track current and wiring rating,
+EXPERIMENT_DESIGN_ONLY,F1,1,Input fuse and holder,Time-delay 3.15 A fuse and holder; DC rating >=60 V,THT,THT,Proposed / power review,Load branch only. Exact MPN and breaking capacity pending; coordinate charger and eFuse pulses.,
 EXPERIMENT_DESIGN_ONLY,DTVS,1,Input transient suppression,TVS diode,Axial or large-pad SMD,TBD,MPN pending,Coordinate standoff and clamp with all rail ratings,
-EXPERIMENT_DESIGN_ONLY,U4,1,External watchdog,TPS3435 leaded variant,SOT-23-THIN-8,Top SMD,Exact order code pending,Select timeout and reset/re-arm behavior,https://www.ti.com/product/TPS3435
-EXPERIMENT_DESIGN_ONLY,U5,1,Bridge enable AND gate,SN74LVC1G08DBVR,SOT-23-5,Top SMD,Candidate,3.3 V. Gate MCU enable with watchdog healthy output,https://www.ti.com/product/SN74LVC1G08
-EXPERIMENT_DESIGN_ONLY,PWR_OR,1,USB and external 5 V isolation,Diode or ideal-diode circuit,THT or leaded SMD,TBD,Circuit pending,Feed VSYS and validate reverse current in both directions,
+EXPERIMENT_DESIGN_ONLY,U4,1,External watchdog,TPS3435 leaded variant,SOT-23-THIN-8,Top SMD,Exact order code pending,Select timeout and reset/re-arm behavior,datasheets/TPS3435.pdf
+EXPERIMENT_DESIGN_ONLY,U5,1,Bridge enable AND gate,SN74LVC1G08DBVR,SOT-23-5,Top SMD,Candidate,3.3 V. Gate MCU enable with watchdog healthy output,datasheets/SN74LVC1G08.pdf
 EXPERIMENT_DESIGN_ONLY,RMON1 RMON2 CMON,3,Input voltage measurement,Divider and RC filter,Axial or 1206 plus ceramic,Mixed,Values pending,ADC protection over the entire input range,
 EXPERIMENT_DESIGN_ONLY,ADC_PROTECT,1,ADC input protection group,Resistors and clamps,THT or leaded SMD,TBD,Circuit pending,Check IPROPI faults as well as rail-sense faults,
 EXPERIMENT_DESIGN_ONLY,J4 J5,2,Parallel track outputs,2-way 5.08 mm terminal block,THT,THT,MPN pending,Same DCC district. Both connectors carry RAIL A and RAIL B,
 EXPERIMENT_DESIGN_ONLY,A2 J6,1,OLED and cable connector,Existing SSD1315 128x64 display,4-pin 2.54 mm connector,THT connector,Module retained,Measure pin order and mounting. Verify supply and pull-up voltage,
-EXPERIMENT_DESIGN_ONLY,U6,0,Conditional OLED level translator,PCA9306 leaded variant,Lead-visible package,Top SMD if required,Conditional,Populate only after actual OLED voltage check,https://www.ti.com/product/PCA9306
+EXPERIMENT_DESIGN_ONLY,U6,0,Conditional OLED level translator,PCA9306 leaded variant,Lead-visible package,Top SMD if required,Conditional,Populate only after actual OLED voltage check,datasheets/PCA9306.pdf
 EXPERIMENT_DESIGN_ONLY,ENC1,1,Speed encoder and select button,Existing mechanical encoder,THT or panel wired,THT,Mechanical dimensions pending,Confirm exact pin order and footprint,
 EXPERIMENT_DESIGN_ONLY,SW1,1,Movement STOP button,Normally open momentary switch,THT or panel wired,THT,MPN pending,Local DCC emergency-stop input,
 EXPERIMENT_DESIGN_ONLY,LED1 RLED,1,Movement indicator and series resistor,3 mm LED and axial resistor,THT,THT,Resistor value pending LED choice,Budget current from 3.3 V rail,
 EXPERIMENT_DESIGN_ONLY,JPDBG,1,SWD test/debug connector,SWDIO SWCLK GND,2.54 mm THT,THT,Layout pending,Wire to Pico debug access with module installed,
 EXPERIMENT_DESIGN_ONLY,BYPASS CONFIG,1,Logic bypass pull-up and configuration groups,Individual resistors and capacitors,Axial plus 0805 or 1206,Mixed,Count and values pending,Includes PD support and watchdog configuration,
 EXPERIMENT_DESIGN_ONLY,MECH,1,Mounting hardware,M3 screws and spacers,Mechanical,Mechanical,Dimensions pending,Keep fasteners clear of Pico antenna and track copper,
-EXPERIMENT_DESIGN_ONLY,R1,1,PD negotiation core,1 kohm 0.5 W minimum,THT axial candidate,THT,Proposed / review 01A,CH224K shunt supply feed; check ambient derating,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
-EXPERIMENT_DESIGN_ONLY,R2,1,PD negotiation core,56 kohm 1%,THT axial candidate,THT,Proposed / review 01A,15 V request CFG1 to GND; CFG2/3 open,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
-EXPERIMENT_DESIGN_ONLY,R3,1,PD negotiation core,10 kohm,THT axial candidate,THT,Proposed / review 01A,PG pull-up to eventual Pico 3V3,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
-EXPERIMENT_DESIGN_ONLY,C1,1,PD negotiation core,1 uF 10 V X7R,1206 candidate,Top SMD,Proposed / review 01A,VDD bypass; effective capacitance at 3.3 V to verify,https://www.wch-ic.com/downloads/CH224DS1_PDF.html
+EXPERIMENT_DESIGN_ONLY,R1,1,PD negotiation core,1 kohm 0.5 W minimum,THT axial candidate,THT,Proposed / review 01A,CH224K shunt supply feed; check ambient derating,datasheets/CH224-v1F-EN.pdf
+EXPERIMENT_DESIGN_ONLY,R2,1,PD negotiation core,56 kohm 1%,THT axial candidate,THT,Proposed / review 01A,15 V request CFG1 to GND; CFG2/3 open,datasheets/CH224-v1F-EN.pdf
+EXPERIMENT_DESIGN_ONLY,R3,1,PD negotiation core,10 kohm,THT axial candidate,THT,Proposed / review 01A,PG pull-up to eventual Pico 3V3,datasheets/CH224-v1F-EN.pdf
+EXPERIMENT_DESIGN_ONLY,C1,1,PD negotiation core,1 uF 10 V X7R,1206 candidate,Top SMD,Proposed / review 01A,VDD bypass; effective capacitance at 3.3 V to verify,datasheets/CH224-v1F-EN.pdf
+EXPERIMENT_DESIGN_ONLY,U7,1,Input eFuse,TPS26631PWPR,HTSSOP-20 PowerPAD,Top SMD reflow,Proposed / power review,Latch-off; input voltage window; optional blocking FET omitted,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,D2,1,Main input reverse-current isolation,SB560,DO-201AD,THT,Proposed / power review,Series diode; loss and thermal review pending,datasheets/SB560.pdf
+EXPERIMENT_DESIGN_ONLY,D3,1,Pico VSYS isolation,1N5819,DO-41,THT,Proposed / power review,Cathode toward Pico VSYS; provisional logic budget <=0.5 A,datasheets/1N5819.pdf
+EXPERIMENT_DESIGN_ONLY,R10,1,UVLO upper divider,100 kohm 1%,Axial candidate,THT,Proposed / power review,Senses raw USB voltage before diode,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,R11,1,UVLO lower divider,10 kohm 1%,Axial candidate,THT,Proposed / power review,Nominal rising input threshold 13.20 V,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,R12,1,OVP upper divider,132 kohm 1%,Axial candidate,THT,Proposed / power review,Senses raw USB voltage before diode,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,R13,1,OVP lower divider,10 kohm 1%,Axial candidate,THT,Proposed / power review,Nominal OVP threshold 17.04 V,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,R14,1,Input sustained current setting,7.15 kohm 1%,Axial candidate,THT,Proposed / power review,Nominal 2.52 A; TPS26631 permits higher transient current,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,R15,1,eFuse enable bias,10 kohm,Axial candidate,THT,Proposed / power review,Bias from CH224K VDD; no Pico boot dependency,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,C10,1,eFuse local input bypass,1 uF 50 V X7R,1206 candidate,Top SMD,Proposed / power review,Effective capacitance and local placement to verify,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,C11,1,eFuse slew rate setting,47 nF 25 V X7R,1206 candidate,Top SMD,Proposed / power review,Approximately 14.2 ms ramp at 14.5 V,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,C12,1,Shared reservoir after eFuse,470 uF 35 V electrolytic,Radial candidate,THT,Proposed / power review,Check ripple current ESR tolerance dimensions and input ramp,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,C13,1,eFuse local output bypass,1 uF 50 V X7R,1206 candidate,Top SMD,Proposed / power review,Place locally at U7 output,datasheets/TPS2663.pdf
+EXPERIMENT_DESIGN_ONLY,R20,1,Buck feedback upper divider,100 kohm 1%,Axial or 1206 candidate,Mixed,Proposed / power review,Keep FB loop small; final package subject to layout,datasheets/LMR51420.pdf
+EXPERIMENT_DESIGN_ONLY,R21,1,Buck feedback lower divider,13.7 kohm 1%,Axial or 1206 candidate,Mixed,Proposed / power review,4.980 V nominal with R20,datasheets/LMR51420.pdf
+EXPERIMENT_DESIGN_ONLY,C20,1,Buck input bulk bypass,4.7 uF 50 V X7R,1206 or larger,Top SMD,Proposed / power review,Effective capacitance >=2.2 uF under bias; verify exact MPN,datasheets/LMR51420.pdf
+EXPERIMENT_DESIGN_ONLY,C21,1,Buck local HF bypass,100 nF 50 V X7R,0805 candidate,Top SMD,Proposed / power review,Keep input switching loop short,datasheets/LMR51420.pdf
+EXPERIMENT_DESIGN_ONLY,C22,1,Bootstrap capacitor,100 nF 25 V X7R,0805 candidate,Top SMD,Proposed / power review,Between CB and SW; local placement critical,datasheets/LMR51420.pdf
+EXPERIMENT_DESIGN_ONLY,C23 C24,2,Buck output capacitors,22 uF 16 V X7R each,1206 or larger,Top SMD,Proposed / power review,Two parts; combined effective target >=30 uF at 5 V; loop/filter review pending,datasheets/LMR51420.pdf
+EXPERIMENT_DESIGN_ONLY,LED2,1,Power fault indicator,High-efficiency red 3 mm LED,THT radial,THT,Proposed / power LED review,Anode from input resistor; cathode to U7 FLT. MPN and low-current brightness pending.,
+EXPERIMENT_DESIGN_ONLY,LED3,1,Main supply indicator,High-efficiency green 3 mm LED,THT radial,THT,Proposed / power LED review,VMAIN present; may fade as bulk capacitance discharges. MPN pending.,
+EXPERIMENT_DESIGN_ONLY,R30,1,Fault LED current limit,4.7 kohm 0.25 W,THT axial,THT,Proposed / power LED review,Input after D2 to LED2 anode. Initial 5-20 V input analysis; surge coordination pending.,
+EXPERIMENT_DESIGN_ONLY,R31,1,Main supply LED current limit,6.8 kohm 0.25 W,THT axial,THT,Proposed / power LED review,VMAIN to LED3 anode. About 1.8 mA at 14.5 V with 2.2 V LED.,

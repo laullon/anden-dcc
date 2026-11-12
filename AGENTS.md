@@ -14,7 +14,7 @@ The central record is hardware/pico2w-reva/PROJECT.md.
 Use the same checkout for both platforms, keeping their scope and status clear.
 
 The experiment currently contains a design brief, preliminary BOM, architecture
-diagram and proposed GPIO allocation. The first PD negotiation circuit is
+diagram and proposed GPIO allocation. The PD negotiation, protected input and 5 V supply circuits are
 captured for user review. Remaining schematic capture, verified footprints,
 PCB routing, Pico firmware and prototype validation remain pending. The user
 reviews assistant-created schematic sections and owns PCB layout; the assistant

@@ -57,27 +57,27 @@ assembly method for the power section.
 The DRV8874 accepts 3.3 V logic and includes current sensing and regulation.
 Its 6 A peak device rating is separate from the finished PCB's continuous
 current capability. The thermal pad, copper and vias must be designed together.
-[TI DRV8874 datasheet](https://www.ti.com/lit/ds/symlink/drv8874.pdf)
+[TI DRV8874 datasheet](datasheets/DRV8874.pdf)
 
 The LMR51420 accepts 4.5–36 V input. Its 5 V rail supplies Pico VSYS through
 source isolation. The inductor, feedback divider and effective ceramic
 capacitance must be checked for the actual input range and load.
-[TI regulator datasheet](https://www.ti.com/lit/ds/symlink/lmr51420.pdf)
+[TI regulator datasheet](datasheets/LMR51420.pdf)
 
 CH224K requests the PD profile with hardware configuration. The exact strap
 resistor and VBUS/VDD support network must be taken from the current WCH
 datasheet before the schematic is frozen. Its PG output is interpreted
 together with a measured rail voltage.
-[WCH CH224 documentation](https://www.wch-ic.com/downloads/CH224DS1_PDF.html)
+[WCH CH224 datasheet PDF](datasheets/CH224-v1F-EN.pdf)
 
 The watchdog candidate has a leaded package, but its full order code determines
 timeout, output and enable behavior. Those choices remain open. Its healthy
 output and the Pico track-enable request feed the hardware enable gate.
-[TI TPS3435 documentation](https://www.ti.com/product/TPS3435)
+[TI TPS3435 datasheet PDF](datasheets/TPS3435.pdf)
 
 The USB4750 candidate provides six through-hole contacts and is rated for 3 A.
 Its vertical entry must fit the enclosure before selecting the footprint.
-[Connector drawing and specifications](https://gct.co/connector/usb4750)
+[Connector drawing and specifications](datasheets/USB4750-drawing.pdf)
 
 ## Power and signal design
 
@@ -138,7 +138,7 @@ current loops away from the controller and cab inputs.
 Place the Pico antenna at a board edge with the manufacturer's keep-out
 clear of copper, components, fasteners and enclosure metal. Keep its USB and
 BOOTSEL accessible, and provide SWD access.
-[Pico 2 W datasheet](https://datasheets.raspberrypi.com/picow/pico-2-w-datasheet.pdf)
+[Pico 2 W datasheet](datasheets/Pico-2-W.pdf)
 
 Mark connector functions, pin 1, polarity and measured rail names on silkscreen.
 Label track terminals RAIL A and RAIL B. Both rails are bridge outputs. Provide test points for GND, PD VBUS,
@@ -175,3 +175,11 @@ Open [the KiCad project](kicad/anden-dcc-pico2w-reva.kicad_pro). See the
 [CAD status and sheet map](kicad/README.md) before editing. This is an
 experimental project with the [PD core captured for review](kicad/review/01a-usb-pd.md).
 Remaining circuit capture and PCB layout are pending.
+
+### Captured power draft
+
+The [01B/02 power review](kicad/review/02-power.md) now captures a proposed
+TPS26631 protected input branch and the LMR51420X 5 V supply. Values,
+calculations, English PDF links and unresolved qualification items are recorded
+there. This is awaiting user review; component shortlist and BOM entries remain
+provisional. No PCB layout has been changed.
