@@ -1,6 +1,6 @@
 # Uno DCC controller
 
-**Uno 0.7.7**, paired with ESP13 0.7.4. Supported MCU: **ATmega328P, 16 MHz,
+**Uno 0.7.8**, paired with ESP13 0.7.5. Supported MCU: **ATmega328P, 16 MHz,
 5 V Arduino Uno R3**. It generates DCC, routes bridge A, checks the UART protocol
 and owns the output timeouts. The optional [encoder cab](CAB.md) controls
 crawl speed. Bridge B remains disabled.
@@ -38,8 +38,8 @@ snapshots publish at complete packet boundaries. The local cab can replace one a
 packet boundary. Packet bytes are prepared in the main loop; time-critical interrupt code selects prebuilt bytes.
 
 Continuous track operation requires an explicit start and checked KEEP renewals. The independent
-two-second Uno lease expires locally; late KEEP never restarts it. Current/timing
-faults and an interrupt backup disable A. Three-second no-load DC/DCC scope tests
+two-second Uno lease expires locally; late KEEP never restarts it. Timing faults and an interrupt backup disable A. Track current is monitoring-only;
+the no-load bench modes retain their raw current cutoff. Three-second no-load DC/DCC scope tests
 remain available under Setup. None of these checks establishes loaded protection.
 
 ## UART
@@ -56,6 +56,6 @@ Commands carry a sequence number; replies acknowledge the matching request.
 - `PING`, `STATUS`, `LED`, `PULSE`, `DCCTEST` provide diagnostics.
 
 Older ROSTER/CONTROL messages remain accepted for compatibility. The eighteenth
-STATE field is capability `4` for F0–F28 and a cab eligibility mask plus cached display names. Install the
+STATE field is capability `5` for track current monitoring, F0–F28, a cab eligibility mask and cached display names. A nineteenth field carries the held peak A0 count. Install the
 matching ESP13 release first. Details and measured limits are in the
 [first-locomotive guide](FIRST-LOCO-TEST.md) and [validation record](../../docs/VALIDATION.md).

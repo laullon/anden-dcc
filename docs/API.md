@@ -105,3 +105,21 @@ uses LOCOMOTIVE for an empty name. The saved UTF-8 name is unchanged.
 The Uno rejects unknown/ineligible addresses and malformed labels without
 changing any existing label, DCC schedule or output state.
 CONTROLX clears cached labels before the new metadata is sent.
+
+
+## Track current monitoring
+
+ESP13 0.7.5 / Uno 0.7.8 add capability `5`. Its checked STATE reply has a
+nineteenth field containing the held peak raw A0 value (0–1023). Earlier
+reply formats remain supported.
+
+`uno.currentMonitoringOnly` identifies firmware that disables the automatic
+raw current cutoff in normal track mode. `uno.adcA` is the latest raw sample;
+`uno.adcPeakA` is the highest sample observed during the current/last track
+session, reset by the next explicit TRACKON. It remains visible after stop.
+These readings are uncalibrated ADC counts, not amperes.
+`uno.bench.rawLimit` is null in monitor-only track mode; no-load bench tests
+retain their limit of 100. Timing faults, STOP and lease/backup shutdowns remain.
+
+Watching the current display provides no automatic short-circuit protection.
+Loaded tests need external current limiting or appropriate protection.

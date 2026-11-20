@@ -40,7 +40,7 @@ public:
 private:
   bool finderHold = false;
   AndenLink::Receiver receiver;
-  uint16_t sequence = 0, adcA = 0, adcB = 0, flags = 0, ledEdges = 0;
+  uint16_t sequence = 0, adcA = 0, adcB = 0, adcPeakA = 0, flags = 0, ledEdges = 0;
   uint32_t lastPoll = 0, lastSeen = 0, roundTrip = 0, timeouts = 0;
   bool known = false;
   char version[12] = {0};
@@ -49,7 +49,7 @@ private:
   uint16_t dccCount = 0, dccMask = 0, dccSignature = 0, faults = 0;
   uint32_t packets = 0;
   bool benchCapable = false, dccBenchCapable = false, trackCapable = false,
-       functionsCapable = false, cabFilterCapable = false, cabNamesCapable = false;
+       functionsCapable = false, cabFilterCapable = false, cabNamesCapable = false, currentMonitoringCapable = false;
   uint16_t benchRemaining = 0;
   uint8_t benchState = 0, mode = 0;
   bool accept(uint16_t expected);

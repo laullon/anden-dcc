@@ -1,5 +1,16 @@
 # Changelog
 
+## Supervised current monitoring · ESP13 0.7.5 / Uno 0.7.8
+
+- Disable the automatic raw A0 cutoff in track mode for supervised measurements;
+  retain it for separate no-load bench pulses.
+- Show live raw A0 counts, a session peak and a filled/outlined track-enable
+  indicator on the OLED. Refresh telemetry independently of full redraws.
+- Expose monitor-only policy and peak readings in status; retain timing,
+  connection/lease and manual stop shutdowns.
+- These readings are uncalibrated. Human monitoring provides no automatic
+  short-circuit protection; loaded testing needs external protection.
+
 ## Persistent cab speed · Uno 0.7.7
 
 - Keep the selected encoder speed until an explicit stop/change or track shutdown.

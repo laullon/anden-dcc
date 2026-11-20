@@ -126,30 +126,51 @@ void CabDisplay::begin() {
   ready = CabI2c::write(OLED, on, sizeof(on));
 }
 
-void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* nextName) {
+void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* nextName,
+                        uint16_t nextRaw, uint16_t nextPeak, bool nextPowered) {
   if (!ready)
     return;
-  if (nextAddress != address || nextSpeed != speed ||
+  const uint32_t now = millis();
+  if (nextAddress != address || nextSpeed != speed || nextPowered != powered ||
       strncmp(nextName, name, CabLabel::LENGTH)) {
     address = nextAddress;
     speed = nextSpeed;
+    powered = nextPowered;
     strncpy(name, nextName, CabLabel::LENGTH);
     name[CabLabel::LENGTH] = 0;
+    rawCurrent = nextRaw;
+    peakCurrent = nextPeak;
+    lastTelemetry = now;
+    currentOnly = false;
     page = column = 0;
+  } else if (page >= 8 && uint32_t(now - lastTelemetry) >= 250 &&
+             (nextRaw != rawCurrent || nextPeak != peakCurrent)) {
+    // Snapshot live readings only between frames. ADC noise must not restart a
+    // redraw continuously or prevent the speed/bar from reaching the screen.
+    rawCurrent = nextRaw;
+    peakCurrent = nextPeak;
+    lastTelemetry = now;
+    currentOnly = true;
+    page = 5;
+    column = 0;
   }
-  const uint32_t now = millis();
   if (page >= 8 || uint32_t(now - lastWrite) < 5)
     return;
   lastWrite = now;
 
   const char* label = address ? (*name ? name : "LOCOMOTIVE") : "SELECT A LOCO";
-  const uint8_t labelScale = strlen(label) <= 10 ? 2 : 1;
-  const uint8_t labelStart = (WIDTH - strlen(label) * 6 * labelScale) / 2;
+  const uint8_t labelScale = strlen(label) <= 9 ? 2 : 1;
+  const uint8_t labelStart = (116 - strlen(label) * 6 * labelScale) / 2;
   char number[4];
   snprintf(number, sizeof(number), "%u", unsigned(speed));
-  const uint8_t numberStart = (WIDTH - strlen(number) * 24) / 2;
+  const uint8_t numberStart = (WIDTH - strlen(number) * 18) / 2;
   const uint8_t level = speed > UnoDcc::MAX_CRAWL_STEP ? UnoDcc::MAX_CRAWL_STEP : speed;
   const uint8_t filled = uint16_t(level) * 106 / UnoDcc::MAX_CRAWL_STEP;
+
+  char telemetry[17];
+  snprintf(telemetry, sizeof(telemetry), "A0 %4u P %4u",
+           unsigned(rawCurrent), unsigned(peakCurrent));
+  const uint8_t telemetryStart = (WIDTH - strlen(telemetry) * 6) / 2;
 
   // Build one bounded transaction. Polling its transfer leaves Timer1 free.
   // A redraw clears every column, so shorter names cannot leave old pixels.
@@ -158,7 +179,7 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* next
   uint8_t count = 7;
   for (uint8_t i = 0; i < CHUNK && column < WIDTH; ++i, ++column) {
     uint8_t pixels = 0;
-    if (page < 2 && column >= labelStart) {
+    if (page < 2 && column >= labelStart && column < 116) {
       if (labelScale == 2) {
         pixels = textColumn(label, column - labelStart, 2, page);
       } else {
@@ -166,8 +187,19 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* next
         const uint16_t text = uint16_t(textColumn(label, column - labelStart, 1)) << 4;
         pixels = text >> (page * 8);
       }
-    } else if (page >= 2 && page <= 5 && column >= numberStart) {
-      pixels = textColumn(number, column - numberStart, 4, page - 2);
+    } else if (page < 2 && column >= 120) {
+      // Filled circle = track enabled; outline = output off.
+      const uint8_t x = column - 120;
+      uint8_t icon = powered ? 0xFF : 0x81;
+      if (x == 0 || x == 7)
+        icon = 0x3C;
+      else if (x == 1 || x == 6)
+        icon = powered ? 0x7E : 0x42;
+      pixels = (uint16_t(icon) << 4) >> (page * 8);
+    } else if (page >= 2 && page <= 4 && column >= numberStart) {
+      pixels = textColumn(number, column - numberStart, 3, page - 2);
+    } else if (page == 5 && column >= telemetryStart) {
+      pixels = textColumn(telemetry, column - telemetryStart, 1);
     } else if (page >= 6 && column >= 8 && column < 120) {
       // One rounded gauge, with third markers matching the three crawl steps.
       // The outline stays visible at zero; only the commanded portion fills.
@@ -189,6 +221,11 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* next
     ready = false;
   if (column == WIDTH) {
     column = 0;
-    ++page;
+    if (currentOnly) {
+      page = 8;
+      currentOnly = false;
+    } else {
+      ++page;
+    }
   }
 }

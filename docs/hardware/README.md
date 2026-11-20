@@ -70,8 +70,9 @@ First verify USB-only Uno ping and LED, then use the
 [power test](../../firmware/uno-stack-test/POWER-TEST.md),
 [DCC scope guide](../../firmware/uno-stack-test/DCC-SCOPE.md) and
 [first-locomotive guide](../../firmware/uno-stack-test/FIRST-LOCO-TEST.md).
-The output timeout and uncalibrated current cutoff do not replace loaded fault
-and thermal validation.
+Track mode monitors current without an automatic current cutoff. The no-load
+bench cutoff and output timeouts do not replace external short-circuit
+protection or loaded fault and thermal validation.
 
 [BOM](BOM.md) · [CSV BOM](bom.csv) · [Connections](connections.csv) ·
 [Print diagram](print.html)

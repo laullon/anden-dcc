@@ -23,11 +23,12 @@ with tempfile.TemporaryDirectory(prefix='anden-uno-commands-') as directory:
 #define A1 15
 extern uint32_t clockMs;
 extern uint8_t pins[20];
+extern uint16_t analogA;
 inline uint32_t millis() { return clockMs; }
 inline void pinMode(uint8_t pin, uint8_t mode) { if (mode == INPUT_PULLUP) pins[pin] = HIGH; }
 inline void digitalWrite(uint8_t pin, uint8_t value) { pins[pin] = value; }
 inline int digitalRead(uint8_t pin) { return pins[pin]; }
-inline int analogRead(uint8_t) { return 0; }
+inline int analogRead(uint8_t pin) { return pin == A0 ? analogA : 0; }
 struct FakeSerial {
     std::deque<uint8_t> input;
     std::string output;
@@ -47,9 +48,13 @@ extern FakeSerial Serial;
 #include <cassert>
 uint32_t clockMs = 0;
 uint8_t pins[20] = {};
+uint16_t analogA = 0, shownRaw = 0, shownPeak = 0;
+bool shownPower = false;
 FakeSerial Serial;
 void CabDisplay::begin() {}
-void CabDisplay::update(uint8_t, uint8_t, const char*) {}
+void CabDisplay::update(uint8_t, uint8_t, const char*, uint16_t raw, uint16_t peak, bool powered) {
+    shownRaw = raw; shownPeak = peak; shownPower = powered;
+}
 namespace UnoDcc {
 UnoDccStream schedule;
 bool running = false;
@@ -194,6 +199,20 @@ int main() {
     const unsigned idleStops = UnoDcc::broadcastStops;
     pins[2] = LOW; loop();
     assert(UnoDcc::broadcastStops == idleStops+1 && pins[3]);
+    analogA = 145; ++clockMs; loop();
+    assert(pins[3] && shownRaw == 145 && shownPeak == 145 && shownPower);
+    analogA = 28; ++clockMs; loop();
+    assert(shownRaw == 28 && shownPeak == 145);
+    send("AD1,17,BENCHSTOP");
+    analogA = 0; ++clockMs; loop();
+    assert(!shownPower && shownRaw == 0 && shownPeak == 145);
+    send("AD1,18,TRACKON");
+    assert(shownPeak == 0 && shownPower);
+    send("AD1,19,BENCHSTOP");
+    send("AD1,20,PULSE,1");
+    assert(shownPower);
+    clockMs += 3000; loop();
+    assert(!shownPower);
 }
 ''')
     executable = folder / 'commands'

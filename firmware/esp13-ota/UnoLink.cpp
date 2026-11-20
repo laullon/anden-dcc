@@ -223,6 +223,10 @@ String UnoLink::json() const {
   out += known ? ((flags & 2) ? "true" : "false") : "null";
   out += F(",\"adcA\":");
   out += known ? String(adcA) : "null";
+  out += F(",\"adcPeakA\":");
+  out += known && currentMonitoringCapable ? String(adcPeakA) : "null";
+  out += F(",\"currentMonitoringOnly\":");
+  out += online() && currentMonitoringCapable ? "true" : "false";
   out += F(",\"adcB\":");
   out += known ? String(adcB) : "null";
   out += F(",\"ledOn\":");
@@ -261,15 +265,17 @@ String UnoLink::json() const {
   out += benchRemaining;
   out += F(",\"state\":");
   out += benchState;
-  out += F(",\"rawLimit\":100},\"motorPowerTested\":false}");
+  out += F(",\"rawLimit\":");
+  out += currentMonitoringCapable && mode == 3 ? "null" : "100";
+  out += F("},\"motorPowerTested\":false}");
   return out;
 }
 
 bool UnoLink::accept(uint16_t expected) {
-  char* parts[18];
-  size_t n = AndenLink::fields(receiver.body, parts, 18);
+  char* parts[19];
+  size_t n = AndenLink::fields(receiver.body, parts, 19);
   // Older Uno versions omit trailing DCC, bench and capability fields.
-  if ((n != 8 && n != 14 && n != 16 && n != 17 && n != 18) || strcmp(parts[0], "AD1") ||
+  if ((n != 8 && n != 14 && n != 16 && n != 17 && n != 18 && n != 19) || strcmp(parts[0], "AD1") ||
       strcmp(parts[2], "STATE"))
     return false;
   uint16_t id, a, b, f, edges;
@@ -302,15 +308,20 @@ bool UnoLink::accept(uint16_t expected) {
                   !AndenLink::number(parts[15], testState) || testState > 7))
     return false;
   uint16_t reportedMode = (f & 16) ? 1 : 0;
-  if (n >= 17 && (!AndenLink::number(parts[16], reportedMode) || reportedMode > (n == 18 ? 3 : 2)))
+  if (n >= 17 && (!AndenLink::number(parts[16], reportedMode) || reportedMode > (n >= 18 ? 3 : 2)))
+    return false;
+  uint16_t peak = 0;
+  if (n == 19 && (strcmp(parts[17], "5") ||
+                  !AndenLink::number(parts[18], peak) || peak > 1023))
     return false;
   // Publish the snapshot only after every field in this reply has passed validation.
   benchCapable = n >= 16;
   dccBenchCapable = n >= 17;
-  cabNamesCapable = n == 18 && !strcmp(parts[17], "4");
+  currentMonitoringCapable = n == 19;
+  cabNamesCapable = currentMonitoringCapable || (n == 18 && !strcmp(parts[17], "4"));
   cabFilterCapable = cabNamesCapable || (n == 18 && !strcmp(parts[17], "3"));
   functionsCapable = cabFilterCapable || (n == 18 && !strcmp(parts[17], "2"));
-  trackCapable = n == 18 && (!strcmp(parts[17], "1") || functionsCapable);
+  trackCapable = n >= 18 && (!strcmp(parts[17], "1") || functionsCapable);
   benchRemaining = remaining;
   benchState = testState;
   mode = reportedMode;
@@ -324,6 +335,7 @@ bool UnoLink::accept(uint16_t expected) {
   memcpy(version, parts[3], length + 1);
   adcA = a;
   adcB = b;
+  adcPeakA = peak;
   flags = f;
   ledEdges = edges;
   return true;

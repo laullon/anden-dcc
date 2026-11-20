@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-constexpr char VERSION[] = "0.7.7";
+constexpr char VERSION[] = "0.7.8";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
 constexpr uint8_t MOVEMENT_LED = 7;
 namespace {
@@ -24,15 +24,17 @@ CabDisplay display;
 uint8_t ledEdges = 0;
 // A stationary schedule must be acknowledged before TRACKON can enable A.
 bool controlReady = false;
-uint16_t rawA = 0;
+uint16_t rawA = 0, peakA = 0;
 uint32_t nextEdge = 0, lastSense = 0;
 
-// Sample while running and force a fresh reading before enable and status replies.
+// Sample A0 in the background; force a fresh reading before enable/status replies.
 void serviceBridge(bool fresh) {
   uint32_t now = millis();
-  if (fresh || (bench.active() && uint32_t(now - lastSense) >= 1)) {
+  if (fresh || uint32_t(now - lastSense) >= 1) {
     rawA = analogRead(A0);
     lastSense = now;
+    if (bench.active() && bench.mode == BridgeBench::Track && rawA > peakA)
+      peakA = rawA;
   }
   bool wasActive = bench.active();
   bench.poll(now, rawA, UnoDcc::isRunning(), UnoDcc::guardExpired());
@@ -81,6 +83,7 @@ bool startBridge(uint8_t mode) {
                           ? HIGH
                           : LOW); // Brake A remains LOW: opposite bridge inputs.
   if (mode == BridgeBench::Track) {
+    peakA = rawA; // Hold the observed maximum until the next explicit track start.
     UnoDcc::startStopped();
   }
   if (!UnoDcc::armBridge(mode >= BridgeBench::Dcc)) {
@@ -112,11 +115,11 @@ void sendState(uint16_t sequence) {
   char wire[AndenLink::MAX_BODY + 8];
   char* body = wire + 1;
   auto dcc = UnoDcc::status();
-  snprintf(body, AndenLink::MAX_BODY + 1, "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,4",
+  snprintf(body, AndenLink::MAX_BODY + 1, "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,5,%u",
            sequence, VERSION, unsigned(rawA), unsigned(analogRead(A1)), unsigned(flags),
            unsigned(ledEdges), unsigned(dcc.running), unsigned(dcc.count), unsigned(dcc.signature),
            unsigned(dcc.mask), static_cast<unsigned long>(dcc.packets), unsigned(dcc.faults),
-           unsigned(bench.remaining(millis())), unsigned(bench.state), unsigned(bench.mode));
+           unsigned(bench.remaining(millis())), unsigned(bench.state), unsigned(bench.mode), unsigned(peakA));
   size_t size = AndenLink::encode(wire, sizeof(wire), body);
   if (size)
     Serial.write(reinterpret_cast<const uint8_t*>(wire), size);
@@ -306,5 +309,6 @@ void loop() {
     serviceBridge();
     serviceCab();
   }
-  display.update(cab.address(), cab.step(), cab.name());
+  display.update(cab.address(), cab.step(), cab.name(), rawA, peakA,
+                 bench.active() && digitalRead(ENABLE_A));
 }

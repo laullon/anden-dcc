@@ -63,16 +63,19 @@ write decoder configuration.
   expires after **2 seconds** without KEEP. Neither path restarts output.
 - An interrupt guard still disables A after 60,000 half-bits (3.48–6 seconds) if
   main-loop servicing stalls while interrupts continue. Timing faults disable A.
-- The existing raw A0 cutoff **100** remains unchanged. It is deliberately
-  conservative and **uncalibrated**, not a proven short-circuit protection system.
-  Decoder startup current may trip it. Stop and inspect rather than increasing
-  the limit blindly. Loaded fault behavior and current calibration remain unverified.
+- Track mode uses current monitoring only. The OLED shows the latest raw A0
+  reading and the highest sampled value since power-on. Automatic current
+  cutoff is disabled in this mode. Watching the display does not provide
+  short-circuit protection. Use supervised tests and external current limiting;
+  current calibration and loaded fault behavior remain unvalidated.
+- The separate no-load three-second bench tests retain the raw cutoff of 100.
 
 ## Protocol and implementation
 
 The STATE reply has an eighteenth capability field. Value `1` means stationary
 control. Value `2` adds F0–F28. Value `3` also accepts a trailing cab eligibility
-mask in CONTROLX.
+mask in CONTROLX. Value `4` adds cached cab names. Value `5` adds track current
+monitoring and a nineteenth field containing the highest sampled A0 value.
 Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
 8/14/16/17-field responses remain readable.
 
@@ -82,7 +85,7 @@ Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
   eight short addresses; the checked body limit is 144 bytes. All speed packets
   remain zero for web requests. Capability `2` accepts the original form.
   Capability `3` also accepts a final decimal mask of the roster positions
-  marked **On diorama**. Omitting the mask selects no loco for cab movement.
+  marked **On track**. Omitting the mask selects no loco for cab movement.
 - `TRACKON`: explicit start, requiring a prepared control/search schedule.
 - `KEEP`: renew only an already-running stationary track lease.
 - `BENCHSTOP`: immediate output disable.

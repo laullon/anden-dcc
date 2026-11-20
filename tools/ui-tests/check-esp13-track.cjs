@@ -35,6 +35,7 @@ const root=path.resolve(__dirname,'../..');
  assert.equal(on,0);assert(await page.locator('#track-on').isEnabled());assert(await page.locator('#track-on').isVisible());assert(await page.locator('#track-off').isHidden());assert.equal(await page.locator('#track-label').innerText(),'Track is OFF');
  await page.locator('.loco[data-id="1"] [data-forward="0"]').click();assert.equal(state.dcc.locos[0].forward,false);assert.equal(state.dcc.locos[1].forward,true);
  await page.locator('#track-on').click();await page.waitForFunction(()=>document.getElementById('track-label').textContent==='Track is ON');
+ state.uno.currentMonitoringOnly=true;await page.evaluate(()=>refreshStatus());assert((await page.locator('#track-detail').innerText()).includes('no automatic current cutoff'));state.uno.currentMonitoringOnly=false;await page.evaluate(()=>refreshStatus());
  await page.waitForFunction(()=>document.getElementById('track-on').disabled);await page.waitForTimeout(1100);assert(keeps>=1);assert.equal(on,1);assert(await page.locator('#track-on').isHidden());assert(await page.locator('#track-off').isVisible());
  // Polling must preserve a pressed mouse target until mouseup/click.
  const mouseTarget=page.locator('.loco[data-id="1"] .favorite-strip [data-function="0"]');await mouseTarget.scrollIntoViewIfNeeded();const originalNode=await mouseTarget.elementHandle();const rect=await mouseTarget.boundingBox();

@@ -3,6 +3,37 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## Supervised current monitoring · ESP13 0.7.5 / Uno 0.7.8 · 20 November 2026
+
+Both firmware builds and all eight browser suites pass. Native checks verify
+that track mode accepts raw A0 values through 1023 without a current trip,
+while the DC/DCC no-load bench modes retain their raw cutoff of 100.
+The command harness verifies live sample forwarding, held peak readings,
+reset on a new track start, sampling after stop and power indication.
+OLED pixel checks cover filled/outlined power indication and telemetry-only
+updates that cannot restart/starve a full redraw. Timing, manual stop and
+connection/lease guards remain covered.
+
+The Uno build uses 17,760 bytes of flash and 1,301 bytes of static RAM
+(747 bytes left for stack/local variables). The ESP image is 414,656 bytes.
+ESP13 0.7.5 was accepted by OTA. Its initial reboot-status read was truncated;
+a subsequent status request confirmed the new version. Uno 0.7.8 was uploaded
+and flash-verified on /dev/cu.usbserial-1120. Checked 19-field UART replies
+confirmed capability 5, valid peak telemetry and both output enables LOW.
+
+With USB logic power, the user confirmed the OLED's A0/P row and hollow power
+indicator, then reconnected the ESP UART switches and refreshed the panel.
+A later live snapshot confirmed both release versions online, monitoring-only
+policy, rawLimit null for track mode, DCC running and zero timing faults.
+It reported A0 0 with track output off and held peak 366 from the last session.
+The load conditions for that later reading were not recorded, so it does not
+establish current calibration or protection behavior.
+
+Track mode has no automatic current cutoff. The displayed values are raw ADC
+counts and the peak is the largest sampled value, not a calibrated true peak.
+Human observation provides no automatic short-circuit protection; loaded
+tests require external current limiting or appropriate protection.
+
 ## Persistent cab speed · Uno 0.7.7
 
 The Uno regression suite passes. The command harness holds a nonzero speed

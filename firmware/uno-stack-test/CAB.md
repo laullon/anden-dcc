@@ -1,11 +1,11 @@
 # Encoder cab
 
-Uno 0.7.7 and ESP13 0.7.4 provide local crawl control for one locomotive at a time.
+Uno 0.7.8 and ESP13 0.7.5 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
 
-![OLED layout preview showing the loco name in yellow, a large speed number and a continuous speed gauge.](../../docs/hardware/cab-display.png)
+![OLED layout preview showing the loco name in yellow, a large speed number, sampled current/peak, a power indicator and a continuous speed gauge.](../../docs/hardware/cab-display.png)
 
 Preview rendered from the firmware's display output.
 
@@ -77,7 +77,15 @@ Use a 0.96-inch 128×64 I²C SSD1315 Arduino-compatible breakout at address
 Follow the module's printed pin labels. The cab's MP1584 supplies its VCC at 5.0 V.
 
 The display is probed at Uno boot. It shows the selected loco name in yellow,
-a large speed number in blue and a rounded, continuous speed gauge. The gauge
+a large speed number in blue and a rounded, continuous speed gauge.
+A filled yellow circle means track output is enabled; an outlined circle
+means it is off. This reports the enable command, not measured rail voltage.
+
+The `A0` number is the latest sampled raw current-sense ADC value (0–1023).
+`P` holds the highest sampled A0 value in the track session. It resets on
+the next explicit power-on and stays visible after stopping or powering off.
+These are uncalibrated counts, not amperes. The live row updates about four
+times per second without interrupting a full display redraw. The gauge
 is empty at zero and fills to one third, two thirds or full at crawl steps
 1, 2 or 3. Small notches mark the thirds. An unnamed loco shows LOCOMOTIVE;
 with no eligible loco, SELECT A LOCO appears.
@@ -127,9 +135,18 @@ stop motion before applying the new schedule. Track power loss clears the
 speed, and the finder suspends the cab.
 
 Keep the web panel's power session alive. Loss of the browser/ESP connection,
-a timing/current fault or an expired Uno track lease disables track output.
+a DCC timing fault or an expired Uno track lease disables track output.
 The Timer1 bridge guard remains as an independent cutoff if main-loop
 heartbeats stop. Use **Turn power off** in the panel to disable the whole track.
+
+## Current monitoring for supervised tests
+
+Track mode monitors current without an automatic current cutoff. Human
+observation cannot react fast enough to protect a decoder or bridge from a
+short circuit. Use brief, supervised tests with a current-limited supply or
+suitable external protection. Current calibration and loaded fault behavior
+remain unvalidated. The no-load three-second bench tests retain their existing
+raw A0 cutoff of 100.
 
 ## First check
 

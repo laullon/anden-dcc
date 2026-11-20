@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-// Bench pulses and leased track control. The ADC limit remains uncalibrated.
+// No-load bench pulses retain a raw ADC cutoff. Track mode monitors only.
 class BridgeBench {
 public:
   static constexpr uint16_t DURATION_MS = 3000, RAW_LIMIT = 100;

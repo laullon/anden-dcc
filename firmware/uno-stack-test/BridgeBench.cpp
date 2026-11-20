@@ -7,7 +7,7 @@ bool BridgeBench::start(uint8_t requestedMode, uint32_t now, uint16_t raw, bool 
     state = TimingFault;
     return false;
   }
-  if (raw >= RAW_LIMIT) {
+  if (requestedMode != Track && raw >= RAW_LIMIT) {
     state = RawTrip;
     return false;
   }
@@ -25,7 +25,7 @@ void BridgeBench::poll(uint32_t now, uint16_t raw, bool healthy, bool guardExpir
     state = TimingFault;
   else if (guardExpired)
     state = GuardExpired;
-  else if (raw >= RAW_LIMIT)
+  else if (mode != Track && raw >= RAW_LIMIT)
     state = RawTrip;
   else if (uint32_t(now - started) >= duration())
     state = mode == Track ? LeaseExpired : Complete;
