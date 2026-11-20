@@ -1,6 +1,6 @@
 # Encoder cab
 
-Uno 0.7.8 and ESP13 0.7.5 provide local crawl control for one locomotive at a time.
+Uno 0.7.9 and ESP13 0.7.6 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
@@ -86,8 +86,8 @@ The `A0` number is the latest sampled raw current-sense ADC value (0–1023).
 the next explicit power-on and stays visible after stopping or powering off.
 These are uncalibrated counts, not amperes. The live row updates about four
 times per second without interrupting a full display redraw. The gauge
-is empty at zero and fills to one third, two thirds or full at crawl steps
-1, 2 or 3. Small notches mark the thirds. An unnamed loco shows LOCOMOTIVE;
+is empty at zero and shows speed magnitude, filling to one third, two thirds
+or full at speeds ±1, ±2 or ±3. Small notches mark the thirds. An unnamed loco shows LOCOMOTIVE;
 with no eligible loco, SELECT A LOCO appears.
 
 The ESP sends display labels when synchronizing the roster. The Uno caches all
@@ -114,9 +114,12 @@ Panel bring-up and live timing tests are recorded in the
    saves immediately. Unmarked loco cards have their direction and function
    controls disabled. Existing rosters start with all cards unchecked.
    Set direction in the panel, then turn track power on.
-2. Turn clockwise to increase the selected loco's speed and counterclockwise
-   to reduce it. The initial cap is three DCC crawl steps. All other loco
-   addresses keep their zero-speed refresh.
+2. Turn clockwise to increase signed speed and counterclockwise to decrease
+   it. Positive speeds 1–3 command forward; negative speeds −1 to −3 command
+   reverse. Crossing between directions takes a separate step through zero,
+   which publishes a stop before the next moving packet. The display shows
+   the sign, and the web direction buttons and headlights follow the actual
+   direction reported by the Uno. All other locos keep zero-speed refresh.
 3. Press the encoder button once to select the next marked loco. If the current
    loco is moving, the Uno sends it a stop first. Selection wraps around the
    marked list and the next loco starts at step zero.
@@ -128,6 +131,9 @@ The movement LED is steady while track power is on and the Uno commands a
 nonzero speed. It goes dark when the commanded speed returns to zero or track
 power is cut. It indicates the speed command, so the locomotive can still coast
 after the LED goes dark.
+
+Web direction changes stop the cab. The next encoder move sets direction
+from the sign of its speed.
 
 The selected speed stays set until you turn it down, press STOP, change the
 selected loco or turn track power off. Roster, direction and function updates

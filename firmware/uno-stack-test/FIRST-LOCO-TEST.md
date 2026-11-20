@@ -75,7 +75,9 @@ write decoder configuration.
 The STATE reply has an eighteenth capability field. Value `1` means stationary
 control. Value `2` adds F0–F28. Value `3` also accepts a trailing cab eligibility
 mask in CONTROLX. Value `4` adds cached cab names. Value `5` adds track current
-monitoring and a nineteenth field containing the highest sampled A0 value.
+monitoring and a nineteenth field containing the highest sampled A0 value. Value
+`6` adds a twentieth field with actual per-slot direction bits for signed
+encoder control.
 Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
 8/14/16/17-field responses remain readable.
 

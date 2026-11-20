@@ -31,5 +31,8 @@ bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, cons
                uint8_t cabMask = 0);
 // DCC speed code 1 is emergency stop. Codes 2 and above are motion.
 bool motion(uint8_t address, uint8_t speedCode);
+bool motion(uint8_t address, uint8_t speedCode, bool forward);
+// Actual per-slot direction bits, including changes made by the local encoder.
+uint8_t directions();
 bool find(uint8_t first, uint8_t last, uint8_t low, uint8_t high);
 } // namespace UnoDcc

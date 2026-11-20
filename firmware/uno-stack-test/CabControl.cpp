@@ -46,7 +46,7 @@ uint8_t CabControl::address() const {
   return count ? selected : 0;
 }
 
-uint8_t CabControl::step() const {
+int8_t CabControl::step() const {
   return speed;
 }
 
@@ -139,9 +139,12 @@ bool CabControl::poll(bool trackPowered) {
 
   const int next = int(speed) + (transitions > 0 ? 1 : -1);
   transitions = 0;
-  if (next < 0 || next > UnoDcc::MAX_CRAWL_STEP)
+  if (next < -int(UnoDcc::MAX_CRAWL_STEP) || next > UnoDcc::MAX_CRAWL_STEP)
     return true;
-  if (!UnoDcc::motion(selected, next ? next + 1 : 0))
+  const uint8_t magnitude = next < 0 ? -next : next;
+  // Zero is a real stop before reversing. Retain the last direction at zero.
+  const bool forward = next == 0 ? speed >= 0 : next > 0;
+  if (!UnoDcc::motion(selected, magnitude ? magnitude + 1 : 0, forward))
     return false;
   speed = next;
   return true;

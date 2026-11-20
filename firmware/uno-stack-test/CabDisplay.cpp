@@ -126,7 +126,7 @@ void CabDisplay::begin() {
   ready = CabI2c::write(OLED, on, sizeof(on));
 }
 
-void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* nextName,
+void CabDisplay::update(uint8_t nextAddress, int8_t nextSpeed, const char* nextName,
                         uint16_t nextRaw, uint16_t nextPeak, bool nextPowered) {
   if (!ready)
     return;
@@ -161,10 +161,11 @@ void CabDisplay::update(uint8_t nextAddress, uint8_t nextSpeed, const char* next
   const char* label = address ? (*name ? name : "LOCOMOTIVE") : "SELECT A LOCO";
   const uint8_t labelScale = strlen(label) <= 9 ? 2 : 1;
   const uint8_t labelStart = (116 - strlen(label) * 6 * labelScale) / 2;
-  char number[4];
-  snprintf(number, sizeof(number), "%u", unsigned(speed));
+  char number[5];
+  snprintf(number, sizeof(number), "%d", int(speed));
   const uint8_t numberStart = (WIDTH - strlen(number) * 18) / 2;
-  const uint8_t level = speed > UnoDcc::MAX_CRAWL_STEP ? UnoDcc::MAX_CRAWL_STEP : speed;
+  const uint8_t magnitude = speed < 0 ? -int(speed) : speed;
+  const uint8_t level = magnitude > UnoDcc::MAX_CRAWL_STEP ? UnoDcc::MAX_CRAWL_STEP : magnitude;
   const uint8_t filled = uint16_t(level) * 106 / UnoDcc::MAX_CRAWL_STEP;
 
   char telemetry[17];

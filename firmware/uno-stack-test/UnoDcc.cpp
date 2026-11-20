@@ -119,10 +119,8 @@ bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, cons
   }
   return stream.pending == 255;
 }
-bool motion(uint8_t address, uint8_t speedCode) {
-  if (!running || speedCode > MAX_CRAWL_STEP + 1 ||
-      !stream.prepareMotion(address, speedCode))
-    return false;
+namespace {
+bool publishMotion(uint8_t speedCode) {
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     // Check power again after copying the bank. The ISR may have cut it.
     if (speedCode > 1 && (!running || !dccBridge || bridgePending || !(PORTD & _BV(PD3))))
@@ -135,6 +133,33 @@ bool motion(uint8_t address, uint8_t speedCode) {
   if (stream.pending != 255)
     return false;
   return running;
+}
+} // namespace
+
+bool motion(uint8_t address, uint8_t speedCode) {
+  if (!running || speedCode > MAX_CRAWL_STEP + 1 ||
+      !stream.prepareMotion(address, speedCode))
+    return false;
+  return publishMotion(speedCode);
+}
+
+bool motion(uint8_t address, uint8_t speedCode, bool forward) {
+  if (!running || speedCode > MAX_CRAWL_STEP + 1 ||
+      !stream.prepareMotion(address, speedCode, forward))
+    return false;
+  return publishMotion(speedCode);
+}
+
+uint8_t directions() {
+  // The ISR can change the active index, but only main code writes bank data.
+  // Capture the index once; avoid masking interrupts around an eight-slot loop.
+  const auto& bank = stream.banks[stream.active];
+  uint8_t mask = 0;
+  if (bank.functionMode)
+    for (uint8_t i = 0; i < bank.count; ++i)
+      if (bank.functionPackets[i][1][2] & 0x80)
+        mask |= 1 << i;
+  return mask;
 }
 
 bool find(uint8_t first, uint8_t last, uint8_t low, uint8_t high) {

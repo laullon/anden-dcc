@@ -169,7 +169,19 @@ bool RosterControl::saveRoster(const LocoRoster& value, const FavoriteFunctions*
     LittleFS.remove("/locos.tmp");
   return ok;
 }
+LocoRoster RosterControl::runtimeRoster() const {
+  // Keep the configured snapshot intact for signature matching. Status and
+  // explicit edits use a copy with the Uno's actual encoder direction.
+  LocoRoster current = roster;
+  uint8_t directions;
+  if (uno.readDirections(roster, directions))
+    for (uint8_t i = 0; i < current.count; ++i)
+      current.entries[i].forward = directions & (1 << i);
+  return current;
+}
+
 String RosterControl::dccStatus() {
+  const LocoRoster current = runtimeRoster();
   String out = "{\"ready\":";
   out += uno.matches(roster) ? "true" : "false";
   out += ",\"functionsSupported\":";
@@ -187,7 +199,7 @@ String RosterControl::dccStatus() {
   for (uint8_t i = 0; i < roster.count; ++i) {
     if (i)
       out += ',';
-    const auto& l = roster.entries[i];
+    const auto& l = current.entries[i];
     out += "{\"id\":" + String(l.id) + ",\"address\":" + String(l.address) +
            ",\"name\":" + jsonString(l.name) +
            ",\"type\":" + jsonString(LocoRoster::typeName(l.type));
@@ -244,6 +256,7 @@ void RosterControl::trackRoutes() {
                                 F("Track firmware and a connected, stopped roster are required."));
       return;
     }
+    roster = runtimeRoster();
     if (!uno.syncRoster(roster) || !uno.query("TRACKON") || !uno.trackActive()) {
       HttpSupport::sendUnoError(server, uno, 409,
                                 F("Track start refused. Check current cutoff and timing status."));
@@ -314,6 +327,7 @@ void RosterControl::finderRoutes() {
       HttpSupport::sendUnoError(server, uno, 409, F("Search unavailable."));
       return;
     }
+    roster = runtimeRoster();
     // Suppress automatic roster sync until the search and its cleanup finish.
     uno.holdRoster(true);
     if (!applyFinder(changed)) {
@@ -389,7 +403,7 @@ void RosterControl::favoriteRoutes() {
       HttpSupport::sendUnoError(server, uno, 404, F("Locomotive not found."));
       return;
     }
-    LocoRoster changed = roster;
+    LocoRoster changed = runtimeRoster();
     LocoRoster::setFunction(changed.entries[index], fn, on == "1");
     if (!uno.syncRoster(changed)) {
       HttpSupport::sendUnoError(server, uno, 503, F("Uno did not acknowledge the function."));
@@ -451,7 +465,7 @@ void RosterControl::rosterRoutes() {
       HttpSupport::sendJson(server, 400, F("{\"error\":\"Invalid locomotive or direction\"}"));
       return;
     }
-    LocoRoster changed = roster;
+    LocoRoster changed = runtimeRoster();
     changed.entries[index].forward = forward == "1";
     if (!uno.syncRoster(changed)) {
       HttpSupport::sendUnoError(server, uno, 503, F("Uno did not acknowledge direction."));
@@ -476,7 +490,7 @@ void RosterControl::rosterRoutes() {
       HttpSupport::sendJson(server, 404, F("{\"error\":\"Loco not in roster\"}"));
       return;
     }
-    LocoRoster changed = roster;
+    LocoRoster changed = runtimeRoster();
     changed.entries[index].f0 = on == "1";
     if (!uno.syncRoster(changed)) {
       HttpSupport::sendJson(server, 503,
@@ -500,7 +514,7 @@ void RosterControl::rosterRoutes() {
       return;
     }
     // Change only presence; a stale browser cannot overwrite a renamed loco.
-    LocoRoster changed = roster;
+    LocoRoster changed = runtimeRoster();
     changed.entries[index].onDiorama = presence == "1";
     if (!saveRoster(changed)) {
       HttpSupport::sendJson(server, 500, F("{\"error\":\"Could not save roster\"}"));
@@ -535,7 +549,7 @@ void RosterControl::rosterRoutes() {
       HttpSupport::sendJson(server, 400, F("{\"error\":\"Invalid ID or address\"}"));
       return;
     }
-    LocoRoster changed = roster;
+    LocoRoster changed = runtimeRoster();
     auto result =
         changed.save(id, address, name.c_str(), server.hasArg("type") ? type.c_str() : nullptr);
     if (result != LocoRoster::Result::Ok) {
@@ -569,7 +583,7 @@ void RosterControl::rosterRoutes() {
       return;
     }
     int id = rosterNumber(server.arg("id"), 8);
-    LocoRoster changed = roster;
+    LocoRoster changed = runtimeRoster();
     if (id < 0) {
       HttpSupport::sendJson(server, 400, F("{\"error\":\"Invalid ID\"}"));
       return;

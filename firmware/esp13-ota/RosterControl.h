@@ -34,6 +34,7 @@ private:
   bool rosterStorage = false;
   const char* trackStopReason = "Track A output is disabled.";
 
+  LocoRoster runtimeRoster() const;
   String finderStatus();
   bool applyFinder(const AddressFinder& value);
   void serviceFinder();

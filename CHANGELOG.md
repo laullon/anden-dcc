@@ -1,5 +1,13 @@
 # Changelog
 
+## Signed encoder speed · ESP13 0.7.6 / Uno 0.7.9
+
+- Turn through zero into reverse, with signed speed −3…+3 on the OLED.
+- Publish a stop at zero and update DCC direction/XOR for the following move.
+  Keep STOP, selection, power-loss and lease behavior.
+- Report actual direction bits to the ESP so cards, directional lights and
+  later function/roster updates follow encoder direction changes.
+
 ## Supervised current monitoring · ESP13 0.7.5 / Uno 0.7.8
 
 - Disable the automatic raw A0 cutoff in track mode for supervised measurements;

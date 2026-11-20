@@ -167,6 +167,16 @@ bool UnoDccStream::prepareMotion(uint8_t address, uint8_t speedCode) {
   return false;
 }
 
+bool UnoDccStream::prepareMotion(uint8_t address, uint8_t speedCode, bool forward) {
+  if (!prepareMotion(address, speedCode))
+    return false;
+  auto& next = banks[active ^ 1];
+  auto& packet = next.functionPackets[next.firstSlot / DccFunctions::GROUPS][1];
+  packet[2] = (forward ? 0x80 : 0) | speedCode;
+  packet[3] = packet[0] ^ packet[1] ^ packet[2];
+  return true;
+}
+
 bool UnoDccStream::prepareFinder(uint8_t first, uint8_t last, uint8_t onLow, uint8_t onHigh) {
   if (!first || last > 127 || first > last ||
       (onLow && (onLow < first || onHigh > last || onLow > onHigh)) || (!onLow && onHigh))

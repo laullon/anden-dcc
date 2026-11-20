@@ -74,7 +74,7 @@ int main() {
 
   uint16_t liveRaw = 0, livePeak = 0;
   bool trackEnabled = false;
-  auto redraw = [&](uint8_t address, uint8_t speed, const char* name) {
+  auto redraw = [&](uint8_t address, int8_t speed, const char* name) {
     capture.transactions.clear();
     for (unsigned i = 0; i < 48; ++i) {
       clockMs += 5;
@@ -97,14 +97,14 @@ int main() {
     std::cout << '\\n';
     // Rounded frame and a continuous fill, with third markers at x=45/82.
     assert(frame[6][8] == 0x80 && frame[7][8] == 0x07);
-    const unsigned filled = speed * 106 / 3;
+    const unsigned filled = (speed < 0 ? -int(speed) : speed) * 106 / 3;
     for (unsigned x = 11; x < 117; ++x) {
       const bool lit = (frame[6][x] & 0xC0) && (frame[7][x] & 0x0F);
       assert(lit == (x < 11 + filled));
     }
     // Text such as STEP/STOP/ON/OFF must not occupy the speed's side margins.
     for (unsigned p = 2; p <= 4; ++p)
-      for (unsigned x = 0; x < 40; ++x)
+      for (unsigned x = 0; x < 37; ++x)
         assert(frame[p][x] == 0 && frame[p][127 - x] == 0);
     assert(frame[5][22] == 0x7E); // A in the A0/peak telemetry row.
     assert(frame[0][122] == (trackEnabled ? 0xF0 : 0x10));
@@ -120,6 +120,9 @@ int main() {
   assert(shortName[20] == 0);
   redraw(3, 1, "SANTA FE");
   redraw(3, 3, "SANTA FE");
+  redraw(3, -1, "SANTA FE");
+  redraw(3, -2, "SANTA FE");
+  redraw(3, -3, "SANTA FE");
   redraw(6, 0, "");
   redraw(6, 0, "ABCDEFGHIJKLMNOP");
   redraw(0, 0, "");

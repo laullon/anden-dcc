@@ -3,6 +3,33 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## Signed encoder speed · ESP13 0.7.6 / Uno 0.7.9 · 20 November 2026
+
+Both firmware builds and all eight browser suites pass. Native command tests
+cover −3…+3 limits, forward-to-zero-to-reverse traversal, signed-speed hold,
+negative-speed STOP and return through zero to forward. The actual Timer1
+model decodes explicit forward/reverse speed packets, verifies XOR and checks
+the reported per-slot direction bits. Legacy motion callers retain their
+existing direction-preserving behavior. OLED pixel tests cover negative
+numbers with a magnitude-based gauge.
+
+Local motion keeps the original schedule signature, while a twentieth STATE
+field carries actual direction bits. The ESP uses that matching-roster
+snapshot for card direction and explicit roster/function updates, avoiding
+background resets of local motion.
+
+The Uno build uses 18,146 bytes of flash and 1,307 bytes static RAM
+(741 bytes for stack/local variables). The ESP image is 415,168 bytes.
+ESP13 0.7.6 was installed by OTA with verified reboot. Uno 0.7.9 was uploaded
+and flash-verified on /dev/cu.usbserial-1120. Checked 20-field UART status
+confirmed capability 6 and both output enables LOW before the cab test.
+
+After UART reconnection, live status reported both versions online, track
+mode active, zero timing faults and direction mask 1. The selected address 6
+was reported in reverse while the other roster slot stayed forward.
+The user visual/encoder confirmation is pending. The test setup was
+USB-only with cab/PD power and track disconnected.
+
 ## Supervised current monitoring · ESP13 0.7.5 / Uno 0.7.8 · 20 November 2026
 
 Both firmware builds and all eight browser suites pass. Native checks verify

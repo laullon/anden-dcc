@@ -10,15 +10,15 @@ public:
   bool poll(bool trackPowered);
   bool stop();
   uint8_t address() const;
-  uint8_t step() const;
+  int8_t step() const;
   const char* name() const;
   bool setName(uint8_t address, const char* hex);
 
 private:
   uint8_t addresses[8] = {};
   char names[8][CabLabel::LENGTH + 1] = {};
-  uint8_t count = 0, selected = 0, speed = 0, phase = 0;
-  int8_t transitions = 0;
+  uint8_t count = 0, selected = 0, phase = 0;
+  int8_t speed = 0, transitions = 0;
   bool selectLatched = false, stopLatched = false;
   uint32_t selectLowAt = 0, stopLowAt = 0;
 };

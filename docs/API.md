@@ -123,3 +123,24 @@ retain their limit of 100. Timing faults, STOP and lease/backup shutdowns remain
 
 Watching the current display provides no automatic short-circuit protection.
 Loaded tests need external current limiting or appropriate protection.
+
+
+## Signed encoder speed
+
+ESP13 0.7.6 / Uno 0.7.9 add capability `6`. Its STATE reply has twenty
+fields: field 19 remains the sampled A0 peak and field 20 is a direction-bit
+mask for the current roster positions. `uno.cabDirections` is that mask, or
+null when unavailable. Old capability/reply formats remain supported.
+
+Encoder speed is signed in the range −3 to +3. A step to zero publishes a
+stop packet with the previous direction; the next step beyond zero publishes
+motion in the opposite direction. The OLED renders negative numbers and the
+gauge shows magnitude. The `forward` property in `dcc.locos` reflects Uno
+direction telemetry when its roster signature matches the saved model.
+The existing web `speed` field remains zero; web requests do not set motion.
+
+Local direction changes preserve the roster's synchronization signature so
+background polling does not overwrite them or stop the cab. Explicit roster,
+function and direction updates first take the current direction snapshot,
+then apply the requested change. They retain the existing stop-on-update
+behavior. Power-on/search restoration also retains that direction snapshot.

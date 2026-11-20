@@ -114,6 +114,13 @@ bool UnoLink::cabFilterSupported() const {
   return online() && cabFilterCapable;
 }
 
+bool UnoLink::readDirections(const LocoRoster& value, uint8_t& directions) const {
+  if (!signedCabCapable || !matches(value))
+    return false;
+  directions = cabDirections;
+  return true;
+}
+
 bool UnoLink::trackSupported() const {
   return trackCapable;
 }
@@ -249,6 +256,8 @@ String UnoLink::json() const {
   out += functionsSupported() ? "true" : "false";
   out += F(",\"cabNamesSupported\":");
   out += online() && cabNamesCapable ? "true" : "false";
+  out += F(",\"cabDirections\":");
+  out += online() && signedCabCapable ? String(cabDirections) : "null";
   out += F(",\"trackSupported\":");
   out += trackCapable ? "true" : "false";
   out += F(",\"trackActive\":");
@@ -272,10 +281,10 @@ String UnoLink::json() const {
 }
 
 bool UnoLink::accept(uint16_t expected) {
-  char* parts[19];
-  size_t n = AndenLink::fields(receiver.body, parts, 19);
+  char* parts[20];
+  size_t n = AndenLink::fields(receiver.body, parts, 20);
   // Older Uno versions omit trailing DCC, bench and capability fields.
-  if ((n != 8 && n != 14 && n != 16 && n != 17 && n != 18 && n != 19) || strcmp(parts[0], "AD1") ||
+  if ((n != 8 && n != 14 && n != 16 && n != 17 && n != 18 && n != 19 && n != 20) || strcmp(parts[0], "AD1") ||
       strcmp(parts[2], "STATE"))
     return false;
   uint16_t id, a, b, f, edges;
@@ -311,13 +320,19 @@ bool UnoLink::accept(uint16_t expected) {
   if (n >= 17 && (!AndenLink::number(parts[16], reportedMode) || reportedMode > (n >= 18 ? 3 : 2)))
     return false;
   uint16_t peak = 0;
-  if (n == 19 && (strcmp(parts[17], "5") ||
-                  !AndenLink::number(parts[18], peak) || peak > 1023))
+  if (n >= 19 && (strcmp(parts[17], n == 20 ? "6" : "5") ||
+                   !AndenLink::number(parts[18], peak) || peak > 1023))
+    return false;
+  uint16_t directions = 0;
+  if (n == 20 && (!AndenLink::number(parts[19], directions) ||
+                  directions >= (1U << count)))
     return false;
   // Publish the snapshot only after every field in this reply has passed validation.
   benchCapable = n >= 16;
   dccBenchCapable = n >= 17;
-  currentMonitoringCapable = n == 19;
+  currentMonitoringCapable = n >= 19;
+  signedCabCapable = n == 20;
+  cabDirections = directions;
   cabNamesCapable = currentMonitoringCapable || (n == 18 && !strcmp(parts[17], "4"));
   cabFilterCapable = cabNamesCapable || (n == 18 && !strcmp(parts[17], "3"));
   functionsCapable = cabFilterCapable || (n == 18 && !strcmp(parts[17], "2"));

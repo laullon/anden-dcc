@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-constexpr char VERSION[] = "0.7.8";
+constexpr char VERSION[] = "0.7.9";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
 constexpr uint8_t MOVEMENT_LED = 7;
 namespace {
@@ -115,11 +115,11 @@ void sendState(uint16_t sequence) {
   char wire[AndenLink::MAX_BODY + 8];
   char* body = wire + 1;
   auto dcc = UnoDcc::status();
-  snprintf(body, AndenLink::MAX_BODY + 1, "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,5,%u",
+  snprintf(body, AndenLink::MAX_BODY + 1, "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,6,%u,%u",
            sequence, VERSION, unsigned(rawA), unsigned(analogRead(A1)), unsigned(flags),
            unsigned(ledEdges), unsigned(dcc.running), unsigned(dcc.count), unsigned(dcc.signature),
            unsigned(dcc.mask), static_cast<unsigned long>(dcc.packets), unsigned(dcc.faults),
-           unsigned(bench.remaining(millis())), unsigned(bench.state), unsigned(bench.mode), unsigned(peakA));
+           unsigned(bench.remaining(millis())), unsigned(bench.state), unsigned(bench.mode), unsigned(peakA), unsigned(UnoDcc::directions()));
   size_t size = AndenLink::encode(wire, sizeof(wire), body);
   if (size)
     Serial.write(reinterpret_cast<const uint8_t*>(wire), size);

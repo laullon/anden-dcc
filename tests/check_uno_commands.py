@@ -52,7 +52,7 @@ uint16_t analogA = 0, shownRaw = 0, shownPeak = 0;
 bool shownPower = false;
 FakeSerial Serial;
 void CabDisplay::begin() {}
-void CabDisplay::update(uint8_t, uint8_t, const char*, uint16_t raw, uint16_t peak, bool powered) {
+void CabDisplay::update(uint8_t, int8_t, const char*, uint16_t raw, uint16_t peak, bool powered) {
     shownRaw = raw; shownPeak = peak; shownPower = powered;
 }
 namespace UnoDcc {
@@ -80,6 +80,19 @@ bool motion(uint8_t address, uint8_t speedCode) {
     if (!schedule.prepareMotion(address, speedCode)) return false;
     schedule.active ^= 1;
     return true;
+}
+bool motion(uint8_t address, uint8_t speedCode, bool forward) {
+    if (!schedule.prepareMotion(address, speedCode, forward)) return false;
+    schedule.active ^= 1;
+    return true;
+}
+uint8_t directions() {
+    const auto& bank = schedule.banks[schedule.active];
+    uint8_t mask = 0;
+    if (bank.functionMode)
+        for (uint8_t i = 0; i < bank.count; ++i)
+            if (bank.functionPackets[i][1][2] & 128) mask |= 1 << i;
+    return mask;
 }
 bool find(uint8_t first, uint8_t last, uint8_t low, uint8_t high) { return schedule.prepareFinder(first,last,low,high); }
 }
@@ -178,7 +191,23 @@ int main() {
     }
     rotate(false);
     assert(cab.step() == 0 && packetSpeed(0) == 0 && pins[7] == LOW);
+    assert(UnoDcc::directions() & 1); // Zero retains forward after a forward move.
+    rotate(false);
+    assert(cab.step() == -1 && packetSpeed(0) == 2 && !(UnoDcc::directions() & 1));
+    assert(pins[7] == HIGH); // Negative speed is still movement.
+    for (unsigned i = 0; i < 5; ++i) rotate(false);
+    assert(cab.step() == -3 && packetSpeed(0) == 4);
+    clockMs += 1000; send("AD1,98,KEEP");
+    assert(cab.step() == -3 && pins[3]);
+    pins[2] = LOW; loop();
+    assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3] && pins[7] == LOW);
+    assert(!(UnoDcc::directions() & 1)); // Emergency stop retains reverse.
+    pins[2] = HIGH; clockMs += 25; loop();
+    rotate(false); assert(cab.step() == -1);
     rotate(true);
+    assert(cab.step() == 0 && packetSpeed(0) == 0 && !(UnoDcc::directions() & 1));
+    rotate(true);
+    assert(cab.step() == 1 && (UnoDcc::directions() & 1));
     send("AD1,11,CONTROLX,3,5,3,1,4,0,6,8,4"); // Remove selected address 3.
     UnoDcc::schedule.active ^= 1;
     assert(cab.step() == 0 && cab.address() == 6 && packetSpeed(0) == 0 && pins[7] == LOW);

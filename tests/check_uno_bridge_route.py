@@ -146,8 +146,11 @@ int main(){
  assert(!UnoDcc::motion(6,2));
  pumpTimer=true;assert(UnoDcc::functions(8,allAddresses,0xA5,flags,2));pumpTimer=false;
  assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
+ bool explicitDirection=false, forward=false;
  auto updateSpeed=[&](uint8_t code) {
-   pumpTimer=true;assert(UnoDcc::motion(6,code));pumpTimer=false;
+   pumpTimer=true;
+   assert(explicitDirection ? UnoDcc::motion(6,code,forward) : UnoDcc::motion(6,code));
+   pumpTimer=false;
    const auto start=dccHalves.size()-1;
    while(dccHalves.size()<start+106)step();
    auto bit=[&](unsigned p) {
@@ -159,7 +162,8 @@ int main(){
    uint8_t bytes[4]={};
    for(unsigned byte=0;byte<4;++byte)
      for(unsigned p=0;p<8;++p)bytes[byte]=(bytes[byte]<<1)|bit(17+byte*9+p);
-   assert(bytes[0]==6&&bytes[1]==0x3F&&bytes[2]==code&&bytes[3]==(6^0x3F^code));
+   const uint8_t encoded = code | (explicitDirection && forward ? 0x80 : 0);
+   assert(bytes[0]==6&&bytes[1]==0x3F&&bytes[2]==encoded&&bytes[3]==(6^0x3F^encoded));
  };
  assert(!UnoDcc::motion(3,2)); // Ineligible even while stopped.
  updateSpeed(2);
@@ -167,6 +171,11 @@ int main(){
  assert(!UnoDcc::motion(6,5));
  updateSpeed(1);
  assert(PORTD.value&_BV(PD3));
+ explicitDirection=true;forward=true;updateSpeed(2);
+ assert(UnoDcc::directions() & 2);
+ updateSpeed(0);
+ forward=false;updateSpeed(2);
+ assert(!(UnoDcc::directions() & 2));
  updateSpeed(4);
  for(unsigned halves=0;halves<uint32_t(BridgeGuard::HALVES)*2;++halves) {
    if(halves%1000==0)UnoDcc::renewGuard();
