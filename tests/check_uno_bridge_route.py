@@ -142,7 +142,7 @@ int main(){
  unsigned duration=enableEdges[1].time-enableEdges[0].time;
  assert(duration>=uint32_t(BridgeGuard::HALVES-1)*UnoDccStream::ONE && duration<=uint32_t(BridgeGuard::HALVES)*UnoDccStream::ZERO);
  // A cab update leads with the selected speed packet. Check the real ISR bits
- // and verify the short guard still cuts A with ordinary bridge KEEP messages.
+ // and verify motion persists with KEEP while loss of renewal still cuts A.
  assert(!UnoDcc::motion(6,2));
  pumpTimer=true;assert(UnoDcc::functions(8,allAddresses,0xA5,flags,2));pumpTimer=false;
  assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
@@ -168,19 +168,24 @@ int main(){
  updateSpeed(1);
  assert(PORTD.value&_BV(PD3));
  updateSpeed(4);
- unsigned halves=0;
- while(!UnoDcc::guardExpired() && halves<16000) {
+ for(unsigned halves=0;halves<uint32_t(BridgeGuard::HALVES)*2;++halves) {
    if(halves%1000==0)UnoDcc::renewGuard();
+   step();
+   assert(!UnoDcc::guardExpired()&&(PORTD.value&_BV(PD3)));
+ }
+ // Stop renewing: the existing ISR backup must still disable a moving bridge.
+ unsigned halves=0;
+ while(!UnoDcc::guardExpired() && halves<BridgeGuard::HALVES) {
    step();++halves;
  }
- assert(halves>15000&&UnoDcc::guardExpired()&&!(PORTD.value&_BV(PD3)));
+ assert(UnoDcc::guardExpired()&&!(PORTD.value&_BV(PD3)));
  assert(!UnoDcc::armBridge(true)); // Stale motion bank cannot be armed.
  pumpTimer=true;assert(UnoDcc::motion(6,1));pumpTimer=false;
  // A mirror arriving outside the allowed phase must stop both output and timer.
  assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
  step(UnoDcc::BRIDGE_DELAY_TICKS+3);
  assert(!UnoDcc::isRunning() && !(PORTD.value&_BV(PD3)) && !(PORTB.value&_BV(PB4)) && UnoDcc::status().faults==1);
- std::printf("PASS: actual Timer1 ISR, DC isolation, packet-boundary enable, D12 legacy/F0-F28 58/100 us phase model under ISR delays, priority cab motion/stop packets, cab/bridge guards and late-edge fail-off.\n");
+ std::printf("PASS: actual Timer1 ISR, DC isolation, packet-boundary enable, D12 legacy/F0-F28 58/100 us phase model under ISR delays, priority cab motion/stop packets, persistent cab motion, bridge guard and late-edge fail-off.\n");
 }
 ''')
     exe=tmp/'test'

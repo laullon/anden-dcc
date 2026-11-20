@@ -1,6 +1,6 @@
 # Encoder cab
 
-Uno 0.7.6 and ESP13 0.7.4 provide local crawl control for one locomotive at a time.
+Uno 0.7.7 and ESP13 0.7.4 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
@@ -121,13 +121,15 @@ nonzero speed. It goes dark when the commanded speed returns to zero or track
 power is cut. It indicates the speed command, so the locomotive can still coast
 after the LED goes dark.
 
-An 800 ms motion limit starts with the first nonzero step. Turning the knob or
-receiving a web heartbeat cannot extend it. A fresh turn starts another move.
-Roster, direction or function updates stop motion before applying the new
-schedule. Track power loss clears the speed, and the finder suspends the cab.
-If the main loop stalls while Timer1 continues, a separate interrupt counter
-cuts bridge A after 16,000 half-bits, nominally 0.928–1.6 seconds. Use **Turn
-power off** in the panel to disable the whole track output.
+The selected speed stays set until you turn it down, press STOP, change the
+selected loco or turn track power off. Roster, direction and function updates
+stop motion before applying the new schedule. Track power loss clears the
+speed, and the finder suspends the cab.
+
+Keep the web panel's power session alive. Loss of the browser/ESP connection,
+a timing/current fault or an expired Uno track lease disables track output.
+The Timer1 bridge guard remains as an independent cutoff if main-loop
+heartbeats stop. Use **Turn power off** in the panel to disable the whole track.
 
 ## First check
 

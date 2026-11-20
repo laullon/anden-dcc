@@ -163,7 +163,16 @@ int main() {
     assert(cab.address() == 3 && cab.step() == 0 && packetSpeed(2) == 1);
     pins[6] = HIGH; clockMs += 25; loop();
     rotate(true);
-    clockMs += 800; loop(); assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3] && pins[7] == LOW);
+    clockMs += 800; loop();
+    assert(cab.step() == 1 && packetSpeed(0) == 2 && pins[3] && pins[7] == HIGH);
+    // Healthy heartbeats preserve the selected speed well beyond both old limits.
+    for (unsigned i = 0; i < 10; ++i) {
+        clockMs += 1000;
+        send("AD1,97,KEEP");
+        assert(cab.step() == 1 && packetSpeed(0) == 2 && pins[3] && pins[7] == HIGH);
+    }
+    rotate(false);
+    assert(cab.step() == 0 && packetSpeed(0) == 0 && pins[7] == LOW);
     rotate(true);
     send("AD1,11,CONTROLX,3,5,3,1,4,0,6,8,4"); // Remove selected address 3.
     UnoDcc::schedule.active ^= 1;
@@ -195,4 +204,4 @@ int main() {
                     str(ROOT / 'firmware/uno-stack-test/CabControl.cpp'), *library_sources(),
                     '-o', str(executable)], check=True)
     subprocess.run([str(executable)], check=True)
-print('PASS: real Uno UART parser, transactional malformed-command rejection, filtered cab selection, dedicated broadcast STOP, speed cap, timeout, roster/direction changes and default-off outputs.')
+print('PASS: real Uno UART parser, transactional malformed-command rejection, filtered cab selection, dedicated broadcast STOP, speed cap, persistent speed, lease expiry, roster/direction changes and default-off outputs.')

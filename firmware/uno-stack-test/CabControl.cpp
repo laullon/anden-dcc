@@ -5,7 +5,7 @@
 
 namespace {
 constexpr uint8_t ENCODER_A = 4, ENCODER_B = 5, SELECT = 6, STOP = 2;
-constexpr uint16_t RELEASE_MS = 25, MAX_MOVE_MS = 800;
+constexpr uint16_t RELEASE_MS = 25;
 
 uint8_t readPhase() {
   return (digitalRead(ENCODER_A) ? 2 : 0) | (digitalRead(ENCODER_B) ? 1 : 0);
@@ -96,7 +96,7 @@ bool CabControl::poll(bool trackPowered) {
     return true;
   }
 
-  if (speed && (!trackPowered || uint32_t(now - motionStarted) >= MAX_MOVE_MS))
+  if (speed && !trackPowered)
     return stop();
 
   if (digitalRead(SELECT) == LOW) {
@@ -143,8 +143,6 @@ bool CabControl::poll(bool trackPowered) {
     return true;
   if (!UnoDcc::motion(selected, next ? next + 1 : 0))
     return false;
-  if (!speed && next)
-    motionStarted = now;
   speed = next;
   return true;
 }

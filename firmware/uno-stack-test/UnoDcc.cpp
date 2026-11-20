@@ -16,10 +16,6 @@ BridgeGuard bridgeGuard;
 volatile bool running = false;
 volatile uint16_t deadlineFaults = 0;
 volatile bool dccBridge = false, bridgePending = false;
-// The main loop stops after 800 ms. If it stalls, the ISR cuts power after
-// 16,000 half-bits (0.928–1.6 s). Rotation and UART KEEP never extend this.
-constexpr uint16_t MOTION_GUARD_HALVES = 16000;
-volatile uint16_t motionHalves = 0;
 } // namespace
 // DC can enable immediately. DCC leaves A disabled until the ISR reaches a
 // packet boundary, so the first signal on the rails starts with a preamble.
@@ -47,7 +43,6 @@ void disarmBridge() {
     dccBridge = false;
     bridgePending = false;
     bridgeGuard.disarm();
-    motionHalves = 0;
     PORTB &= ~_BV(PB4);
   }
 }
@@ -132,8 +127,6 @@ bool motion(uint8_t address, uint8_t speedCode) {
     // Check power again after copying the bank. The ISR may have cut it.
     if (speedCode > 1 && (!running || !dccBridge || bridgePending || !(PORTD & _BV(PD3))))
       return false;
-    if (speedCode > 1 && !motionHalves)
-      motionHalves = MOTION_GUARD_HALVES;
     stream.commit();
   }
   const uint32_t started = millis();
@@ -141,11 +134,6 @@ bool motion(uint8_t address, uint8_t speedCode) {
   }
   if (stream.pending != 255)
     return false;
-  if (speedCode <= 1) {
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-      motionHalves = 0;
-    }
-  }
   return running;
 }
 
@@ -221,12 +209,9 @@ ISR(TIMER1_COMPB_vect) {
       PORTD |= _BV(PD3);
     }
   }
-  const bool motionExpired = UnoDcc::motionHalves && !--UnoDcc::motionHalves;
-  if (motionExpired) {
-    UnoDcc::bridgeGuard.disarm();
-    UnoDcc::bridgeGuard.expired = true;
-  }
-  if (motionExpired || UnoDcc::bridgeGuard.tick()) {
+  // A healthy track lease sustains the selected speed. The interrupt backup
+  // still cuts output if main-loop/ESP heartbeats stop renewing that lease.
+  if (UnoDcc::bridgeGuard.tick()) {
     PORTD &= ~_BV(PD3);
     UnoDcc::dccBridge = false;
     UnoDcc::bridgePending = false;

@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-// Bench pulses and stationary track control. The ADC limit remains uncalibrated.
+// Bench pulses and leased track control. The ADC limit remains uncalibrated.
 class BridgeBench {
 public:
   static constexpr uint16_t DURATION_MS = 3000, RAW_LIMIT = 100;

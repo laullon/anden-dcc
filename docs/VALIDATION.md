@@ -3,6 +3,30 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## Persistent cab speed · Uno 0.7.7
+
+The Uno regression suite passes. The command harness holds a nonzero speed
+through 800 ms and a further ten seconds of valid KEEP heartbeats, then checks
+explicit encoder stop, dedicated STOP, selection/schedule changes and lease
+expiry. The actual Timer1 model sustains motion for 120,000 half-bits with
+renewals, then verifies that loss of renewal still trips the existing bridge
+guard. Late-edge fail-off remains covered.
+
+The firmware removes both the main-loop movement timer and the separate
+non-renewable motion counter. The two-second Uno track lease and interrupt
+bridge guard remain. The build uses 17,142 bytes of flash and 1,277 bytes
+of static RAM, leaving 771 bytes for stack/local variables.
+
+Uno 0.7.7 was uploaded and flash-verified on /dev/cu.usbserial-1120 after that
+port returned the ATmega328P signature. Checked UART status confirmed the
+new version, DCC running, zero timing faults and both output enables LOW.
+After both ESP UART switches were turned ON, the live ESP13 reported
+Uno 0.7.7 online with track mode active and zero timing faults. With motor/cab
+power and track disconnected, the user turned the physical encoder and
+confirmed that the displayed speed stayed set when the knob was left alone.
+This validates the held speed command; loaded locomotive operation was not
+part of this test.
+
 ## Minimal OLED layout · Uno 0.7.6
 
 The Uno build and its native regression suite pass. The display now renders the

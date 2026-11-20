@@ -1,5 +1,12 @@
 # Changelog
 
+## Persistent cab speed · Uno 0.7.7
+
+- Keep the selected encoder speed until an explicit stop/change or track shutdown.
+- Remove the 800 ms movement timeout and the separate non-renewable motion timer.
+- Preserve the track lease, interrupt backup, timing/current fault shutdowns,
+  speed cap and stop-on-selection/schedule-change behavior.
+
 ## Minimal cab display · Uno 0.7.6
 
 - Keep the selected loco name and a larger speed number.
