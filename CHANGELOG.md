@@ -1,5 +1,10 @@
 # Changelog
 
+## Wider crawl levels · Uno 0.7.10
+
+- Keep encoder level 1 at decoder speed step 1; map levels 2 and 3 to
+  decoder steps 4 and 7 in both directions. Signed levels and stops stay unchanged.
+
 ## Signed encoder speed · ESP13 0.7.6 / Uno 0.7.9
 
 - Turn through zero into reverse, with signed speed −3…+3 on the OLED.

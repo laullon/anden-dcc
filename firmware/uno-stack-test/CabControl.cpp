@@ -144,7 +144,9 @@ bool CabControl::poll(bool trackPowered) {
   const uint8_t magnitude = next < 0 ? -next : next;
   // Zero is a real stop before reversing. Retain the last direction at zero.
   const bool forward = next == 0 ? speed >= 0 : next > 0;
-  if (!UnoDcc::motion(selected, magnitude ? magnitude + 1 : 0, forward))
+  // Preserve the lowest crawl speed; space the higher levels farther apart.
+  const uint8_t code = magnitude ? 2 + (magnitude - 1) * UnoDcc::CRAWL_STEP_SPACING : 0;
+  if (!UnoDcc::motion(selected, code, forward))
     return false;
   speed = next;
   return true;

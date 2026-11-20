@@ -161,8 +161,8 @@ int main() {
     send("AD1,10,TRACKON");
     assert(pins[3] && cab.address() == 3 && pins[7] == LOW);
     for (int i = 0; i < 5; ++i) rotate(true);
-    assert(cab.step() == 3 && packetSpeed(0) == 4 && packetSpeed(1) == 0 && pins[7] == HIGH);
-    rotate(false); assert(cab.step() == 2 && packetSpeed(0) == 3);
+    assert(cab.step() == 3 && packetSpeed(0) == 8 && packetSpeed(1) == 0 && pins[7] == HIGH);
+    rotate(false); assert(cab.step() == 2 && packetSpeed(0) == 5);
     const unsigned starts = UnoDcc::broadcastStops;
     pins[2] = LOW; loop();
     assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3] && pins[7] == LOW);
@@ -196,7 +196,7 @@ int main() {
     assert(cab.step() == -1 && packetSpeed(0) == 2 && !(UnoDcc::directions() & 1));
     assert(pins[7] == HIGH); // Negative speed is still movement.
     for (unsigned i = 0; i < 5; ++i) rotate(false);
-    assert(cab.step() == -3 && packetSpeed(0) == 4);
+    assert(cab.step() == -3 && packetSpeed(0) == 8);
     clockMs += 1000; send("AD1,98,KEEP");
     assert(cab.step() == -3 && pins[3]);
     pins[2] = LOW; loop();

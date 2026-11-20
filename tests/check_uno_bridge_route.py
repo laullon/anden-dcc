@@ -168,7 +168,9 @@ int main(){
  assert(!UnoDcc::motion(3,2)); // Ineligible even while stopped.
  updateSpeed(2);
  assert(!UnoDcc::motion(3,2));
- assert(!UnoDcc::motion(6,5));
+ updateSpeed(5);
+ updateSpeed(8);
+ assert(!UnoDcc::motion(6,9));
  updateSpeed(1);
  assert(PORTD.value&_BV(PD3));
  explicitDirection=true;forward=true;updateSpeed(2);

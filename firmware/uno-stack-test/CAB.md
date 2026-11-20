@@ -1,6 +1,6 @@
 # Encoder cab
 
-Uno 0.7.9 and ESP13 0.7.6 provide local crawl control for one locomotive at a time.
+Uno 0.7.10 and ESP13 0.7.6 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
@@ -116,7 +116,8 @@ Panel bring-up and live timing tests are recorded in the
    Set direction in the panel, then turn track power on.
 2. Turn clockwise to increase signed speed and counterclockwise to decrease
    it. Positive speeds 1–3 command forward; negative speeds −1 to −3 command
-   reverse. Crossing between directions takes a separate step through zero,
+   reverse. Levels 1, 2 and 3 use decoder speed steps 1, 4 and 7 respectively
+   in either direction: level 1 retains its original crawl speed. Crossing between directions takes a separate step through zero,
    which publishes a stop before the next moving packet. The display shows
    the sign, and the web direction buttons and headlights follow the actual
    direction reported by the Uno. All other locos keep zero-speed refresh.

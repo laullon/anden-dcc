@@ -6,6 +6,9 @@ namespace UnoDcc {
 constexpr uint16_t BRIDGE_DELAY_TICKS = 40;
 constexpr uint16_t BRIDGE_LATE_TICKS = 2;
 constexpr uint8_t MAX_CRAWL_STEP = 3;
+// Cab levels 1/2/3 select decoder steps 1/4/7 (DCC codes 2/5/8).
+constexpr uint8_t CRAWL_STEP_SPACING = 3;
+constexpr uint8_t MAX_CRAWL_CODE = 2 + (MAX_CRAWL_STEP - 1) * CRAWL_STEP_SPACING;
 
 struct Status {
   uint8_t count, mask;

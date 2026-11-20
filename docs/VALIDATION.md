@@ -3,6 +3,15 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## Wider crawl levels · Uno 0.7.10 · 20 November 2026
+
+All Uno native checks pass. Cab command tests verify unchanged level 1 and
+higher levels mapped to DCC codes 5 and 8 (decoder steps 4 and 7).
+The Timer1 packet decoder verifies the higher codes and rejection above code 8.
+Build: 18,154 bytes flash, 1,309 bytes static RAM (739 bytes remaining).
+Uno 0.7.10 was uploaded over USB and flash-verified with external power and
+track disconnected. Loaded locomotive comparison of the new levels remains pending.
+
 ## Signed encoder speed · ESP13 0.7.6 / Uno 0.7.9 · 20 November 2026
 
 Both firmware builds and all eight browser suites pass. Native command tests

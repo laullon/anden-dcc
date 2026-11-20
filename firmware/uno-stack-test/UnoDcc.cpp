@@ -137,14 +137,14 @@ bool publishMotion(uint8_t speedCode) {
 } // namespace
 
 bool motion(uint8_t address, uint8_t speedCode) {
-  if (!running || speedCode > MAX_CRAWL_STEP + 1 ||
+  if (!running || speedCode > MAX_CRAWL_CODE ||
       !stream.prepareMotion(address, speedCode))
     return false;
   return publishMotion(speedCode);
 }
 
 bool motion(uint8_t address, uint8_t speedCode, bool forward) {
-  if (!running || speedCode > MAX_CRAWL_STEP + 1 ||
+  if (!running || speedCode > MAX_CRAWL_CODE ||
       !stream.prepareMotion(address, speedCode, forward))
     return false;
   return publishMotion(speedCode);
