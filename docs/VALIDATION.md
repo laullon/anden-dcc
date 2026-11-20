@@ -27,8 +27,10 @@ confirmed capability 6 and both output enables LOW before the cab test.
 After UART reconnection, live status reported both versions online, track
 mode active, zero timing faults and direction mask 1. The selected address 6
 was reported in reverse while the other roster slot stayed forward.
-The user visual/encoder confirmation is pending. The test setup was
-USB-only with cab/PD power and track disconnected.
+The user confirmed that turning the encoder below zero displays −1/−2/−3
+on the OLED and selects Reverse on the loco card. The test setup was
+USB-only with cab/PD power and track disconnected; loaded locomotive
+reversal remains unvalidated.
 
 ## Supervised current monitoring · ESP13 0.7.5 / Uno 0.7.8 · 20 November 2026
 
