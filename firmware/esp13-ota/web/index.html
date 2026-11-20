@@ -68,7 +68,7 @@ html{scroll-padding-bottom:90px}.loco-bottom>span{min-width:0;overflow-wrap:anyw
 <h1>Give your scene<br>some light.</h1>
 <p class="intro">Lights, sound and favorite functions for each locomotive. Start with a stationary test, then bring your diorama to life.</p>
 <section id="track-power" class="card track-power" data-power="unknown" aria-labelledby="track-title"><div><h2 id="track-title">Track power</h2><p class="track-indicator" id="track-state" role="status" aria-live="polite"><span class="power-dot" aria-hidden="true"></span><span id="track-label">Checking status…</span></p><p id="track-detail" class="track-description">Waiting for the controller.</p></div><div class="track-action"><button id="track-on" type="button" disabled hidden>⏻ Turn power on</button><button id="track-off" type="button">⏻ Turn power off</button></div></section><p class="message" id="track-message" role="status"></p><p class="track-help">Track power session · use the local cab for movement. Changing tabs is OK. Losing the page connection for 6 seconds turns track power off.</p>
-<section id="finder-panel" class="card" hidden aria-labelledby="finder-title" style="margin-top:18px"><h2 id="finder-title">Find a locomotive address</h2><p class="muted">Use one locomotive on the test track. We switch its headlights in groups and ask what you see—no CV programming. Choose the range, then turn power on above to start. Address 0 is broadcast and is excluded.</p><form id="finder-range"><div class="form-row"><div><label for="finder-first">First address</label><input id="finder-first" type="number" min="1" max="127" value="1" required></div><div><label for="finder-last">Last address</label><input id="finder-last" type="number" min="1" max="127" value="100" required></div></div><div class="actions"><button type="submit">Start search</button></div><p id="finder-range-hint" class="muted">Turn track power on from this page to start the search.</p></form><div id="finder-current" hidden><h3 id="finder-question"></h3><p class="muted" id="finder-detail"></p><p id="finder-wait"></p><div id="finder-answers" class="actions"><button data-finder-answer="on" type="button">Lights are on</button><button data-finder-answer="off" type="button">Lights are off</button><button data-finder-answer="retry" type="button" class="secondary">Repeat</button></div></div><div class="actions"><button id="finder-add" type="button" hidden>Use this address</button><button id="finder-again" type="button" class="secondary" hidden>New search</button><button id="finder-cancel" type="button" class="secondary" hidden>Cancel search</button><button id="finder-close" type="button" class="secondary">Close</button></div><p class="message" id="finder-message" role="status"></p></section>
+<section id="finder-panel" class="card" hidden aria-labelledby="finder-title" style="margin-top:18px"><h2 id="finder-title">Find a locomotive address</h2><p class="muted">Use one locomotive on the test track. We switch its headlights in groups and ask what you see—no CV programming. Choose the range, then turn power on above to start. Address 0 is broadcast and is excluded.</p><form id="finder-range"><div class="form-row"><div><label for="finder-first">First address</label><input id="finder-first" type="number" min="1" max="127" value="1" required></div><div><label for="finder-last">Last address</label><input id="finder-last" type="number" min="1" max="127" value="100" required></div></div><div class="actions"><button type="submit">Start search</button></div><p id="finder-range-hint" class="muted">Turn track power on to start the search.</p></form><div id="finder-current" hidden><h3 id="finder-question"></h3><p class="muted" id="finder-detail"></p><p id="finder-wait"></p><div id="finder-answers" class="actions"><button data-finder-answer="on" type="button">Lights are on</button><button data-finder-answer="off" type="button">Lights are off</button><button data-finder-answer="retry" type="button" class="secondary">Repeat</button></div></div><div class="actions"><button id="finder-add" type="button" hidden>Use this address</button><button id="finder-again" type="button" class="secondary" hidden>New search</button><button id="finder-cancel" type="button" class="secondary" hidden>Cancel search</button><button id="finder-close" type="button" class="secondary">Close</button></div><p class="message" id="finder-message" role="status"></p></section>
 <section aria-labelledby="roster-title"><div class="roster-heading"><h2 id="roster-title">Your locomotives</h2><div class="light-pair"><button id="find-address" type="button">Find address</button><button id="add-loco" class="secondary" type="button">+ Add loco</button></div></div><p id="dcc-info">Waiting for the Uno DCC generator…</p><div id="loco-list" class="roster-grid"></div><p id="empty-roster" class="muted" hidden>No locomotives yet. Add one to start.</p><p id="roster-message" class="message" role="status" aria-live="polite"></p></section>
 <dialog id="loco-dialog" class="loco-dialog"><form id="loco-form"><h2 id="editor-title">Edit locomotive</h2><input type="hidden" id="loco-id" name="id"><label for="loco-name">Name</label><input id="loco-name" name="name" maxlength="48" placeholder="Optional name"><label for="loco-address">Short DCC address</label><input id="loco-address" name="address" type="number" min="1" max="127" required><label for="loco-type">Locomotive type</label><select id="loco-type" name="type"><option value="electric">Electric</option><option value="diesel">Diesel</option><option value="steam">Steam</option></select><label><input type="checkbox" id="loco-on-diorama"> On track</label><p id="loco-presence-hint" class="muted detail"></p><div id="loco-preview" class="loco-preview"></div><p id="editor-guard" class="message" role="status" hidden></p><p id="editor-message" class="message" role="status"></p><div class="actions"><button id="save-loco" type="submit">Save loco</button><button id="cancel-loco" class="secondary" type="button">Cancel</button><button id="remove-loco" class="secondary" type="button">Remove</button></div></form></dialog>
 <!-- LOCO_ART_START -->
@@ -184,17 +184,18 @@ async function requestJson(path,options={},timeoutMs=5000){
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function message(id,text,error=false){if($(id).textContent!==text)$(id).textContent=text;$(id).classList.toggle('error',error)}
 function lock(){const value=controlsBusy();for(const control of document.querySelectorAll('form input,form button,form select'))control.disabled=value;$('upload-button').disabled=value||!state;renderUno();renderRoster()}
-let trackLease=0,trackBusy=false,keepBusy=false,trackRevision=0,trackTurningOff=false,lastKeepAck=0,trackRetrying=false;
+let trackBusy=false,trackRevision=0,trackTurningOff=false;
 function renderTrack(){
  const u=state&&state.uno,known=!!u?.online&&typeof u.enableA==='boolean'&&typeof u.enableB==='boolean',active=known&&!!u.trackActive,bench=known&&!active&&(u.enableA||u.enableB);
- const power=!known?'unknown':active?'on':bench?'bench':'off';$('track-power').dataset.power=power;
- $('track-label').textContent=trackTurningOff?'Switching off…':trackBusy?'Switching on…':({on:'Track is ON',off:'Track is OFF',unknown:'Status unavailable',bench:'Bench test is ON'})[power];
- $('track-detail').textContent=({on:u?.currentMonitoringOnly?'Monitoring only · no automatic current cutoff.':'Track A enabled · speed control is local.',off:({4:'Current cutoff tripped (raw A0).',5:'DCC timing fault.',6:'Backup cutoff tripped.',7:'Uno control link timed out.'})[u?.bench?.state]||state?.trackStopReason||'Track A output is disabled.',unknown:'Reconnect to check the output. You can still request power off.',bench:'A test output is enabled. Turn it off before using the track.'})[power];
+ const recovering=known&&u.trackRequested===true&&!active;
+ const power=!known?'unknown':recovering?'recovering':active?'on':bench?'bench':'off';$('track-power').dataset.power=power;
+ $('track-label').textContent=trackTurningOff?'Switching off…':trackBusy?'Switching on…':({recovering:'Recovering DCC…',on:'Track is ON',off:'Track is OFF',unknown:'Status unavailable',bench:'Bench test is ON'})[power];
+ $('track-detail').textContent=({recovering:'Power requested ON · output paused for 3 seconds, then restarts at speed zero.',on:u?.currentMonitoringOnly?'Monitoring only · no automatic current cutoff.':'Track A enabled · speed control is local.',off:({4:'Current cutoff tripped (raw A0).',5:'DCC timing fault.',6:'Backup cutoff tripped.',7:'Uno control link timed out.'})[u?.bench?.state]||state?.trackStopReason||'Track A output is disabled.',unknown:'Reconnect to check the output. You can still request power off.',bench:'A test output is enabled. Turn it off before using the track.'})[power];
  $('track-on').hidden=power!=='off'||trackBusy||trackTurningOff;$('track-off').hidden=power==='off'&&!trackBusy&&!trackTurningOff;
  $('track-on').disabled=!!state?.dcc?.finder?.active||!known||!u.trackSupported||!state?.dcc?.ready||u.enableA||u.enableB||trackBusy||trackTurningOff||controlsBusy();
  $('track-off').disabled=trackTurningOff;$('track-off').textContent=trackTurningOff?'Switching off…':bench?'■ Stop test output':'⏻ Turn power off';
  $('floating-power').dataset.power=power;
- $('floating-label').textContent=trackTurningOff?'Stopping…':trackBusy?'Starting…':({on:'Track ON',off:'Track OFF',unknown:'Unknown',bench:'Test ON'})[power];
+ $('floating-label').textContent=trackTurningOff?'Stopping…':trackBusy?'Starting…':({recovering:'Recovering DCC',on:'Track ON',off:'Track OFF',unknown:'Unknown',bench:'Test ON'})[power];
  for(const action of ['on','off']){const main=$('track-'+action),small=$('floating-'+action);small.hidden=main.hidden;small.disabled=main.disabled;}
  $('floating-off').textContent=trackTurningOff?'Stopping…':bench?'■ Stop test':'⏻ Power off';
 }
@@ -202,41 +203,27 @@ async function trackRequest(path,data={}){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),1200);
  try{const response=await fetch('/api/track/'+path,{method:'POST',body:new URLSearchParams(data),signal:controller.signal});const result=await response.json();if(!response.ok){const error=Error(result.error||'Track command failed.');error.status=response.status;throw error;}return result}finally{clearTimeout(timer)}
 }
-// A late start reply after Stop or pagehide carries its own lease. Use it to
-// stop that session without disturbing a newer one.
+// Power changes only through explicit button actions; status polls just observe.
 $('track-on').onclick=async()=>{
  if(controlsBusy())return;trackBusy=true;const revision=++trackRevision;invalidateStatus();lock();
- try{const result=await trackRequest('on');if(!Number.isInteger(result.lease)||result.lease<1||result.lease>65535)throw Error('Power start was not confirmed. Check status before trying again.');if(revision!==trackRevision){await trackRequest('off',{lease:result.lease});return}trackLease=result.lease;acknowledgePower(true);lastKeepAck=performance.now();trackRetrying=false;message('track-message','');}
+ try{const result=await trackRequest('on');if(!result.ok)throw Error('Power start was not confirmed. Check status before trying again.');if(revision!==trackRevision)return;acknowledgePower(true);message('track-message','');}
  catch(error){if(revision===trackRevision)message('track-message',error.message,true)}finally{trackBusy=false;lock();refreshStatus()}
 };
 $('track-off').onclick=async()=>{
- if(trackTurningOff)return;const revision=++trackRevision;invalidateStatus();trackLease=0;trackTurningOff=true;lock();
+ if(trackTurningOff)return;const revision=++trackRevision;invalidateStatus();trackTurningOff=true;lock();
  try{const result=await trackRequest('off');if(!result.ok)throw Error('Power off was not confirmed. Check status before trying again.');if(revision===trackRevision){acknowledgePower(false);message('track-message','');}}catch(error){if(revision===trackRevision)message('track-message',error.message,true)}finally{trackTurningOff=false;lock();refreshStatus()}
 };
 // These flags follow checked server acknowledgments, never an optimistic click.
 function acknowledgePower(on){
  if(!state?.uno)return;
- Object.assign(state.uno,{trackActive:on,enableA:on,enableB:false});
+ Object.assign(state.uno,{trackRequested:on,trackActive:on,enableA:on,enableB:false});
  if(state.uno.bench)Object.assign(state.uno.bench,on?{active:true,mode:3,state:1}:{active:false,state:3});
  if(!on)state.trackStopReason='Power off requested.';
 }
-// Both panels use one command path and one browser-owned power lease.
+// Both panels use the same explicit power commands.
 $('floating-on').onclick=()=>{if(!$('track-on').disabled&&!$('track-on').hidden)$('track-on').click()};
 $('floating-off').onclick=()=>{if(!$('track-off').disabled&&!$('track-off').hidden)$('track-off').click()};
 new IntersectionObserver(([entry])=>{$('floating-power').hidden=entry.isIntersecting||entry.boundingClientRect.bottom>0}).observe($('track-power'));
-// KEEP renews an existing session only. The retry window follows BrowserLease
-// on the ESP, while the Uno enforces its own shorter output timeout.
-setInterval(async()=>{
- if(!trackLease || keepBusy)return;keepBusy=true;const lease=trackLease;
- try{await trackRequest('keep',{lease});if(trackLease===lease){lastKeepAck=performance.now();if(trackRetrying){trackRetrying=false;message('track-message','');}}}
- catch(error){
-  if(trackLease!==lease)return;
-  if(error.status===409 || performance.now()-lastKeepAck>=6000){trackLease=0;trackRetrying=false;message('track-message','Connection lost or test stopped. Power must be switched on again.',true);refreshStatus();}
-  else{trackRetrying=true;message('track-message','Connection interrupted — retrying…',true);}
- }finally{keepBusy=false}
-},500);
-function leaveTrack(){++trackRevision;if(trackLease){const lease=trackLease;trackLease=0;navigator.sendBeacon('/api/track/off',new URLSearchParams({lease}));}}
-addEventListener('pagehide',leaveTrack);
 function renderUno(){
  renderTrack();renderFinder();
  clearTimeout(benchPollTimer);benchPollTimer=0;
@@ -487,8 +474,8 @@ function renderFinder(){
  for(const b of $('finder-answers').querySelectorAll('button'))b.disabled=!online||controlsBusy()||remaining>0||!state?.uno?.trackActive;
  const rangeBusy=controlsBusy()||f.active;
  for(const input of $('finder-range').querySelectorAll('input'))input.disabled=rangeBusy;
- $('finder-range').querySelector('button').disabled=rangeBusy||!online||!state?.uno?.trackActive||!trackLease;
- $('finder-range-hint').textContent=!online?'Choose a range now; connect the controller and turn track power on to start.':!state?.uno?.trackActive||!trackLease?'Turn track power on from this page to start the search.':'Ready to search this range. Keep one decoder on the test track.';
+ $('finder-range').querySelector('button').disabled=rangeBusy||!online||!state?.uno?.trackActive;
+ $('finder-range-hint').textContent=!online?'Choose a range now; connect the controller and turn track power on to start.':!state?.uno?.trackActive?'Turn track power on to start the search.':'Ready to search this range. Keep one decoder on the test track.';
  const titles={verifyOn:'Can we turn the lights on?',verifyOff:'Can we turn the lights off?',split:'Are the headlights on or off?',confirmOn:'Confirm: lights on?',confirmOff:'Confirm: lights off?',cleanup:'Turning search lights off…',found:'Address '+f.result+' found',failed:'Address not confirmed'};
  $('finder-question').textContent=titles[f.stage]||'Find an address';
  $('finder-detail').textContent=f.stage==='split'?'Candidates '+f.low+'–'+f.high+'. Lights ON for '+f.low+'–'+f.middle+'; OFF for the other addresses.':f.stage==='found'?'The on/off confirmation passed. You can add or edit this locomotive after switching power off.':f.stage==='failed'?'Check the range, F0 headlights and track contact, then try again.':f.stage==='cleanup'?'Please wait while the searched range is cleared and the saved roster is restored.':'Watch the locomotive’s headlights. Speed remains zero.';

@@ -23,10 +23,10 @@ a **Deek-Robot L298P motor shield** powers the rails, and a **DOIT ESP13 shield*
 hosts Wi-Fi, the panel and firmware updates. These three stacked boards are the
 supported build.
 
-**Current firmware in this repository is ESP13 0.7.6 / Uno 0.7.10.** The panel controls
+**Current firmware in this repository is ESP13 0.7.7 / Uno 0.8.0.** The panel controls
 functions, direction and track power. The optional [encoder cab](firmware/uno-stack-test/CAB.md)
 adds local crawl speed control, selection of locos marked **On track**, a separate
-STOP button and an address/speed display.
+power button and an address/speed display.
 
 [Español](README.es.md) · [Wiring and BOM](docs/hardware/README.md) ·
 [API](docs/API.md) · [Validation](docs/VALIDATION.md) · [UI review](docs/UI-REVIEW.md) · [Code structure](docs/CODE-STRUCTURE.md) · [Full review](docs/CODE-REVIEW.md)
@@ -58,7 +58,7 @@ Panel preview from ESP13 0.6.5 with simulated controller data. [Mobile preview](
 
 | Part | Role |
 | --- | --- |
-| Arduino Uno R3 / ATmega328P, 16 MHz, 5 V | Timer1 DCC, checked serial commands, output timeout |
+| Arduino Uno R3 / ATmega328P, 16 MHz, 5 V | Timer1 DCC, checked serial commands, local power and recovery |
 | Deek-Robot L298P motor shield, Uno Rev3-style pinout | Bridge A powers the track; bridge B stays disabled |
 | DOIT ESP13 / ESP-WROOM-02 Wi-Fi shield | Web UI, Wi-Fi, saved roster, OTA |
 | MP1584 on the cab board, adjusted to 5.0 V | Supplies stack logic and OLED through the ESP13 shield 5V/GND headers |
@@ -129,11 +129,11 @@ To upload from the terminal, run:
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.6
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.7
 ```
 
 OTA updates **only the ESP**. Uno updates still use USB with both ESP switches OFF
-and motor power disconnected. Install ESP13 0.7.6 before Uno 0.7.10 so the
+and motor power disconnected. Install ESP13 0.7.7 before Uno 0.8.0 so the
 panel recognizes the new cab capability. The ESP layout stays **1 MB / 64 KB LittleFS**,
 DOUT, for compatibility with the installed application. Reload the panel after
 the ESP restarts so the browser loads the new UI.
@@ -154,12 +154,14 @@ npm test --prefix tools/ui-tests
 ```
 
 CI compiles both boards and exercises packet bytes, UART framing, function masks,
-atomic publication, address search, output leases, mouse interaction, themes and
+atomic publication, address search, latched power and fault recovery, mouse interaction, themes and
 phone layouts. The [logic-analyzer guide](DCC-ANALYZER.md) explains measurements.
 
-Power defaults OFF and requires explicit activation. The Uno has a two-second
-control lease; the ESP allows six seconds for browser reconnection. A lost session
-does not restart itself. Current sensing is **uncalibrated** and normal track
+Power defaults OFF after Uno boot. The UI and D2 cab button explicitly toggle
+track power. Browser reloads, lost HTTP replies and Wi-Fi/ESP disconnections do
+not change that selection or the selected speed. A DCC timing fault disables
+the bridge for three seconds, then restarts at zero speed with the ON request
+retained. The local main-loop watchdog still cuts a stalled bridge. Current sensing is **uncalibrated** and normal track
 mode has no automatic current cutoff. Short-circuit, thermal and loaded fault
 protection are not yet proven. See the
 [first-locomotive guide](firmware/uno-stack-test/FIRST-LOCO-TEST.md) for measured

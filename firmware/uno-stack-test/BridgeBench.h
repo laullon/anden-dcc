@@ -23,8 +23,7 @@ public:
   bool active() const { return state == Running; }
   bool start(uint8_t requestedMode, uint32_t now, uint16_t raw, bool healthy);
   void poll(uint32_t now, uint16_t raw, bool healthy, bool guardExpired);
-  uint16_t duration() const { return mode == Track ? 2000 : DURATION_MS; }
-  bool renew(uint32_t now);
+  uint16_t duration() const { return mode == Track ? 0 : DURATION_MS; }
   void stop();
   uint16_t remaining(uint32_t now) const;
 
@@ -34,7 +33,7 @@ private:
 
 // Main arms/disarms with interrupts masked. Timer1 calls tick() each half-bit.
 // 60,000 halves last 3.48–6 seconds at the fixed 58/100 us timings, providing
-// a second cutoff if the main loop stops servicing the bench or track deadline.
+// a cutoff if the main loop stops servicing the bench pulse or latched track.
 class BridgeGuard {
 public:
   static constexpr uint16_t HALVES = 60000;

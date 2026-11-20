@@ -47,7 +47,7 @@ void disarmBridge() {
   }
 }
 namespace {
-// Drop track power before halting Timer1. Recovery requires a reset.
+// Drop track power before halting Timer1; main may recover after a quiet pause.
 void timingFault() {
   PORTD &= ~_BV(PD3);
   dccBridge = false;
@@ -65,6 +65,17 @@ void begin() {
   uint8_t empty[1] = {0};
   stream.prepare(0, empty, 0);
   stream.commit();
+  restartStopped();
+}
+bool restartStopped() {
+  if (running)
+    return false;
+  disarmBridge();
+  // begin() has an empty legacy bank; later recovery preserves only a full
+  // function roster. No scratch copy of the packet banks is needed on the Uno.
+  if ((stream.banks[stream.active].count || stream.banks[stream.active].functionMode) &&
+      !stream.resetStopped())
+    return false;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     TCCR1A = 0;
     TCCR1B = 0;
@@ -77,6 +88,7 @@ void begin() {
     TIMSK1 = _BV(OCIE1B);
     TCCR1B = _BV(CS11); // 16 MHz / 8 gives 0.5 us timer ticks.
   }
+  return true;
 }
 bool set(uint8_t count, const uint8_t* addresses, uint8_t mask) {
   if (!running || count > UnoDccStream::CAPACITY || (count && !addresses))
@@ -234,8 +246,8 @@ ISR(TIMER1_COMPB_vect) {
       PORTD |= _BV(PD3);
     }
   }
-  // A healthy track lease sustains the selected speed. The interrupt backup
-  // still cuts output if main-loop/ESP heartbeats stop renewing that lease.
+  // Main renews this local watchdog while servicing a latched track output.
+  // A stalled main loop still cuts the bridge, independently of the browser.
   if (UnoDcc::bridgeGuard.tick()) {
     PORTD &= ~_BV(PD3);
     UnoDcc::dccBridge = false;

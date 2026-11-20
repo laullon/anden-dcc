@@ -8,7 +8,7 @@
 | 1, bench / upload | Uno USB cable | Disconnect cab external 5 V feed before connecting |
 | 1, cab board | MP1584 step-down module | 15 V input; adjust and verify 5.0 V output for stack and OLED |
 | 1, cab board | Mechanical rotary encoder with push button | A/B on D4/D5; select on D6; contacts to GND |
-| 1, cab board | Normally open momentary STOP button | D2 to GND |
+| 1, cab board | Normally open momentary power button | D2 to GND |
 | 1, optional | LED and 470 Ω series resistor | D7 through resistor to anode; cathode to GND |
 | 1, optional | 0.96-inch 128×64 SSD1315 I²C OLED breakout | Address 0x3C; 5 V compatible supply and I²C |
 | As needed | Cab board and connectors | Separate labelled 15 V MOTOR and 5 V LOGIC outputs; common GND |

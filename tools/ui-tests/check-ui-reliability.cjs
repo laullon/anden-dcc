@@ -18,7 +18,7 @@ const source=()=>fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.ht
    if(req.method()==='POST'){
     calls.push(url.pathname);
     if(control.holdPost===url.pathname)await hold('pendingPost');
-    if(url.pathname==='/api/track/on'){state.uno.enableA=state.uno.trackActive=true;if(control.holdAfterPower)control.holdStatus=true;return route.fulfill({json:{lease:1}}).catch(()=>{})}
+    if(url.pathname==='/api/track/on'){state.uno.enableA=state.uno.trackActive=true;if(control.holdAfterPower)control.holdStatus=true;return route.fulfill({json:{ok:true}}).catch(()=>{})}
     if(url.pathname==='/api/track/off'){state.uno.enableA=state.uno.trackActive=false;if(control.holdAfterPower)control.holdStatus=true;return route.fulfill({json:{ok:true}}).catch(()=>{})}
     if(url.pathname==='/api/track/keep')return route.fulfill({json:{ok:true}}).catch(()=>{});
     if(url.pathname==='/dcc/function'||url.pathname==='/dcc/f0'){

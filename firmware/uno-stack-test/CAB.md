@@ -1,6 +1,6 @@
 # Encoder cab
 
-Uno 0.7.10 and ESP13 0.7.6 provide local crawl control for one locomotive at a time.
+Uno 0.8.0 and ESP13 0.7.7 provide local crawl control for one locomotive at a time.
 Update the ESP13 first so it understands the new Uno capability. Use the web
 panel to mark locos, set direction and turn track power on. Keep that
 page's power session alive while using the knob. Motion commands run on the Uno.
@@ -12,7 +12,7 @@ Preview rendered from the firmware's display output.
 ## Cab board and power
 
 The cab board carries the USB-C PD trigger, MP1584 step-down module, encoder,
-STOP button, movement LED and OLED. One USB-C PD charger supplies the assembly.
+power button, movement LED and OLED. One USB-C PD charger supplies the assembly.
 The trigger requests **15 V**. Its output splits between the motor shield VIN
 and the MP1584 input. The MP1584 supplies **regulated 5.0 V** to the stack and OLED.
 
@@ -48,7 +48,7 @@ This prevents the external 5 V rail and Mac USB supply from feeding each other.
 Disconnect all power and the track before wiring. Use the **Uno** pins
 on the shield headers. Follow the power isolation steps above for USB uploads.
 
-![Cab wiring from the Uno headers to the encoder, STOP button, OLED and optional movement LED.](../../docs/hardware/cab-schematic.svg)
+![Cab wiring from the Uno headers to the encoder, power button, OLED and optional movement LED.](../../docs/hardware/cab-schematic.svg)
 
 The [base stack schematic](../../docs/hardware/schematic.svg) shows the original USB-powered bench arrangement and the bridge A track connections.
 
@@ -57,7 +57,7 @@ The [base stack schematic](../../docs/hardware/schematic.svg) shows the original
 | Mechanical encoder | A / CLK | D4 |
 | Mechanical encoder | B / DT | D5 |
 | Encoder button | SW (select next loco) | D6 |
-| Momentary STOP button | Contact to GND when pressed | D2 |
+| Momentary power button (formerly STOP) | Contact to GND when pressed | D2 |
 | Encoder contacts | Common and button return | GND |
 | SSD1315 OLED | SDA | A4 / SDA |
 | SSD1315 OLED | SCL | A5 / SCL |
@@ -68,7 +68,7 @@ The [base stack schematic](../../docs/hardware/schematic.svg) shows the original
 
 ![Encoder pinout. The three right pins go to D4, GND and D5 from top to bottom. The two switch contacts go to D6 and GND.](../../docs/hardware/encoder-pinout.png)
 
-The encoder and STOP inputs have pull-ups and expect contacts that close to ground. Use
+The encoder and power-button inputs have pull-ups and expect contacts that close to ground. Use
 the pin labels on your module. Swap A and B if clockwise decreases speed. The
 decoder counts four valid quadrature transitions per step.
 
@@ -124,9 +124,10 @@ Panel bring-up and live timing tests are recorded in the
 3. Press the encoder button once to select the next marked loco. If the current
    loco is moving, the Uno sends it a stop first. Selection wraps around the
    marked list and the next loco starts at step zero.
-4. Press the separate **STOP** button to broadcast an emergency stop to all
-   addresses on the powered track. Selection stays put and the track stays
-   powered for lights and sound. Release STOP and turn the encoder again to move.
+4. The separate D2 button now toggles **track power**, once per press. Press
+   while ON to cut output and clear speed; press again to start at zero speed
+   with a broadcast stop burst. Selection stays put. A held button does not
+   retrigger. A button held at boot must be released before it can switch ON.
 
 The movement LED is steady while track power is on and the Uno commands a
 nonzero speed. It goes dark when the commanded speed returns to zero or track
@@ -136,15 +137,18 @@ after the LED goes dark.
 Web direction changes stop the cab. The next encoder move sets direction
 from the sign of its speed.
 
-The selected speed stays set until you turn it down, press STOP, change the
+The selected speed stays set until you turn it down, press the power button, change the
 selected loco or turn track power off. Roster, direction and function updates
 stop motion before applying the new schedule. Track power loss clears the
 speed, and the finder suspends the cab.
 
-Keep the web panel's power session alive. Loss of the browser/ESP connection,
-a DCC timing fault or an expired Uno track lease disables track output.
-The Timer1 bridge guard remains as an independent cutoff if main-loop
-heartbeats stop. Use **Turn power off** in the panel to disable the whole track.
+Track power stays latched without a browser, Wi-Fi connection or ESP heartbeat.
+Reloading the panel reads the current state. Use the UI or D2 button to switch
+power off. A timing fault cuts bridge enable immediately, waits three seconds
+and restarts DCC at speed zero; the ON request stays set. This pause avoids
+leaving constant DC across the rails. OFF during recovery cancels the restart.
+The independent Timer1 watchdog still cuts output if Uno main-loop servicing
+stalls. Normal boot starts with power OFF.
 
 ## Current monitoring for supervised tests
 

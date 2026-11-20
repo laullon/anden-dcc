@@ -20,7 +20,7 @@ void UnoLink::invalidate() {
 // Poll faster during output tests. Finder owns the temporary schedule while held.
 void UnoLink::loop() {
   if (uint32_t(millis() - lastPoll) >= (benchActive() ? 300 : 2000) && query("STATUS") && capable &&
-      desired && !finderHold && (outputsDisabled() || trackActive()) && !matches(*desired))
+      desired && !finderHold && outputsDisabled() && !trackRequested() && !matches(*desired))
     syncRoster(*desired);
 }
 
@@ -129,6 +129,10 @@ bool UnoLink::trackActive() const {
   return benchActive() && mode == 3;
 }
 
+bool UnoLink::trackRequested() const {
+  return latchedPowerCapable ? requestedPower : trackActive();
+}
+
 bool UnoLink::dccReady() const {
   return online() && capable && dccRunning;
 }
@@ -224,6 +228,10 @@ String UnoLink::json() const {
   out += receiver.badFrames;
   out += F(",\"timeouts\":");
   out += timeouts;
+  out += F(",\"trackRequested\":");
+  out += known ? (trackRequested() ? "true" : "false") : "null";
+  out += F(",\"powerLatched\":");
+  out += latchedPowerCapable ? "true" : "false";
   out += F(",\"enableA\":");
   out += known ? ((flags & 1) ? "true" : "false") : "null";
   out += F(",\"enableB\":");
@@ -281,10 +289,10 @@ String UnoLink::json() const {
 }
 
 bool UnoLink::accept(uint16_t expected) {
-  char* parts[20];
-  size_t n = AndenLink::fields(receiver.body, parts, 20);
+  char* parts[21];
+  size_t n = AndenLink::fields(receiver.body, parts, 21);
   // Older Uno versions omit trailing DCC, bench and capability fields.
-  if ((n != 8 && n != 14 && n != 16 && n != 17 && n != 18 && n != 19 && n != 20) || strcmp(parts[0], "AD1") ||
+  if ((n != 8 && n != 14 && n != 16 && n != 17 && n != 18 && n != 19 && n != 20 && n != 21) || strcmp(parts[0], "AD1") ||
       strcmp(parts[2], "STATE"))
     return false;
   uint16_t id, a, b, f, edges;
@@ -320,18 +328,23 @@ bool UnoLink::accept(uint16_t expected) {
   if (n >= 17 && (!AndenLink::number(parts[16], reportedMode) || reportedMode > (n >= 18 ? 3 : 2)))
     return false;
   uint16_t peak = 0;
-  if (n >= 19 && (strcmp(parts[17], n == 20 ? "6" : "5") ||
+  if (n >= 19 && (strcmp(parts[17], n == 21 ? "7" : n == 20 ? "6" : "5") ||
                    !AndenLink::number(parts[18], peak) || peak > 1023))
     return false;
   uint16_t directions = 0;
-  if (n == 20 && (!AndenLink::number(parts[19], directions) ||
+  if (n >= 20 && (!AndenLink::number(parts[19], directions) ||
                   directions >= (1U << count)))
+    return false;
+  uint16_t requested = 0;
+  if (n == 21 && (!AndenLink::number(parts[20], requested) || requested > 1))
     return false;
   // Publish the snapshot only after every field in this reply has passed validation.
   benchCapable = n >= 16;
   dccBenchCapable = n >= 17;
   currentMonitoringCapable = n >= 19;
-  signedCabCapable = n == 20;
+  signedCabCapable = n >= 20;
+  latchedPowerCapable = n == 21;
+  requestedPower = requested;
   cabDirections = directions;
   cabNamesCapable = currentMonitoringCapable || (n == 18 && !strcmp(parts[17], "4"));
   cabFilterCapable = cabNamesCapable || (n == 18 && !strcmp(parts[17], "3"));

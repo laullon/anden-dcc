@@ -25,7 +25,6 @@ void RosterControl::registerRoutes() {
   finderRoutes();
 }
 void RosterControl::loop() {
-  serviceTrackLease();
   serviceFinder();
 }
 bool RosterControl::storageReady() const {
@@ -35,7 +34,7 @@ const char* RosterControl::stopReason() const {
   return trackStopReason;
 }
 bool RosterControl::setupLocked() const {
-  return finder.active() || uno.benchActive();
+  return finder.active() || uno.benchActive() || uno.trackRequested();
 }
 const LocoRoster& RosterControl::configuration() const {
   return roster;
@@ -76,7 +75,6 @@ void RosterControl::serviceFinder() {
   if (!uno.trackActive() && finder.stage != AddressFinder::Stage::Cleanup)
     finder.cancel(millis());
   if (finder.tick(millis()) && !applyFinder(finder)) {
-    uno.query("BENCHSTOP");
     finder.cancel(millis());
   }
   if (!finder.active()) {
@@ -228,83 +226,50 @@ String RosterControl::dccStatus() {
   }
   return out + "],\"finder\":" + finderStatus() + "}";
 }
-// The ESP renews the short Uno lease while the browser lease is valid.
-// A browser disconnect can briefly interrupt heartbeats without cutting power.
-void RosterControl::serviceTrackLease() {
-  if (!browserLease.active())
-    return;
-  if (browserLease.expired(millis())) {
-    browserLease.stop();
-    trackStopReason = "Browser connection lost (6 seconds).";
-    uno.query("BENCHSTOP");
-    return;
-  }
-  if (browserLease.due(millis())) {
-    if (!uno.query("KEEP") || !uno.trackActive()) {
-      browserLease.stop();
-      trackStopReason = "Uno link or output stopped.";
-      uno.query("BENCHSTOP");
-      return;
-    }
-    browserLease.renewed(millis());
-  }
-}
 void RosterControl::trackRoutes() {
   server.on("/api/track/on", HTTP_POST, [this] {
-    if (finder.active() || !uno.query("PING") || !uno.trackSupported() || !uno.outputsDisabled()) {
+    // An explicit ON is idempotent, including the local recovery pause.
+    if (uno.query("PING") && uno.trackRequested()) {
+      HttpSupport::sendJson(server, 200, F("{\"ok\":true}"));
+      return;
+    }
+    if (finder.active() || !uno.online() || !uno.trackSupported() || !uno.outputsDisabled()) {
       HttpSupport::sendUnoError(server, uno, 409,
                                 F("Track firmware and a connected, stopped roster are required."));
       return;
     }
+    if (!uno.dccReady() && (!uno.query("DCCRESET") || !uno.dccReady())) {
+      HttpSupport::sendUnoError(server, uno, 409, F("DCC timer could not restart. Check the controller."));
+      return;
+    }
     roster = runtimeRoster();
-    if (!uno.syncRoster(roster) || !uno.query("TRACKON") || !uno.trackActive()) {
+    if (!uno.syncRoster(roster) || !uno.query("TRACKON") || !uno.trackRequested()) {
       HttpSupport::sendUnoError(server, uno, 409,
                                 F("Track start refused. Check current cutoff and timing status."));
       return;
     }
-    // Issue a browser token only after the Uno confirms the output is enabled.
-    uint16_t trackLease = browserLease.start(millis());
     trackStopReason = "Track A output is disabled.";
-    HttpSupport::sendJson(server, 200, "{\"lease\":" + String(trackLease) + "}");
-  });
-  server.on("/api/track/keep", HTTP_POST, [this] {
-    uint16_t lease;
-    if (!AndenLink::number(server.arg("lease").c_str(), lease) ||
-        !browserLease.accepts(lease, millis())) {
-      HttpSupport::sendUnoError(server, uno, 409,
-                                F("Track session expired. Turn power on explicitly."));
-      return;
-    }
-    if (!uno.query("KEEP") || !uno.trackActive()) {
-      browserLease.stop();
-      trackStopReason = "Uno link or output stopped.";
-      HttpSupport::sendUnoError(server, uno, 409,
-                                F("Track stopped. Check status before restarting."));
-      return;
-    }
-    browserLease.touch(lease, millis());
-    browserLease.renewed(millis());
     HttpSupport::sendJson(server, 200, F("{\"ok\":true}"));
   });
+  // Compatibility with old tabs: this endpoint is read-only, never a lease.
+  server.on("/api/track/keep", HTTP_POST, [this] {
+    const bool ok = uno.query("STATUS");
+    HttpSupport::sendJson(server, ok ? 200 : 503,
+                         ok ? F("{\"ok\":true}") : F("{\"error\":\"Uno unavailable.\"}"));
+  });
   server.on("/api/track/off", HTTP_POST, [this] {
-    // A pagehide Stop belongs to one session. Manual Stop applies to any output.
+    // Old firmware pages send a lease-bearing beacon on reload. Reject it so
+    // an old tab cannot silently undo the user's latched power selection.
     if (server.hasArg("lease")) {
-      uint16_t lease;
-      if (!AndenLink::number(server.arg("lease").c_str(), lease) ||
-          !browserLease.accepts(lease, millis())) {
-        HttpSupport::sendUnoError(server, uno, 409,
-                                  F("This page no longer owns the track session."));
-        return;
-      }
+      HttpSupport::sendJson(server, 409, F("{\"error\":\"Reload this page to use manual power control.\"}"));
+      return;
     }
-    browserLease.stop();
-    trackStopReason =
-        server.hasArg("lease") ? "Control page closed or reloaded." : "Power off requested.";
+    trackStopReason = "Power off requested.";
     bool ok = uno.query("BENCHSTOP") && uno.outputsDisabled();
     HttpSupport::sendJson(
         server, ok ? 200 : 503,
         ok ? F("{\"ok\":true}")
-           : F("{\"error\":\"Stop not acknowledged; the local timeout still applies.\"}"));
+           : F("{\"error\":\"Power off not acknowledged. Check the controller or use the cab button.\"}"));
   });
 }
 void RosterControl::finderRoutes() {
@@ -332,9 +297,8 @@ void RosterControl::finderRoutes() {
     uno.holdRoster(true);
     if (!applyFinder(changed)) {
       uno.holdRoster(false);
-      uno.query("BENCHSTOP");
       HttpSupport::sendUnoError(server, uno, 503,
-                                F("Search schedule was not acknowledged; power stopped."));
+                                F("Search schedule was not acknowledged. Refresh status before trying again."));
       return;
     }
     finder = changed;
@@ -357,8 +321,7 @@ void RosterControl::finderRoutes() {
       return;
     }
     if (!applyFinder(changed)) {
-      uno.query("BENCHSTOP");
-      HttpSupport::sendUnoError(server, uno, 503, F("Search update failed; power stopped."));
+      HttpSupport::sendUnoError(server, uno, 503, F("Search update was not acknowledged. Refresh status before trying again."));
       return;
     }
     finder = changed;
@@ -372,8 +335,7 @@ void RosterControl::finderRoutes() {
     if (finder.active()) {
       if (finder.stage != AddressFinder::Stage::Cleanup) {
         finder.cancel(millis());
-        if (!applyFinder(finder))
-          uno.query("BENCHSTOP");
+        applyFinder(finder); // A lost reply must not change the power selection.
       }
     } else
       finder.dismiss();
@@ -609,8 +571,4 @@ void RosterControl::rosterRoutes() {
     uno.syncRoster(roster);
     HttpSupport::sendJson(server, 200, dccStatus());
   });
-}
-
-void RosterControl::seedLease(uint16_t seed) {
-  browserLease.seed(seed);
 }

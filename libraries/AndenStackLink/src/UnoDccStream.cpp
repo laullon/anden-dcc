@@ -141,6 +141,25 @@ bool UnoDccStream::prepareFunctions(uint8_t count, const uint8_t* addresses, uin
   return true;
 }
 
+bool UnoDccStream::resetStopped() {
+  Bank& bank = banks[active];
+  if (!bank.functionMode)
+    return false; // Recovery requires a validated extended-function roster.
+  pending = 255;
+  for (uint8_t i = 0; i < bank.count; ++i) {
+    uint8_t* packet = bank.functionPackets[i][1];
+    packet[2] &= 0x80; // Zero speed, preserving actual direction.
+    packet[3] = packet[0] ^ packet[1] ^ packet[2];
+  }
+  bank.moving = false;
+  bank.firstSlot = 0;
+  position = slot = startupRemaining = 0;
+  second = false;
+  duration = ONE;
+  startupPending = true;
+  return true;
+}
+
 bool UnoDccStream::prepareMotion(uint8_t address, uint8_t speedCode) {
   if (pending != 255 || !banks[active].functionMode || speedCode > 127)
     return false;

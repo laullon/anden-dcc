@@ -1,8 +1,8 @@
 # Uno DCC controller
 
-**Uno 0.7.10**, paired with ESP13 0.7.6. Supported MCU: **ATmega328P, 16 MHz,
+**Uno 0.8.0**, paired with ESP13 0.7.7. Supported MCU: **ATmega328P, 16 MHz,
 5 V Arduino Uno R3**. It generates DCC, routes bridge A, checks the UART protocol
-and owns the output timeouts. The optional [encoder cab](CAB.md) controls
+and owns bridge enable and local fault recovery. The optional [encoder cab](CAB.md) controls
 crawl speed. Bridge B remains disabled.
 
 [Wiring and BOM](../../docs/hardware/README.md) ·
@@ -37,8 +37,11 @@ stop packets. Double-buffered
 snapshots publish at complete packet boundaries. The local cab can replace one address's speed packet and prioritize it at the next
 packet boundary. Packet bytes are prepared in the main loop; time-critical interrupt code selects prebuilt bytes.
 
-Continuous track operation requires an explicit start and checked KEEP renewals. The independent
-two-second Uno lease expires locally; late KEEP never restarts it. Timing faults and an interrupt backup disable A. Track current is monitoring-only;
+Track power is latched by explicit TRACKON/BENCHSTOP commands or the D2 cab
+button. Browser and ESP availability do not own a power lease. Timing faults
+cut bridge enable, pause for three seconds and restart at zero speed while
+retaining the ON request. User OFF cancels recovery. The independent interrupt
+watchdog still disables A if the local main loop stalls. Track current is monitoring-only;
 the no-load bench modes retain their raw current cutoff. Three-second no-load DC/DCC scope tests
 remain available under Setup. None of these checks establishes loaded protection.
 
@@ -50,7 +53,8 @@ Commands carry a sequence number; replies acknowledge the matching request.
 
 - `CABNAME` caches a hex-encoded display label for one eligible cab address.
 - `CONTROLX` supplies the complete 29-bit function-mask roster and directions.
-- `TRACKON` explicitly starts output; `KEEP` renews existing track output only.
+- `TRACKON` explicitly starts output; `KEEP` is retained as a status-only legacy command.
+- `DCCRESET` restarts a halted timer only while power is OFF; never enables output.
 - `BENCHSTOP` disables it immediately.
 - `FIND` selects address-search packets without a large SRAM bitmap.
 - `PING`, `STATUS`, `LED`, `PULSE`, `DCCTEST` provide diagnostics.

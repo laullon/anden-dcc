@@ -14,7 +14,7 @@ using HttpSupport::jsonString;
 
 // ESP Wi-Fi/web runtime. RosterControl owns the roster and output sessions.
 // Keep the same flash layout for subsequent OTA builds.
-constexpr char VERSION[] = "0.7.6";
+constexpr char VERSION[] = "0.7.7";
 constexpr char APP_ID[] = "ANDEN_ESP13_OTA_V1";
 constexpr char HOST[] = "anden-esp13";
 const IPAddress AP_IP(192, 168, 13, 1);
@@ -123,7 +123,6 @@ void setup() {
   WiFi.persistent(false);
   WiFi.mode(WIFI_AP_STA);
   bootId = uint32_t(random(0x7FFFFFFF));
-  rosterControl.seedLease(uint16_t(bootId));
   WiFi.hostname(HOST);
   WiFi.softAPConfig(AP_IP, AP_IP, IPAddress(255, 255, 255, 0));
   apReady = WiFi.softAP(HOST); // Open recovery/setup network, intentionally.

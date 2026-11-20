@@ -52,6 +52,21 @@ int main(){
  }
  UnoDccStream startup;assert(startup.prepareFunctions(8,addresses,255,functions));startup.commit();startup.startStopped();
  for(unsigned i=0;i<32;++i)assert((packet(startup)==Bytes{0,0x41,0x41}));assert(packet(startup)[0]==3);
+ // Restart a torn packet with a queued moving update. Preserve committed
+ // functions/direction/signature, discard pending motion and emit a stop burst.
+ for(unsigned phase=0;phase<106;++phase){
+  UnoDccStream s;assert(s.prepareFunctions(8,addresses,0xA5,functions,255));s.commit();packet(s);
+  auto signature=s.banks[s.active].signature;
+  assert(s.prepareMotion(6,8,false));s.commit();packet(s);
+  for(unsigned i=0;i<phase;++i)s.nextHalfTicks();
+  assert(s.prepareMotion(6,5));s.commit();
+  assert(s.resetStopped());assert(s.pending==255&&!s.banks[s.active].moving);
+  assert(s.banks[s.active].signature==signature);
+  for(unsigned i=0;i<32;++i)assert((packet(s)==Bytes{0,0x41,0x41}));
+  uint32_t got[8]={};
+  for(unsigned i=0;i<48;++i){auto b=packet(s);assert(b[0]==addresses[i/6]);got[i/6]|=decode(b);}
+  for(unsigned i=0;i<8;++i)assert(got[i]==functions[i]);
+ }
  UnoDccStream invalid;functions[0]=uint32_t(1)<<29;assert(!invalid.prepareFunctions(1,addresses,1,functions));
  uint32_t parsed;assert(AndenLink::number32("536870911",parsed,DccFunctions::MASK)&&parsed==DccFunctions::MASK);assert(!AndenLink::number32("536870912",parsed,DccFunctions::MASK));assert(!AndenLink::number32("4294967296",parsed));assert(!AndenLink::number32("-1",parsed));
  std::string command="AD1,65535,CONTROLX,8,255";for(unsigned i=0;i<8;++i)command+=",127,536870911";command+=",255";

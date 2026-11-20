@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-constexpr char VERSION[] = "0.7.10";
+constexpr char VERSION[] = "0.8.0";
 constexpr uint8_t ENABLE_A = 3, ENABLE_B = 11, BRAKE_A = 9, BRAKE_B = 8, DIR_A = 12, DIR_B = 13;
 constexpr uint8_t MOVEMENT_LED = 7;
 namespace {
@@ -26,6 +26,10 @@ uint8_t ledEdges = 0;
 bool controlReady = false;
 uint16_t rawA = 0, peakA = 0;
 uint32_t nextEdge = 0, lastSense = 0;
+bool trackRequested = false, recovering = false;
+uint32_t recoveryAt = 0;
+constexpr uint16_t RECOVERY_MS = 3000;
+bool startBridge(uint8_t mode);
 
 // Sample A0 in the background; force a fresh reading before enable/status replies.
 void serviceBridge(bool fresh) {
@@ -38,8 +42,18 @@ void serviceBridge(bool fresh) {
   }
   bool wasActive = bench.active();
   bench.poll(now, rawA, UnoDcc::isRunning(), UnoDcc::guardExpired());
-  if (wasActive && !bench.active())
+  if (wasActive && !bench.active()) {
     UnoDcc::disarmBridge();
+    if (trackRequested && (bench.state == BridgeBench::TimingFault ||
+                           bench.state == BridgeBench::GuardExpired)) {
+      recovering = true;
+      recoveryAt = now;
+    }
+  }
+  // The watchdog monitors the Uno main loop, not Wi-Fi or browser availability.
+  // Check expiry before renewing so a stalled loop cannot hide a cutoff.
+  if (bench.active() && bench.mode == BridgeBench::Track)
+    UnoDcc::renewGuard();
   digitalWrite(ENABLE_B, LOW);
   if (!bench.active()) {
     digitalWrite(ENABLE_A, LOW);
@@ -48,7 +62,15 @@ void serviceBridge(bool fresh) {
 }
 
 void cabFault() {
-  // A failed stop or speed publication makes the schedule unsafe to re-enable.
+  // A timer fault can race a cab publication. Preserve the ON request and
+  // let the same local recovery path reset the committed packet bank.
+  if (trackRequested && !UnoDcc::isRunning()) {
+    serviceBridge(true);
+    cab.stop();
+    return;
+  }
+  // Other publication failures make the schedule unsafe to re-enable.
+  trackRequested = recovering = false;
   bench.stop();
   UnoDcc::disarmBridge();
   controlReady = false;
@@ -67,11 +89,24 @@ void serviceCab() {
                             digitalRead(ENABLE_A);
   if (!cab.poll(trackPowered))
     cabFault();
+  if (cab.takePowerToggle()) {
+    if (trackRequested || bench.active()) {
+      trackRequested = recovering = false;
+      bench.stop();
+      UnoDcc::disarmBridge();
+      stopCab();
+    } else if (controlReady && startBridge(BridgeBench::Track))
+      trackRequested = true;
+  }
   // Recheck the enable pin in case Timer1 cut power while publishing a speed.
   digitalWrite(MOVEMENT_LED, trackPowered && cab.step() && digitalRead(ENABLE_A) ? HIGH : LOW);
 }
 
 bool startBridge(uint8_t mode) {
+  // Explicit ON can recover a halted timer after a cancelled automatic restart.
+  // The bridge is still disabled throughout timer reinitialization.
+  if (mode == BridgeBench::Track && !UnoDcc::isRunning() && !UnoDcc::restartStopped())
+    return false;
   serviceBridge(true);
   if (digitalRead(ENABLE_A) || digitalRead(ENABLE_B) || bench.active())
     return false;
@@ -106,6 +141,20 @@ bool startBridge(uint8_t mode) {
   return bench.active() && digitalRead(ENABLE_A);
 }
 
+void serviceRecovery() {
+  if (!recovering || !trackRequested || uint32_t(millis() - recoveryAt) < RECOVERY_MS)
+    return;
+  recoveryAt = millis();
+  // Output stays disabled throughout the pause and timer reinitialization.
+  // Never retain a moving packet or silently resume the previous cab speed.
+  if (!UnoDcc::isRunning() && !UnoDcc::restartStopped())
+    return;
+  if (!stopCab())
+    return;
+  if (controlReady && startBridge(BridgeBench::Track))
+    recovering = false;
+}
+
 void sendState(uint16_t sequence) {
   serviceBridge(true);
   uint8_t flags = (digitalRead(ENABLE_A) ? 1 : 0) | (digitalRead(ENABLE_B) ? 2 : 0) |
@@ -115,11 +164,11 @@ void sendState(uint16_t sequence) {
   char wire[AndenLink::MAX_BODY + 8];
   char* body = wire + 1;
   auto dcc = UnoDcc::status();
-  snprintf(body, AndenLink::MAX_BODY + 1, "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,6,%u,%u",
+  snprintf(body, AndenLink::MAX_BODY + 1, "AD1,%u,STATE,%s,%u,%u,%u,%u,%u,%u,%u,%u,%lu,%u,%u,%u,%u,7,%u,%u,%u",
            sequence, VERSION, unsigned(rawA), unsigned(analogRead(A1)), unsigned(flags),
            unsigned(ledEdges), unsigned(dcc.running), unsigned(dcc.count), unsigned(dcc.signature),
            unsigned(dcc.mask), static_cast<unsigned long>(dcc.packets), unsigned(dcc.faults),
-           unsigned(bench.remaining(millis())), unsigned(bench.state), unsigned(bench.mode), unsigned(peakA), unsigned(UnoDcc::directions()));
+           unsigned(bench.remaining(millis())), unsigned(bench.state), unsigned(bench.mode), unsigned(peakA), unsigned(UnoDcc::directions()), unsigned(trackRequested));
   size_t size = AndenLink::encode(wire, sizeof(wire), body);
   if (size)
     Serial.write(reinterpret_cast<const uint8_t*>(wire), size);
@@ -135,6 +184,7 @@ void command() {
     return;
   serviceBridge();
   if (!strcmp(parts[2], "BENCHSTOP") && n == 3) {
+    trackRequested = recovering = false;
     bench.stop();
     UnoDcc::disarmBridge();
     stopCab();
@@ -142,17 +192,24 @@ void command() {
     sendState(sequence);
     return;
   }
-  if (!strcmp(parts[2], "TRACKON") && n == 3) {
-    if (controlReady)
-      startBridge(BridgeBench::Track);
+  // Explicit UI ON may need a healthy timer before sending its roster.
+  // This command never enables output or changes the requested power state.
+  if (!strcmp(parts[2], "DCCRESET") && n == 3) {
+    if (!trackRequested && !bench.active() && !digitalRead(ENABLE_A) && !digitalRead(ENABLE_B) &&
+        !UnoDcc::isRunning())
+      UnoDcc::restartStopped();
     sendState(sequence);
     return;
   }
-  // Only a healthy, still-running track session may renew the ISR guard.
+  if (!strcmp(parts[2], "TRACKON") && n == 3) {
+    if (!trackRequested && controlReady && startBridge(BridgeBench::Track))
+      trackRequested = true;
+    sendState(sequence);
+    return;
+  }
+  // Legacy KEEP is status-only; connection traffic no longer owns track power.
   if (!strcmp(parts[2], "KEEP") && n == 3) {
     serviceBridge(true);
-    if (bench.renew(millis()))
-      UnoDcc::renewGuard();
     sendState(sequence);
     return;
   }
@@ -296,6 +353,7 @@ void setup() {
 void loop() {
   serviceBridge();
   serviceCab();
+  serviceRecovery();
   if (ledEdges && int32_t(millis() - nextEdge) >= 0) {
     --ledEdges;
     digitalWrite(DIR_B, ledEdges ? !digitalRead(DIR_B) : LOW);

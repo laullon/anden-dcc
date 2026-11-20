@@ -27,19 +27,8 @@ void BridgeBench::poll(uint32_t now, uint16_t raw, bool healthy, bool guardExpir
     state = GuardExpired;
   else if (mode != Track && raw >= RAW_LIMIT)
     state = RawTrip;
-  else if (uint32_t(now - started) >= duration())
-    state = mode == Track ? LeaseExpired : Complete;
-}
-
-bool BridgeBench::renew(uint32_t now) {
-  if (!active() || mode != Track)
-    return false;
-  if (uint32_t(now - started) >= duration()) {
-    state = LeaseExpired;
-    return false;
-  }
-  started = now;
-  return true;
+  else if (mode != Track && uint32_t(now - started) >= duration())
+    state = Complete;
 }
 
 void BridgeBench::stop() {
@@ -48,6 +37,8 @@ void BridgeBench::stop() {
 }
 
 uint16_t BridgeBench::remaining(uint32_t now) const {
+  if (mode == Track)
+    return 0; // Latched track output has no connection lease or deadline.
   uint32_t elapsed = now - started;
   return active() && elapsed < duration() ? duration() - elapsed : 0;
 }

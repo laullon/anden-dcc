@@ -3,6 +3,31 @@
 The supported stack is Uno R3 / ATmega328P at 16 MHz, Deek-Robot L298P motor
 shield and DOIT ESP13. Tested cores: AVR 1.8.7 and ESP8266 3.1.2.
 
+## Latched power and local recovery · ESP13 0.7.7 / Uno 0.8.0 · 20 November 2026
+
+Both firmware builds and all eight browser suites pass. The focused track suite
+also injects failed status requests, reloads the page and waits beyond six seconds:
+no automatic off or keep requests are sent, and status recovers without an ON
+command. Simulated cab-state changes and the recovery pause update both power bars.
+
+Native tests cover latched speed/output without any KEEP traffic, debounced D2
+power toggles, zero-speed startup, three-second fault recovery, cancellation by
+explicit OFF and a subsequent explicit timer reset with output disabled.
+The real Timer1 model recovers from an injected late mirror, retains the fault
+counter, clears stale motion and requires packet-boundary output enable.
+Packet tests reset torn framing at all 106 half-bit phases, discard pending
+updates and decode 32 startup stops followed by intact function/direction packets
+with zero speeds and valid XOR. The independent main-loop watchdog and timed
+no-load bench pulses still cut output.
+
+Build sizes: Uno 18,742 bytes flash, 1,326 bytes static RAM (722 bytes remaining);
+ESP image 414,144 bytes. Live USB-only
+checks on the final installed builds verified eight seconds ON without browser/KEEP traffic, zero timing faults,
+rejection of an old-page lease-bearing off beacon and explicit OFF. The user
+confirmed both D2 presses toggle the OLED dot and web power state correctly.
+Loaded fault recovery remains unvalidated; the bridge is disabled during the
+pause, rather than holding a static DC voltage across the rails.
+
 ## Wider crawl levels · Uno 0.7.10 · 20 November 2026
 
 All Uno native checks pass. Cab command tests verify unchanged level 1 and

@@ -1,5 +1,14 @@
 # Changelog
 
+## Latched manual power · ESP13 0.7.7 / Uno 0.8.0
+
+- Keep power/speed through UI reloads, failed HTTP replies and ESP/Wi-Fi loss.
+- Toggle power from the D2 cab button; held contacts trigger only once.
+- Recover DCC timing faults after a three-second bridge-disable pause, preserving
+  requested ON while restarting at zero speed. Explicit OFF cancels recovery.
+- Report requested power separately from actual enable, and reject old-tab
+  cleanup beacons. Retain local main-loop watchdog and timed bench pulses.
+
 ## Wider crawl levels · Uno 0.7.10
 
 - Keep encoder level 1 at decoder speed step 1; map levels 2 and 3 to

@@ -60,6 +60,7 @@ UnoDccStream schedule;
 bool running = false;
 void begin() { running = true; }
 bool isRunning() { return running; }
+bool restartStopped() { if (running) return false; if (!schedule.resetStopped()) return false; running = true; return true; }
 bool guardExpired() { return false; }
 bool bridgeStartPending() { return false; }
 bool bridgeIsActive() { return pins[3]; }
@@ -77,12 +78,12 @@ bool functions(uint8_t count, const uint8_t* addresses, uint8_t directions, cons
     return schedule.prepareFunctions(count, addresses, directions, flags, cabMask);
 }
 bool motion(uint8_t address, uint8_t speedCode) {
-    if (!schedule.prepareMotion(address, speedCode)) return false;
+    if (!running || !schedule.prepareMotion(address, speedCode)) return false;
     schedule.active ^= 1;
     return true;
 }
 bool motion(uint8_t address, uint8_t speedCode, bool forward) {
-    if (!schedule.prepareMotion(address, speedCode, forward)) return false;
+    if (!running || !schedule.prepareMotion(address, speedCode, forward)) return false;
     schedule.active ^= 1;
     return true;
 }
@@ -165,12 +166,15 @@ int main() {
     rotate(false); assert(cab.step() == 2 && packetSpeed(0) == 5);
     const unsigned starts = UnoDcc::broadcastStops;
     pins[2] = LOW; loop();
-    assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3] && pins[7] == LOW);
-    assert(cab.address() == 3 && UnoDcc::broadcastStops == starts+1);
-    rotate(true); assert(cab.step() == 0 && UnoDcc::broadcastStops == starts+1);
+    assert(cab.step() == 0 && !pins[3] && !trackRequested && pins[7] == LOW);
+    assert(cab.address() == 3 && UnoDcc::broadcastStops == starts);
+    rotate(true); assert(cab.step() == 0 && !pins[3]);
     pins[2] = HIGH; loop();
     rotate(true); assert(cab.step() == 0); // Release bounce cannot restart motion.
     clockMs += 25; loop();
+    pins[2] = LOW; loop(); assert(pins[3] && trackRequested && cab.step() == 0);
+    for (unsigned i = 0; i < 10; ++i) { clockMs += 10; loop(); assert(pins[3]); }
+    pins[2] = HIGH; clockMs += 25; loop();
 
     pins[6] = LOW; loop(); assert(cab.address() == 6 && cab.step() == 0);
     assert(!strcmp(cab.name(), "DIESEL"));
@@ -183,10 +187,10 @@ int main() {
     rotate(true);
     clockMs += 800; loop();
     assert(cab.step() == 1 && packetSpeed(0) == 2 && pins[3] && pins[7] == HIGH);
-    // Healthy heartbeats preserve the selected speed well beyond both old limits.
+    // No browser, ESP or KEEP traffic: local speed and power remain latched.
     for (unsigned i = 0; i < 10; ++i) {
         clockMs += 1000;
-        send("AD1,97,KEEP");
+        loop();
         assert(cab.step() == 1 && packetSpeed(0) == 2 && pins[3] && pins[7] == HIGH);
     }
     rotate(false);
@@ -200,8 +204,10 @@ int main() {
     clockMs += 1000; send("AD1,98,KEEP");
     assert(cab.step() == -3 && pins[3]);
     pins[2] = LOW; loop();
-    assert(cab.step() == 0 && packetSpeed(0) == 1 && pins[3] && pins[7] == LOW);
-    assert(!(UnoDcc::directions() & 1)); // Emergency stop retains reverse.
+    assert(cab.step() == 0 && !pins[3] && !trackRequested && pins[7] == LOW);
+    assert(!(UnoDcc::directions() & 1)); // Power off retains reverse.
+    pins[2] = HIGH; clockMs += 25; loop();
+    pins[2] = LOW; loop(); assert(pins[3] && trackRequested);
     pins[2] = HIGH; clockMs += 25; loop();
     rotate(false); assert(cab.step() == -1);
     rotate(true);
@@ -213,10 +219,21 @@ int main() {
     assert(cab.step() == 0 && cab.address() == 6 && packetSpeed(0) == 0 && pins[7] == LOW);
     assert(!*cab.name());
     rotate(true); assert(cab.step() == 1);
-    clockMs += 2000; loop();
-    assert(cab.step() == 0 && !pins[3] && packetSpeed(2) == 1 && pins[7] == LOW);
+    clockMs += 20000; loop();
+    assert(cab.step() == 1 && pins[3] && packetSpeed(2) == 2 && pins[7] == HIGH);
+    // Timing fault pauses the bridge, retains ON, then restarts at zero.
+    UnoDcc::running = false; loop();
+    assert(!pins[3] && trackRequested && recovering);
+    clockMs += 2999; loop(); assert(!pins[3]);
+    ++clockMs; loop(); assert(pins[3] && trackRequested && !recovering && cab.step() == 0);
+    // User OFF during recovery cancels the pending automatic restart.
+    UnoDcc::running = false; loop();
+    send("AD1,12,BENCHSTOP");
+    clockMs += 4000; loop(); assert(!pins[3] && !trackRequested && !recovering);
+    send("AD1,12,DCCRESET");
+    assert(UnoDcc::running && !pins[3] && !trackRequested);
     send("AD1,12,TRACKON");
-    assert(pins[3] && cab.step() == 0 && packetSpeed(2) == 1);
+    send("AD1,12,DCCRESET");assert(pins[3] && trackRequested);
     send("AD1,13,FIND,1,10,1,5");
     UnoDcc::schedule.active ^= 1;
     rotate(true); assert(cab.step() == 0 && cab.address() == 0);
@@ -225,9 +242,10 @@ int main() {
     UnoDcc::schedule.active ^= 1;
     send("AD1,16,TRACKON");
     rotate(true); assert(cab.address() == 0 && cab.step() == 0 && pins[3]);
-    const unsigned idleStops = UnoDcc::broadcastStops;
-    pins[2] = LOW; loop();
-    assert(UnoDcc::broadcastStops == idleStops+1 && pins[3]);
+    pins[2] = LOW; loop(); assert(!pins[3] && !trackRequested);
+    pins[2] = HIGH; clockMs += 25; loop();
+    pins[2] = LOW; loop(); assert(pins[3] && trackRequested);
+    pins[2] = HIGH; clockMs += 25; loop();
     analogA = 145; ++clockMs; loop();
     assert(pins[3] && shownRaw == 145 && shownPeak == 145 && shownPower);
     analogA = 28; ++clockMs; loop();
@@ -252,4 +270,4 @@ int main() {
                     str(ROOT / 'firmware/uno-stack-test/CabControl.cpp'), *library_sources(),
                     '-o', str(executable)], check=True)
     subprocess.run([str(executable)], check=True)
-print('PASS: real Uno UART parser, transactional malformed-command rejection, filtered cab selection, dedicated broadcast STOP, speed cap, persistent speed, lease expiry, roster/direction changes and default-off outputs.')
+print('PASS: real Uno UART parser, transactional malformed-command rejection, filtered cab selection, debounced cab power toggle, speed cap, persistent speed, latched output and timing recovery, roster/direction changes and default-off outputs.')

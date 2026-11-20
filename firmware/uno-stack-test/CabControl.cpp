@@ -18,6 +18,8 @@ void CabControl::begin() {
   pinMode(SELECT, INPUT_PULLUP);
   pinMode(STOP, INPUT_PULLUP);
   phase = readPhase();
+  stopLatched = digitalRead(STOP) == LOW;
+  stopLowAt = millis();
   selectLatched = digitalRead(SELECT) == LOW;
   selectLowAt = millis();
 }
@@ -69,7 +71,14 @@ bool CabControl::stop() {
     return true;
   speed = 0;
   transitions = 0;
-  return UnoDcc::motion(selected, 1);
+  // A timing fault has already disabled the bridge; recovery resets packets.
+  return !UnoDcc::isRunning() || UnoDcc::motion(selected, 1);
+}
+
+bool CabControl::takePowerToggle() {
+  const bool requested = powerToggle;
+  powerToggle = false;
+  return requested;
 }
 
 bool CabControl::poll(bool trackPowered) {
@@ -83,10 +92,9 @@ bool CabControl::poll(bool trackPowered) {
     transitions = 0;
     if (!stopLatched) {
       stopLatched = true;
-      // The same broadcast stop burst used at track startup stops all addresses.
-      if (trackPowered)
-        UnoDcc::startStopped();
-      return stop();
+      // Main owns bridge power; emit one request per debounced press.
+      powerToggle = true;
+      return true;
     }
     return true;
   }

@@ -1,6 +1,6 @@
 # ESP13 web controller
 
-**ESP13 0.7.6 / Uno 0.7.9.** This application hosts the panel, Wi-Fi setup,
+**ESP13 0.7.7 / Uno 0.8.0.** This application hosts the panel, Wi-Fi setup,
 persistent roster and ESP OTA updates. The Uno owns DCC and output timing.
 See the [main guide](../../README.md), [wiring](../../docs/hardware/README.md),
 [HTTP API](../../docs/API.md) and [stationary test](../uno-stack-test/FIRST-LOCO-TEST.md).
@@ -67,7 +67,7 @@ boot ID. The CLI helper also checks the version against `--expect-version`.
 
 ```sh
 python3 firmware/esp13-ota/ota.py --host anden-esp13.local \
-  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.6
+  --file build/esp13-ota/esp13-ota.ino.bin --expect-version 0.7.7
 ```
 
 Add `--dry-run` to check the image and target before uploading. Reload the panel
@@ -81,7 +81,9 @@ settings with this layout; flash erasure or layout changes can remove them.
 System / Light / Dark buttons remember appearance in each browser. Wi-Fi and
 firmware controls stay under the collapsed Setup section. A compact power bar
 appears after the main power panel scrolls above the viewport. Both use the same
-acknowledged output state and browser-owned lease; scrolling never changes power.
+acknowledged controller state; browser reloads, scrolling and failed requests never
+send automatic power-off commands. Power is latched by explicit UI or cab actions.
+Timing recovery retains the ON request and is shown separately from active output.
 Unknown output state still offers Power off, while Power on remains guarded.
 
 The DOIT blue LED uses **GPIO16, active LOW**: 500 ms blink while connecting,

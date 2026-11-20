@@ -50,19 +50,14 @@ This is a human-observed F0 search, not a CV read. Long addresses, consists and
 nonstandard headlight mapping can prevent a match. Failed confirmation does not
 write decoder configuration.
 
-## Local cutoff and connection loss
+## Manual power and local recovery (Uno 0.8.0 / ESP13 0.7.7)
 
-- Output starts off and requires an explicit Power on after restart, timeout or trip.
-- Only the page that requested power renews its browser session, every 500 ms.
-  Ordinary status polling does not renew it. Changing tabs is allowed; closing
-  or reloading the owning page requests off. Stale page cleanup cannot stop a
-  newer session.
-- The ESP tolerates brief browser/network interruptions for **6 seconds**,
-  maintaining checked Uno KEEP messages every 500 ms while that session is alive.
-  After browser expiry it requests Stop. If the ESP fails, the Uno independently
-  expires after **2 seconds** without KEEP. Neither path restarts output.
-- An interrupt guard still disables A after 60,000 half-bits (3.48–6 seconds) if
-  main-loop servicing stalls while interrupts continue. Timing faults disable A.
+- Boot starts OFF. Explicit UI commands or D2 button presses toggle track power.
+- Browser reload/close, Wi-Fi and ESP link loss leave power and speed unchanged.
+- Timing faults cut bridge enable immediately, wait three seconds and restart
+  at zero speed. The ON request remains set; OFF cancels the recovery.
+- The 60,000-half-bit interrupt guard monitors local main-loop servicing,
+  independently of browser and ESP traffic. Its cutoff also uses local recovery.
 - Track mode uses current monitoring only. The OLED shows the latest raw A0
   reading and the highest sampled value since power-on. Automatic current
   cutoff is disabled in this mode. Watching the display does not provide
@@ -77,8 +72,8 @@ control. Value `2` adds F0–F28. Value `3` also accepts a trailing cab eligibil
 mask in CONTROLX. Value `4` adds cached cab names. Value `5` adds track current
 monitoring and a nineteenth field containing the highest sampled A0 value. Value
 `6` adds a twentieth field with actual per-slot direction bits for signed
-encoder control.
-Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
+encoder control. Value `7` adds requested track power as the twenty-first field.
+Bench mode 3 is latched track operation; state 7 is the historical lease-expiry code (not emitted by Uno 0.8.0). Earlier
 8/14/16/17-field responses remain readable.
 
 - `CONTROL,count,f0Mask,directionMask,address,0,...`: atomic stationary roster.
@@ -89,12 +84,13 @@ Bench mode 3 is stationary track operation; state 7 is lease expiry. Earlier
   Capability `3` also accepts a final decimal mask of the roster positions
   marked **On track**. Omitting the mask selects no loco for cab movement.
 - `TRACKON`: explicit start, requiring a prepared control/search schedule.
-- `KEEP`: renew only an already-running stationary track lease.
+- `KEEP`: legacy status-only query; no power lease.
+- `DCCRESET`: restart a halted timer only with output/requested power OFF; never enables output.
 - `BENCHSTOP`: immediate output disable.
 - `FIND,first,last,onLow,onHigh`: generate a range in the ISR without a large
   packet table. `0,0` in the last pair means all-off.
 
-The ESP exposes `/api/track/on`, `/api/track/keep` (session lease),
+The ESP exposes `/api/track/on`, `/api/track/keep` (legacy status-only),
 `/api/track/off`, `/dcc/direction`, `/finder/start`, `/finder/answer` and
 `/finder/cancel`. Search replies include a step token; stale answers are rejected.
 The search state machine and Uno packet generator are checked separately. Search and roster banks change only at packet boundaries.

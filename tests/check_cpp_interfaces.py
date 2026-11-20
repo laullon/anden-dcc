@@ -7,7 +7,7 @@ import tempfile
 from native_support import ROOT, library_sources
 
 headers = [p.name for p in (ROOT / 'libraries/AndenStackLink/src').glob('*.h')]
-headers += ['BrowserLease.h', 'FavoriteFunctions.h', 'StatusLed.h', 'WifiValidation.h',
+headers += ['FavoriteFunctions.h', 'StatusLed.h', 'WifiValidation.h',
             'BridgeBench.h', 'UnoDcc.h', 'CabI2c.h', 'CabDisplay.h', 'CabControl.h',
             'FirmwareImage.h', 'RosterStorage.h']
 includes = ['-I', str(ROOT / 'libraries/AndenStackLink/src'),
@@ -23,21 +23,12 @@ with tempfile.TemporaryDirectory(prefix='anden-interfaces-') as directory:
                         *includes, '-fsyntax-only', str(source)], check=True)
     shared = ''.join('#include "' + name + '"\n' for name in headers)
     (folder / 'first.cpp').write_text(shared + '''
-BrowserLease makeLease() {
-    BrowserLease lease;
-    lease.seed(41);
-    lease.start(1000);
-    return lease;
-}
 uint16_t frameCrc() { return AndenLink::crc16("123456789", 9); }
 ''')
     (folder / 'second.cpp').write_text(shared + '''
 #include <cassert>
-BrowserLease makeLease();
 uint16_t frameCrc();
 int main() {
-    auto lease = makeLease();
-    assert(lease.accepts(42, 1001));
     assert(frameCrc() == AndenLink::crc16("123456789", 9));
     LocoRoster roster;
     assert(roster.save(0, 3, "Test") == LocoRoster::Result::Ok);
@@ -51,7 +42,7 @@ int main() {
 }
 ''')
     sources = library_sources() + [str(ROOT / 'firmware/esp13-ota' / (name + '.cpp'))
-                                  for name in ['BrowserLease', 'FavoriteFunctions', 'StatusLed',
+                                  for name in ['FavoriteFunctions', 'StatusLed',
                                                'WifiValidation', 'FirmwareImage']]
     sources.append(str(ROOT / 'firmware/uno-stack-test/BridgeBench.cpp'))
     executable = folder / 'interfaces'

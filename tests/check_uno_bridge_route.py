@@ -194,8 +194,16 @@ int main(){
  pumpTimer=true;assert(UnoDcc::motion(6,1));pumpTimer=false;
  // A mirror arriving outside the allowed phase must stop both output and timer.
  assert(UnoDcc::armBridge(true));while(UnoDcc::bridgeStartPending())step();
+ updateSpeed(8);
  step(UnoDcc::BRIDGE_DELAY_TICKS+3);
  assert(!UnoDcc::isRunning() && !(PORTD.value&_BV(PD3)) && !(PORTB.value&_BV(PB4)) && UnoDcc::status().faults==1);
+ assert(UnoDcc::restartStopped());
+ assert(UnoDcc::isRunning() && !(PORTD.value&_BV(PD3)) && UnoDcc::status().faults==1);
+ assert(!UnoDcc::restartStopped()); // A healthy timer cannot be reset mid-packet.
+ assert(UnoDcc::armBridge(true)); // Recovery cleared the old moving bank.
+ while(UnoDcc::bridgeStartPending())step();
+ for(unsigned i=0;i<1000;++i)step();
+ assert(UnoDcc::isRunning() && (PORTD.value&_BV(PD3)));
  std::printf("PASS: actual Timer1 ISR, DC isolation, packet-boundary enable, D12 legacy/F0-F28 58/100 us phase model under ISR delays, priority cab motion/stop packets, persistent cab motion, bridge guard and late-edge fail-off.\n");
 }
 ''')

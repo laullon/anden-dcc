@@ -1,5 +1,4 @@
 #pragma once
-#include "BrowserLease.h"
 #include "FavoriteFunctions.h"
 #include <AddressFinder.h>
 #include <Arduino.h>
@@ -15,7 +14,6 @@ public:
   RosterControl& operator=(const RosterControl&) = delete;
 
   void begin();
-  void seedLease(uint16_t seed);
   void registerRoutes();
   void loop();
   String dccStatus();
@@ -30,7 +28,6 @@ private:
   LocoRoster roster;
   FavoriteFunctions favorites;
   AddressFinder finder;
-  BrowserLease browserLease;
   bool rosterStorage = false;
   const char* trackStopReason = "Track A output is disabled.";
 
@@ -41,7 +38,6 @@ private:
   static int rosterNumber(const String& text, int maximum);
   void loadRoster();
   bool saveRoster(const LocoRoster& value, const FavoriteFunctions* changed = nullptr);
-  void serviceTrackLease();
   void trackRoutes();
   void finderRoutes();
   void favoriteRoutes();

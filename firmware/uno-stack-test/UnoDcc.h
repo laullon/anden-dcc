@@ -18,6 +18,8 @@ struct Status {
 };
 
 void begin();
+// Recover a halted timer with the existing roster at zero speed.
+bool restartStopped();
 bool isRunning();
 bool guardExpired();
 bool bridgeStartPending();

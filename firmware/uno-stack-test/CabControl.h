@@ -9,6 +9,7 @@ public:
   void clearRoster();
   bool poll(bool trackPowered);
   bool stop();
+  bool takePowerToggle();
   uint8_t address() const;
   int8_t step() const;
   const char* name() const;
@@ -19,6 +20,7 @@ private:
   char names[8][CabLabel::LENGTH + 1] = {};
   uint8_t count = 0, selected = 0, phase = 0;
   int8_t speed = 0, transitions = 0;
+  bool powerToggle = false;
   bool selectLatched = false, stopLatched = false;
   uint32_t selectLowAt = 0, stopLowAt = 0;
 };

@@ -9,14 +9,14 @@ on a particular include order or on globals declared by a sketch.
 | Module | Responsibility and ownership |
 | --- | --- |
 | `esp13-ota.ino` | Wi-Fi/web runtime, server, Uno link and controller instances |
-| `RosterControl.h/.cpp` | Roster, favorite metadata, finder, browser lease, storage and associated HTTP routes |
+| `RosterControl.h/.cpp` | Roster, favorite metadata, finder, manual track-power routes, storage and associated HTTP routes |
 | `UnoLink.h/.cpp` | Checked UART transactions and cached Uno status |
 | `CabLabel.h/.cpp` | Bounded display-name folding and hex transport codec |
-| `CabControl.h/.cpp` | Local encoder/STOP state and cached eligible loco labels |
+| `CabControl.h/.cpp` | Local encoder/power-button state and cached eligible loco labels |
 | `CabDisplay.h/.cpp` | OLED pixel rendering through bounded I²C transactions |
 | `CabI2c.h/.cpp` | Polled AVR TWI transport that leaves Timer1 interrupts available |
 | `HttpSupport.h/.cpp` | JSON serialization/replies; server and Uno dependencies are explicit parameters |
-| `BrowserLease`, `StatusLed`, `FavoriteFunctions`, `WifiValidation` | Separately compiled policies and models |
+| `StatusLed`, `FavoriteFunctions`, `WifiValidation` | Separately compiled policies and models |
 | `RosterStorage.h/.cpp` | Mount existing storage; initialize only verified erased flash |
 | `FirmwareImage.h/.cpp` | Portable streaming image profile/identity/size/CRC validator |
 | `FirmwareUpdate.h/.cpp` | Firmware-only HTTP staging, multipart lifecycle and deferred commit |
@@ -34,7 +34,7 @@ The controller never relies on sketch globals or an implementation header.
 output guard, flags, fault count and Timer1 ISR in one translation unit. Mutable
 state is not exported. The sketch uses operations and read accessors, including
 an atomic startup-stop operation, rather than reaching into the scheduler.
-`BridgeBench.cpp` implements the output mode/lease policy.
+`BridgeBench.cpp` implements the timed bench and latched track-output policy.
 
 ## Shared library
 

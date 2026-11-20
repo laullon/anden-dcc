@@ -10,9 +10,9 @@ success. Starting a search and answering a question also require a checked reply
 | --- | --- | --- |
 | GET | `/` | Embedded web panel |
 | GET | `/api/status` | ESP identity, version, boot ID, network, storage, LED, Uno and `dcc` |
-| POST | `/api/track/on` | Explicit start; returns browser `lease` |
-| POST | `/api/track/keep` | `lease`; renew existing session only |
-| POST | `/api/track/off` | Optional `lease`; absent means manual global Stop |
+| POST | `/api/track/on` | Explicit latched start; returns `ok` |
+| POST | `/api/track/keep` | Legacy status-only endpoint; no lease |
+| POST | `/api/track/off` | Explicit global power off; legacy lease-bearing cleanup rejected |
 | POST | `/dcc/f0` | `address`, `on` (0/1) |
 | POST | `/dcc/function` | `address`, `function` (0–28), `on` (0/1) |
 | POST | `/dcc/direction` | `address`, `forward` (0/1). Stops cab motion before changing direction. |
@@ -65,10 +65,23 @@ Invalid stored records leave the default roster available with saves disabled.
 
 ## Power and errors
 
-The browser normally renews its lease every 500 ms. The ESP gives a browser six
-seconds to reconnect while keeping the Uno's independent two-second lease alive.
-A stale lease cannot stop a newer session or restart an expired one. Power always
-needs explicit activation. Manual off without a lease is a global Stop.
+Power starts OFF on Uno boot and is latched until an explicit UI or cab D2
+action. HTTP failures, page reload/close, browser absence and ESP link loss do
+not switch power off. The UI polls status again after an uncertain response;
+it never compensates with an automatic Stop. Old lease-bearing off beacons are
+rejected, and the legacy keep endpoint only reads status.
+
+Uno 0.8.0 uses capability 7 with 21 STATE fields. The final field is requested
+track power (0/1), following capability 6's direction mask. JSON exposes
+`uno.trackRequested` (requested ON state), `uno.trackActive` (actual active
+track output) and `uno.powerLatched` (firmware capability). A requested but
+inactive output is shown as Recovering DCC. Timing faults and the local
+main-loop watchdog cut the bridge, pause three seconds, then restart at zero
+with a broadcast stop burst. Manual OFF cancels recovery. Fault counts persist
+through recovery. Bench pulses still finish after three seconds.
+The internal `DCCRESET` UART command can restart a halted timer only with
+outputs off and no ON request; it never enables the bridge. Explicit web ON
+uses it before roster synchronization if a prior recovery was cancelled.
 
 Adding, changing or removing roster entries requires both outputs off. Function
 and direction requests can update the schedule with track power off or during
@@ -119,7 +132,7 @@ raw current cutoff in normal track mode. `uno.adcA` is the latest raw sample;
 session, reset by the next explicit TRACKON. It remains visible after stop.
 These readings are uncalibrated ADC counts, not amperes.
 `uno.bench.rawLimit` is null in monitor-only track mode; no-load bench tests
-retain their limit of 100. Timing faults, STOP and lease/backup shutdowns remain.
+retain their limit of 100. Timing faults and the local watchdog still cut bridge enable before recovery; explicit power off cancels recovery.
 
 Watching the current display provides no automatic short-circuit protection.
 Loaded tests need external current limiting or appropriate protection.

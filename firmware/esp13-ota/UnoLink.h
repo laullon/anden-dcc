@@ -20,6 +20,7 @@ public:
   bool cabFilterSupported() const;
   bool readDirections(const LocoRoster& value, uint8_t& directions) const;
   bool trackActive() const;
+  bool trackRequested() const;
   bool dccReady() const;
   bool benchSupported() const;
   bool benchActive() const;
@@ -50,7 +51,7 @@ private:
   uint16_t dccCount = 0, dccMask = 0, dccSignature = 0, faults = 0;
   uint32_t packets = 0;
   bool benchCapable = false, dccBenchCapable = false, trackCapable = false,
-       functionsCapable = false, cabFilterCapable = false, cabNamesCapable = false, currentMonitoringCapable = false, signedCabCapable = false;
+       functionsCapable = false, cabFilterCapable = false, cabNamesCapable = false, currentMonitoringCapable = false, signedCabCapable = false, latchedPowerCapable = false, requestedPower = false;
   uint16_t benchRemaining = 0;
   uint8_t benchState = 0, mode = 0, cabDirections = 0;
   bool accept(uint16_t expected);

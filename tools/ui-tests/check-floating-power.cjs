@@ -7,7 +7,7 @@ const currentVersion=fs.readFileSync(path.join(root,'firmware/esp13-ota/esp13-ot
  let starts=0,stops=0,keeps=0;
  await page.route('http://power.test/**',async route=>{const u=new URL(route.request().url());
   if(u.pathname==='/api/status')return route.fulfill({json:state});
-  if(u.pathname==='/api/track/on'){starts++;await new Promise(r=>setTimeout(r,200));state.uno.trackActive=state.uno.enableA=true;return route.fulfill({json:{lease:starts}})}
+  if(u.pathname==='/api/track/on'){starts++;await new Promise(r=>setTimeout(r,200));state.uno.trackActive=state.uno.enableA=true;return route.fulfill({json:{ok:true}})}
   if(u.pathname==='/api/track/off'){stops++;await new Promise(r=>setTimeout(r,200));state.uno.trackActive=state.uno.enableA=false;return route.fulfill({json:{ok:true}})}
   if(u.pathname==='/api/track/keep'){keeps++;return route.fulfill({json:{ok:true}})}
   assert.equal(route.request().method(),'GET');return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(root,'firmware/esp13-ota/web/index.html'),'utf8')});
@@ -23,7 +23,7 @@ const currentVersion=fs.readFileSync(path.join(root,'firmware/esp13-ota/esp13-ot
   const box=await bar.boundingBox();assert(box.x>=0&&box.x+box.width<=width&&box.y>=0&&box.y+box.height<=900);assert.equal(await on.evaluate(e=>e.getBoundingClientRect().height>=44),true);
   await on.click();await page.waitForFunction(()=>trackBusy);assert.equal(await bar.getAttribute('data-power'),'off');assert((await bar.innerText()).includes('Starting'));assert(await off.isVisible());
   await settle();assert.equal(await bar.getAttribute('data-power'),'on');assert(await off.isVisible());assert.equal(await page.evaluate(()=>scrollY),y);
-  const before=keeps;await page.waitForTimeout(600);assert(keeps>before);
+  const before=keeps;await page.waitForTimeout(600);assert.equal(keeps,before);
   await off.click();await page.waitForFunction(()=>trackTurningOff);assert(await off.isDisabled());await settle();assert.equal(await bar.getAttribute('data-power'),'off');
   state.uno.online=false;await refresh();assert.equal(await bar.getAttribute('data-power'),'unknown');assert(await off.isVisible());assert.equal(await off.isDisabled(),false);assert.equal(await on.isVisible(),false);
   state.uno.online=true;state.dcc.ready=false;await refresh();assert(await on.isDisabled());state.dcc.ready=true;state.dcc.finder.active=true;await refresh();assert(await on.isDisabled());state.dcc.finder.active=false;
@@ -33,5 +33,5 @@ const currentVersion=fs.readFileSync(path.join(root,'firmware/esp13-ota/esp13-ot
   await page.evaluate(()=>scrollTo(0,0));await bar.waitFor({state:'hidden'});
  }
  await page.locator('#theme [data-theme-choice=light]').click();await page.evaluate(()=>document.getElementById('finder-panel').hidden=true);await page.screenshot({path:path.join(out,'stack-mobile.png'),fullPage:true});
- assert.equal(starts,2);assert.equal(stops,4);assert.deepEqual(errors,[]);console.log('PASS: compact power after scroll, shared On/Off/lease, stable scroll and pending states, 44px touch controls, unknown/offline/bench/finder guards, top-panel handoff and desktop/320px themes.');
+ assert.equal(starts,2);assert.equal(stops,4);assert.deepEqual(errors,[]);console.log('PASS: compact power after scroll, shared manual On/Off, stable scroll and pending states, 44px touch controls, unknown/offline/bench/finder guards, top-panel handoff and desktop/320px themes.');
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

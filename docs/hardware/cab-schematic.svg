@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1250" viewBox="0 0 1000 1250" role="img" aria-labelledby="title description">
   <title id="title">Anden DCC cab wiring</title>
-  <desc id="description">Connections on the ESP13 shield's Arduino side. Encoder A to D4, B to D5, switch to D6, and encoder common and switch return to ground. STOP switch between D2 and ground. OLED SDA to A4, SCL to A5, VCC to 5 V and ground to ground. The optional LED connects D7 through a 470 ohm resistor to its anode, with its cathode to ground. The LED lights during a powered nonzero speed command. On the cab board, a USB-C PD trigger supplies 15 V to motor VIN and MP1584 input. The MP1584 supplies verified 5.0 V to the ESP13 Arduino-side 5V header and OLED VCC. All grounds are common. Disconnect external 5 V before Uno USB. Motor VIN CONNECT stays open.</desc>
+  <desc id="description">Connections on the ESP13 shield's Arduino side. Encoder A to D4, B to D5, switch to D6, and encoder common and switch return to ground. Power toggle switch between D2 and ground. OLED SDA to A4, SCL to A5, VCC to 5 V and ground to ground. The optional LED connects D7 through a 470 ohm resistor to its anode, with its cathode to ground. The LED lights during a powered nonzero speed command. On the cab board, a USB-C PD trigger supplies 15 V to motor VIN and MP1584 input. The MP1584 supplies verified 5.0 V to the ESP13 Arduino-side 5V header and OLED VCC. All grounds are common. Disconnect external 5 V before Uno USB. Motor VIN CONNECT stays open.</desc>
   <style>
     text{font-family:Arial,Helvetica,sans-serif;fill:#193b3c}
     .title{font-size:33px;font-weight:700}.subtitle{font-size:17px}
@@ -41,7 +41,7 @@
   <text x="625" y="295" class="label">C (common) + other switch contact</text>
 
   <rect x="603" y="335" width="367" height="112" rx="15" class="panel"/>
-  <text x="625" y="366" class="head">Momentary STOP button</text>
+  <text x="625" y="366" class="head">Momentary POWER button</text>
   <text x="625" y="393" class="label">One contact</text>
   <text x="625" y="426" class="label">Other contact (closes on press)</text>
 
